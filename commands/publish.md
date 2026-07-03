@@ -21,6 +21,9 @@ only — never for a real publish).
 3. **Corollary rule:** touching any published path means re-running `/publish` before the next
    release. The short-circuit makes a no-change run free.
 
+Forks: `publish-audit.json` is deliberately not published — author your own denylist before
+first `/publish` (the `NO-AUDIT-FILE` abort is pointing at this).
+
 ## 1. The script is the contract
 
 Save the script below to a scratch file (e.g. `bf-publish.py`) and run it — dry run first, read

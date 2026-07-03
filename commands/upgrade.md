@@ -61,6 +61,11 @@ Save the script below to a scratch file (e.g. `bf-upgrade.py`) and run it. Dry r
 | `FLAG-UNVERIFIABLE-UNSHIPPED` | adoption pass: under a bump glob but not currently shipped (legacy runtime, or yours) | none — reconcile by hand in the PR |
 | `LIST-CONSUMER` | yours (steady-state: not shipped, not in manifest) | none — listed for transparency |
 
+**Load-bearing for `/walk`:** `commands/walk.md` §3 extracts exactly this fence
+(`awk '/^```python$/,/^```$/'` — it must remain the FIRST ```python block in this file) and calls
+the script with this CLI signature; keep both stable or the fresh-install bootstrap silently
+breaks.
+
 ```python
 #!/usr/bin/env python3
 """Brainforge /upgrade — deterministic classify + apply. Zero judgment in the write path.

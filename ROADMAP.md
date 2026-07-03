@@ -129,16 +129,21 @@ read-it-back loop works for real.
 
 ## Phase 4 — Package as B (OSS-shaped)
 
-- [x] **Publish seam + `/publish` command.** An allowlist-and-audit manifest in the plugin
-      manifest (`include` globs, authored-public-variant `map`, leak-pattern `audit`) plus a
-      deterministic `/publish` command: assemble → audit → diff → land as a PR into the public
-      staging repo. Zero LLM judgment in the write path — what's public is auditable code, not
-      memory.
-- [ ] **Authored public docs set.** `README.public.md`, `DESIGN.public.md`, and this roadmap
-      generalize the private originals for a stranger audience; still open: a contribution
-      guide, the Shopify extension walkthrough, and a per-adapter proof-summary set.
-- [ ] **Live-proof matrix** — re-run the adapter and wizard proofs against a clean local harness
-      to confirm the publishable set is self-sufficient outside the private working repo.
+- [x] **Publish seam + `/publish` command.** An allowlist manifest in the plugin manifest
+      (`include` globs, authored-public-variant `map`) plus a deterministic `/publish` command:
+      assemble → audit → diff → land as a PR into the public staging repo. The leak denylist
+      lives in a private `publish-audit.json` at the repo root — matched by no include glob, so
+      it never ships with the set it polices. Zero LLM judgment in the write path — what's
+      public is auditable code, not memory.
+- [x] **Authored public docs set.** This README and DESIGN.md generalize the private originals
+      for a stranger audience, alongside a contribution guide, the Shopify extension walkthrough,
+      and a per-adapter proof-summary set — all shipped.
+- [x] **Live-proof matrix** — all seven rows proven: the adapter and wizard proofs re-run
+      against a clean local harness, then live against the real staging repo, confirming the
+      publishable set is self-sufficient outside the private working repo.
+- [x] **`/brainforge:walk` bootstrap.** Fresh-install → first brain: emit the scaffold and a
+      birth manifest, then hand off to the brain-resident wizard. Added and proven live during
+      this phase.
 - [ ] **Staging repo + flip checklist.** Stand up the real public staging repo, land the first
       real `/publish` PR, prove installability from it end to end. The flip to fully public is a
       deliberate, still-pending decision — not a default outcome of shipping the seam.
