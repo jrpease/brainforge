@@ -66,9 +66,10 @@ claude plugin install brainforge@brainforge
 mkdir my-brain && cd my-brain && git init
 ```
 
-Then, in a Claude Code session inside that directory, run `/walk`. The first run bootstraps the
-brain — it emits the scaffold, writes the birth manifest, commits, then hands off to the brain's
-own `/walk` (restart the session so the new project commands load, then run `/walk` again). That
+Then, in a Claude Code session inside that directory, run `/brainforge:walk`. That first run
+bootstraps the brain — it emits the scaffold, writes the birth manifest, commits, then hands off
+to the brain's own `/walk` (restart the session so the new project commands load, then run
+`/walk`). That
 one is the depth-first setup wizard: it offers one domain to start with, recommending the fastest,
 most derivable win — eng or design — and deferring brand until you've felt the value. For that
 domain it drives one seamless loop: scaffold the folders and templates, ingest real material into
