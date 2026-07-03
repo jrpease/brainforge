@@ -1,0 +1,8 @@
+{
+  "$comment": "Pipeline memory. The cheap change-detection gate compares the current fingerprint of each source against the value stored here; only differences get the expensive extraction. Updated automatically at the end of each successful sync. Committed so history shows what synced when. Keys are added per source as it's registered; starts empty.",
+  "version": 1,
+  "figma": {},
+  "repos": {},
+  "websites": {},
+  "lastFullSync": null
+}

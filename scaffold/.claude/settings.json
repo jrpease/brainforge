@@ -1,0 +1,24 @@
+{
+  "$comment": "Ships with the brain. On session start: (1) fast-forward pull the latest context so read-only consumers get current truth without remembering to pull (--ff-only is safe: it no-ops on local edits/divergence rather than making merge noise); (2) the drift gate — a dependency-free cheap check (git/cat/find/test only, no jq) that nudges to run /drift when context/canon or context/derived changed since the last drift review (.brainforge/last-drift-review), or when a brain with derived content has never had a review; (3) the sync-health tripwire — a dependency-free check (grep only, no jq) that nudges to run /sync-health when a source is wired but never synced (.sync-state.json has a populated fingerprint slot while lastFullSync is null) or a derived doc still carries source: TODO. A tripwire, not a monitor: it catches the common broken states cheaply; /sync-health does the full per-source accounting, and cadence-staleness. Stateless — self-clears when the underlying state is fixed (unlike the drift gate, which clears on acknowledgment). All three fail safe: a missing/bad file or a failed command is silent, never an error.",
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "startup|resume",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "git -C \"$CLAUDE_PROJECT_DIR\" pull --ff-only --quiet 2>/dev/null && echo '{{ORG}} context: pulled latest.' || echo '{{ORG}} context: could not fast-forward (local changes or offline) — using current copy.'"
+          },
+          {
+            "type": "command",
+            "command": "WM=\"$CLAUDE_PROJECT_DIR/.brainforge/last-drift-review\"; if [ -s \"$WM\" ]; then SHA=\"$(cat \"$WM\")\"; if git -C \"$CLAUDE_PROJECT_DIR\" cat-file -e \"$SHA^{commit}\" 2>/dev/null && ! git -C \"$CLAUDE_PROJECT_DIR\" diff --quiet \"$SHA\" HEAD -- context/canon context/derived 2>/dev/null; then echo '⚠️  {{ORG}} context changed since last drift review — run /drift to check canon vs. reality.'; fi; elif [ ! -e \"$WM\" ] && [ -n \"$(find \"$CLAUDE_PROJECT_DIR/context/derived\" -name '*.md' ! -name 'README.md' ! -name '_index.md' -print -quit 2>/dev/null)\" ]; then echo '⚠️  {{ORG}} context has never had a drift review — run /drift to check canon vs. reality.'; fi"
+          },
+          {
+            "type": "command",
+            "command": "D=\"$CLAUDE_PROJECT_DIR\"; S=\"$D/.sync-state.json\"; N=\"\"; if [ -d \"$D/context/derived\" ] && grep -rqE '^source:[[:space:]]*TODO' \"$D/context/derived\" 2>/dev/null; then N=1; fi; if [ -f \"$S\" ] && grep -qE '\"lastFullSync\":[[:space:]]*null' \"$S\" 2>/dev/null && grep -qE '\"[a-zA-Z0-9_-]+\":[[:space:]]*\\{$' \"$S\" 2>/dev/null; then N=1; fi; if [ -n \"$N\" ]; then echo '⚠️  {{ORG}} sync health: a source is unsynced or still has a TODO — run /sync-health.'; fi"
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,63 @@
+{
+  "$comment": "Registry of every upstream source the pipeline watches. Add entries with /add-source (existing type) or /add-adapter (new type). Credentials live in .env (NEVER here). Each source's last-seen fingerprint lives in .sync-state.json. Arrays start empty — the builder walk fills them.",
+  "version": 1,
+  "$examples": {
+    "$comment": "Reference shapes only — NOT live sources. Real entries go in the arrays below.",
+    "figma": {
+      "id": "figma-design-system",
+      "label": "Design System (tokens, components, styles)",
+      "fileKey": "<figma-file-key>",
+      "url": "https://www.figma.com/design/<file-key>/<name>",
+      "extract": ["variables", "styles", "components"],
+      "into": "context/derived/design-system/",
+      "enabled": true,
+      "$note": "Free-form note: quirks, auth path, what to skip. See pipeline/adapters/figma.md."
+    },
+    "repos": {
+      "id": "web",
+      "label": "Marketing site / web app",
+      "remote": "github.com/<org>/<repo>",
+      "localClone": "<absolute-path-or-omit>",
+      "branch": "main",
+      "summarize": ["routes", "components", "stack", "key-readmes"],
+      "into": "context/derived/repos/",
+      "enabled": true,
+      "$note": "Cheap gate: git diff <lastSha>..origin/<branch> --name-only. See pipeline/adapters/github.md."
+    },
+    "websites": {
+      "id": "marketing-site",
+      "label": "Marketing site",
+      "url": "https://<domain>",
+      "sitemap": "https://<domain>/sitemap.xml",
+      "into": "context/derived/web/",
+      "enabled": true,
+      "$note": "Cheap gate: sitemap <lastmod> + ETag/If-Modified-Since. See pipeline/adapters/website.md."
+    },
+    "monday": {
+      "id": "roadmap",
+      "label": "Product roadmap board",
+      "boardId": "<monday-board-id>",
+      "extract": ["items", "groups", "column-values"],
+      "into": "context/derived/monday/",
+      "enabled": true,
+      "$note": "GraphQL-only (no REST). Cheap gate: boards(ids){updated_at items_count}. Delta via activity_logs(from:lastSync). Allowlist board IDs — never crawl the workspace. See pipeline/adapters/monday.md."
+    },
+    "ga": {
+      "id": "web-analytics",
+      "label": "GA4 property — site analytics",
+      "propertyId": "<ga4-numeric-property-id>",
+      "extract": ["traffic-overview", "acquisition", "top-pages", "ecommerce"],
+      "lookbackDays": 3,
+      "backfillDays": 90,
+      "rollupDays": 28,
+      "into": "context/derived/ga/",
+      "enabled": true,
+      "$note": "GA4 Data API (runReport). First metrics/time-series source: cheap gate = sessions-by-date over a trailing window; delta = new/restated days, not a stop-if-unchanged hash. Auth: ADC (gcloud, for viewer-only props) or GOOGLE_APPLICATION_CREDENTIALS service account added as property Viewer. See pipeline/adapters/ga.md."
+    }
+  },
+  "figma": [],
+  "repos": [],
+  "websites": [],
+  "monday": [],
+  "ga": []
+}
