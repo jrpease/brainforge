@@ -1,18 +1,35 @@
 # Brainforge
 
-> The Claude-native way to **build and operate a "product-org brain"** — a tool-agnostic
-> git repo of *authored truth* + *synced facts* that any LLM can read.
+> A living brain for your product org — what your team authored, plus facts re-synced from
+> your real tools, so it never goes stale.
 
-Brainforge walks a team through standing up an AI brain for their product organization — brand,
-product, design, eng, analytics — one domain at a time, then keeps that brain alive as the
-underlying sources change. It's extracted from a pattern running in production at a design org:
-one repo any LLM can open, split cleanly into what a human wrote and what a pipeline verified.
+Your single source of truth goes stale the day after you write it. Someone renames a component,
+ships a new route, changes how a metric is defined — and the doc that was supposed to be
+canonical is quietly wrong. Every AI tool you point at it inherits the rot.
+
+Brainforge builds a brain for your product org and keeps it current for you. Half of it is what
+a human wrote and stands behind — voice, positioning, principles. The other half is re-synced
+straight from the tools you already use — Figma, GitHub, GA — so the facts match reality without
+anyone maintaining them by hand. It's one git repo of plain markdown and JSON. Any LLM can read
+it — Claude, Cursor, whatever comes next.
 
 ---
 
-## The core idea: Canon vs. Derived
+## What you get
 
-Every brain Brainforge produces splits content two ways, and treats them completely differently:
+- **Truth that stays true.** Derived facts — tokens, components, routes, metrics — re-sync from
+  their source. When the source changes, the brain changes. No stale doc, no manual reconciliation.
+- **Authored knowledge that stays authoritative.** Brand voice, principles, and conventions are
+  written by a human and protected — a sync can never overwrite them.
+- **Every change reviewed before it lands.** Nothing edits your brain silently. A sync proposes a
+  branch; a human merges it. You see the diff first, every time.
+
+---
+
+## How it works, at a glance
+
+Every brain splits its content two ways, and treats each completely differently: what a **human
+wrote** and stands behind, versus what a **pipeline keeps current** from a live source.
 
 | | **Canon** ✍️ | **Derived** 🤖 |
 |---|---|---|
@@ -21,29 +38,14 @@ Every brain Brainforge produces splits content two ways, and treats them complet
 | **Who writes it** | A human, via reviewed PR | The sync pipeline, automatically |
 | **Editing** | By hand, with review | Never by hand — a sync overwrites it |
 
-Domains sit on a spectrum from **authored** (brand) to **derived** (eng, analytics).
+Domains sit on a spectrum from **authored** (brand) to **derived** (eng, analytics). You start
+where the value lands fastest — usually eng or design — and add the rest as you feel the payoff.
 
 ---
 
-## The five golden rules
+## Get started
 
-Every sync playbook in `scaffold/pipeline/` follows the same five rules ([full detail](scaffold/pipeline/README.md)):
-
-1. **Work scales with the delta, not the corpus** — run a cheap change-detection gate first; do
-   expensive extraction only on what changed.
-2. **REST API, not MCP** — sync uses cheap REST endpoints; interactive MCPs are reserved for a
-   human actually designing.
-3. **Deterministic extraction over LLM summarization** — prefer tooling that produces the same
-   output every run; reserve an LLM pass for genuinely narrative output, gated hardest.
-4. **Every sync lands via PR, never a direct write** — a sync proposes a branch; a human merges.
-5. **Always update provenance + state** — every derived file carries `source`/`last-synced`, and
-   `.sync-state.json` records the fingerprint at the end of a successful sync.
-
----
-
-## Install
-
-As a Claude Code plugin:
+Install it as a Claude Code plugin:
 
 ```
 claude plugin marketplace add jrpease/brainforge
@@ -58,29 +60,26 @@ claude plugin marketplace add ./brainforge
 claude plugin install brainforge@brainforge
 ```
 
----
-
-## Quickstart
+Then make a home for your brain and start the walk:
 
 ```
 mkdir my-brain && cd my-brain && git init
 ```
 
-Then, in a Claude Code session inside that directory, run `/brainforge:walk`. That first run
-bootstraps the brain — it emits the scaffold, writes the birth manifest, commits, then hands off
-to the brain's own `/walk` (restart the session so the new project commands load, then run
-`/walk`). That
-one is the depth-first setup wizard: it offers one domain to start with, recommending the fastest,
-most derivable win — eng or design — and deferring brand until you've felt the value. For that
-domain it drives one seamless loop: scaffold the folders and templates, ingest real material into
-a draft, gate the draft at approval, wire a built-in adapter (or add a new one), run the first
-sync, then read the result back so you see real facts land in `derived/` before it offers you the
-next domain. Progress is never stored in a state file — it's recomputed from the brain's actual
-contents every time, so it can't drift from reality.
+In a Claude Code session inside that folder, run `/brainforge:walk`. The first run bootstraps the
+brain — it lays down the scaffold, commits, and hands off to the brain's own `/walk` (restart the
+session so the new commands load, then run `/walk` again).
+
+From there it's a guided setup. It picks one domain to start with — the fastest, most derivable win —
+and drives the whole loop for you: scaffold the folders, pull real material into a draft, pause for
+your approval, wire up an adapter, run the first sync, then read the result back so you watch real
+facts land in `derived/` before it offers you the next domain. It never tracks progress in a state
+file — it recomputes where you are from the brain's actual contents every time, so it can't drift
+from reality.
 
 ---
 
-## Adapter roster
+## What it connects to
 
 | Adapter | Kind | Proven live |
 |---|---|---|
@@ -91,19 +90,31 @@ contents every time, so it can't drift from reality.
 | [Website](scaffold/pipeline/adapters/website.md) | entity-snapshot | built-in, no live proof session yet |
 | [Shopify](scaffold/pipeline/examples/shopify.md) | entity-snapshot | worked `/add-adapter` example — see the [walkthrough](docs/walkthroughs/shopify-add-adapter.md) |
 
----
-
-## Extending
-
-Adding a source Brainforge doesn't ship a built-in for is a Claude Code command, not a code
-change: run `/add-adapter` and fill in `scaffold/pipeline/ADAPTER-TEMPLATE.md` — the same skeleton
-every built-in adapter fills. The Shopify adapter above was built exactly this way; see the
-[worked walkthrough](docs/walkthroughs/shopify-add-adapter.md) for the full extension path, and
-[CONTRIBUTING.md](CONTRIBUTING.md) for how to send a new adapter back upstream.
+Need a source we don't ship a built-in for? That's a command, not a code change. Run
+`/add-adapter` and fill in `scaffold/pipeline/ADAPTER-TEMPLATE.md` — the same skeleton every
+built-in fills. The Shopify adapter above was built exactly this way; the
+[worked walkthrough](docs/walkthroughs/shopify-add-adapter.md) shows the full path, and
+[CONTRIBUTING.md](CONTRIBUTING.md) covers sending a new adapter back upstream.
 
 ---
 
-## How upgrades work
+## Under the hood
+
+### The five golden rules
+
+Every sync playbook in `scaffold/pipeline/` follows the same five rules ([full detail](scaffold/pipeline/README.md)):
+
+1. **Work scales with the delta, not the corpus** — run a cheap change-detection gate first; do
+   expensive extraction only on what changed.
+2. **REST API, not MCP** — sync uses cheap REST endpoints; interactive MCPs are reserved for a
+   human actually designing.
+3. **Deterministic extraction over LLM summarization** — prefer tooling that produces the same
+   output every run; reserve an LLM pass for genuinely narrative output, gated hardest.
+4. **Every sync lands via PR, never a direct write** — a sync proposes a branch; a human merges.
+5. **Always update provenance + state** — every derived file carries `source`/`last-synced`, and
+   `.sync-state.json` records the fingerprint at the end of a successful sync.
+
+### How upgrades work
 
 A brain isn't scaffolded once and abandoned — the sync playbooks and commands are a versioned,
 re-emittable runtime, not a one-time copy. `plugin.json` declares which shipped paths are that
