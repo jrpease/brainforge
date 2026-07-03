@@ -3,7 +3,7 @@
   "name": "brainforge",
   "version": "0.3.0",
   "description": "Build and operate a product-org brain — a tool-agnostic git repo of authored truth + synced facts that any LLM can read.",
-  "author": "jrpease",
+  "author": { "name": "jrpease" },
   "keywords": ["brain", "context", "source-of-truth", "canon", "sync", "design-system"],
   "scaffold": "scaffold/",
   "license": "MIT",

@@ -1,6 +1,9 @@
 {
   "name": "brainforge",
-  "owner": { "name": "jrpease" },
+  "description": "Brainforge — build and operate a product-org brain: a tool-agnostic git repo of authored truth + synced facts that any LLM can read.",
+  "owner": {
+    "name": "jrpease"
+  },
   "plugins": [
     {
       "name": "brainforge",
