@@ -66,14 +66,16 @@ claude plugin install brainforge@brainforge
 mkdir my-brain && cd my-brain && git init
 ```
 
-Then, in a Claude Code session inside that directory, run `/walk`. It's a depth-first setup
-wizard: it offers one domain to start with, recommending the fastest, most derivable win — eng or
-design — and deferring brand until you've felt the value. For that domain it drives one seamless
-loop: scaffold the folders and templates, ingest real material into a draft, gate the draft at
-approval, wire a built-in adapter (or add a new one), run the first sync, then read the result
-back so you see real facts land in `derived/` before it offers you the next domain. Progress is
-never stored in a state file — it's recomputed from the brain's actual contents every time, so it
-can't drift from reality.
+Then, in a Claude Code session inside that directory, run `/walk`. The first run bootstraps the
+brain — it emits the scaffold, writes the birth manifest, commits, then hands off to the brain's
+own `/walk` (restart the session so the new project commands load, then run `/walk` again). That
+one is the depth-first setup wizard: it offers one domain to start with, recommending the fastest,
+most derivable win — eng or design — and deferring brand until you've felt the value. For that
+domain it drives one seamless loop: scaffold the folders and templates, ingest real material into
+a draft, gate the draft at approval, wire a built-in adapter (or add a new one), run the first
+sync, then read the result back so you see real facts land in `derived/` before it offers you the
+next domain. Progress is never stored in a state file — it's recomputed from the brain's actual
+contents every time, so it can't drift from reality.
 
 ---
 
