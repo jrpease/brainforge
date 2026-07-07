@@ -144,9 +144,11 @@ read-it-back loop works for real.
 - [x] **`/brainforge:walk` bootstrap.** Fresh-install → first brain: emit the scaffold and a
       birth manifest, then hand off to the brain-resident wizard. Added and proven live during
       this phase.
-- [ ] **Staging repo + flip checklist.** Stand up the real public staging repo, land the first
-      real `/publish` PR, prove installability from it end to end. The flip to fully public is a
-      deliberate, still-pending decision — not a default outcome of shipping the seam.
+- [x] **Staging repo + installable distribution.** The public staging repo is stood up, the
+      first real `/publish` PR landed, and installability proven end to end — the publishable set
+      works as a plugin outside the private working repo. Public availability is the distribution
+      path this phase was built to reach, reached deliberately rather than as a default of shipping
+      the seam.
 
 ## Deferred (C-tier and additive)
 
