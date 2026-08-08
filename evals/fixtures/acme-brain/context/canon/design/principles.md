@@ -1,0 +1,11 @@
+# Design Principles
+
+ACME's primary color is safety orange, `#FF6A00`. It is the color of the primary action on every screen, the color of the brand mark, and the color a customer should be able to name after using the product for a week. We do not dilute it with a second "primary" color for special occasions. One primary color, used consistently, is what makes it recognizable.
+
+We favor density over whitespace. ACME customers are professionals doing repeated work, not visitors on a landing page. A screen that shows more of the customer's real data, at a readable size, beats a screen padded out to look calm. Whitespace is a tool for grouping and separation, not a default resting state. When in doubt, show one more row, one more field, one more piece of context, before reaching for more margin.
+
+Every action is reversible. This is not a suggestion, it is the bar a feature has to clear before it ships. Delete has an undo. Bulk edits have an undo. Even destructive-sounding actions like "archive" or "remove access" have a documented, discoverable way back, and that path is tested as carefully as the forward path. If an action genuinely cannot be reversed by the product, the interface must say so plainly, in the confirmation step, before the customer commits — density over whitespace does not mean we hide the one line of text that matters most.
+
+These three principles reinforce each other. Safety orange marks the action a customer is about to take. Density means that action is visible among the customer's real data, not buried in a sparse hero layout. Reversibility means the customer can take that action with confidence, because a mistake costs a click to fix, not a support ticket. A dense interface without reversibility would feel reckless. A reversible interface with pale, ambiguous color would feel timid. ACME wants neither. It wants the customer moving fast through their own work, in control of every step, able to see the next action clearly because it is the only thing on the screen that color.
+
+New screens are reviewed against this document before visual review, not after. If a mockup adds a second primary color, spreads content out at the cost of visible rows, or ships an irreversible action without a stated reason, it goes back, regardless of how the visual review would otherwise go.

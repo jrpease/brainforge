@@ -9,7 +9,7 @@ and design. Follow these rules.
   Write any output (drafts, ideas, generated artifacts) into the user's *own* workspace
   folder, not here.
 - The only time you modify this repo is when the user is explicitly **managing** it
-  (setting it up via `/walk`, authoring canon, or running a `/sync...` command from
+  (setting it up via `/forge`, authoring canon, or running a `/sync...` command from
   `.claude/commands/`).
 
 ## Trust model: canon vs. derived
@@ -38,5 +38,5 @@ and design. Follow these rules.
 ## Don't duplicate canon into other repos
 
 If you're helping in *another* repo (e.g. the web app) and need {{ORG}}'s brand/voice, **link to
-this repo's canon — do not copy it in.** See `templates/` for the pointer pattern. One source
+this repo's canon — do not copy it in.** See `templates/brain-pointer-snippet.md` for the pointer pattern. One source
 of truth, referenced from many places.

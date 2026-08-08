@@ -27,6 +27,7 @@ git -C <clone> diff <lastSha>..origin/<branch> --name-only
 ## 3. Finish
 - Stamp `source` / `last-synced` / `generated-by`.
 - Update `.sync-state.json` → `repos[<id>].lastSha = origin/<branch> HEAD`.
+- The emitted `_index.md` frontmatter MUST include `kinds: [repo-summaries]`.
 - Branch + PR.
 
 ## Reminder: the repo owns its own truth

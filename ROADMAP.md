@@ -150,6 +150,20 @@ read-it-back loop works for real.
       path this phase was built to reach, reached deliberately rather than as a default of shipping
       the seam.
 
+## Phase 5 — Subscribe & route
+
+- [x] **Manifest + kinds.** Schema and tooling for describing the brain's shape—domain kinds,
+      routing rules, and what each kind costs at read time.
+- [x] **Synapse reader.** Consume the manifest in a Claude Code plugin and in template snippets
+      for other tools. Route prompts to only the slice they need. ~300-token map; announcing what
+      it loaded and skipped.
+- [x] **Tier-2 pointer.** Extensible snippet templates for Cursor, Codex, and any file-aware
+      tool to paste into their rule files—same manifest, same reading rules.
+- [x] **Routing evals.** Measure routing signal-to-noise and tool-specific read performance at
+      eval time. Seeded cases over all domains prove the tracer + classify + route pipeline
+      catches the right slice.
+- [ ] **MCP façade** — a read-only endpoint over the same manifest, for web-only tools (ChatGPT, Claude.ai). Next.
+
 ## Deferred (C-tier and additive)
 
 - MCP universal reader · access tiers · autonomous scheduled sync · declarative/executable adapters.

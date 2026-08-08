@@ -5,7 +5,7 @@
 > from the built-ins — fill this. `/add-adapter` does exactly this. A worked example lives at
 > `examples/shopify.md`.
 >
-> **Every adapter must honor the five golden rules in `../README.md`.** The skeleton below is
+> **Every adapter must honor the six golden rules in `../README.md`.** The skeleton below is
 > structured so that filling it correctly *is* honoring them.
 
 Covers: <what this source contributes to the brain — e.g. "design tokens + component inventory">.
@@ -44,6 +44,10 @@ Auth: `<CREDENTIAL_ENV_VAR>` from `.env` (add it to `.env.example`). <One line o
 - **Transport (golden rule #2):** use **REST**, not MCP. If REST genuinely cannot reach the data,
   document the exception here and scope the MCP use as tightly as possible.
 - **Emit to:** `context/derived/<folder>/…` — <which files, in what shape (table-first).>
+  - `_index.md` frontmatter MUST declare `kinds: [<one or more from setup/README.md §1a>]`
+    — this is how the consumer layer routes to what you emit.
+  - **Size envelope:** expected tokens per emitted doc (e.g. `_index.md ≤ 1k`, `inventory.md ≤ 5k`).
+    Golden rule 6: if a sync exceeds an envelope or 3×-grows a doc, flag it in the PR body.
 
 ## 3. Finish  — golden rule #5
 - Stamp `source` / `last-synced` / `generated-by` frontmatter on every file touched.

@@ -23,6 +23,7 @@ GET <sitemap>            → list of <loc> + <lastmod>
 ## 3. Finish
 - Stamp `source` / `last-synced` / `generated-by` provenance frontmatter.
 - Update `.sync-state.json` with new per-URL lastmod + etag.
+- The emitted `_index.md` frontmatter MUST include `kinds: [site-inventory]`.
 - Branch + PR.
 
 ## Example

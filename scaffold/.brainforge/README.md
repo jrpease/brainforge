@@ -42,3 +42,17 @@ not shipped at all → yours, never touched.
 It is **JSON, unlike the plain-line watermark above, on purpose**: no shell hook ever reads it —
 only the LLM-driven builder-side `/upgrade` does — so the jq-free constraint doesn't apply. It is
 committed so baselines travel with history. Do not hand-edit it; the emission contract owns it.
+
+## `brain-manifest.json`
+
+The **consumer map** — what a reader needs to know before opening any file: every domain under
+`context/`, its `kinds`, and a token count/band per domain and per file. It is a **core brain
+artifact**, regenerated on every sync (not only on demand), and is what the synapse reader plugin
+and tier-2 pointer snippets consult to route a prompt to the relevant slice instead of loading the
+whole brain. Do not hand-edit it; it is regenerated, never authored.
+
+## `gen-manifest.sh`
+
+The **deterministic generator** for `brain-manifest.json`. No LLM, no network — `git`/`find`/`sed`/
+`awk`/`wc` only (golden rule 3). Run it with `bash .brainforge/gen-manifest.sh`; every sync command
+runs it as a final step so the manifest never drifts from the brain it describes.

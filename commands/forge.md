@@ -1,13 +1,13 @@
 ---
-description: Bootstrap a brain in the current directory from this plugin's scaffold, then hand off to the brain-resident /walk wizard.
+description: Bootstrap a brain in the current directory from this plugin's scaffold, then hand off to the brain-resident /forge wizard.
 ---
 
-# /walk — bootstrap a brain (builder-side)
+# /forge — bootstrap a brain (builder-side)
 
 Run **in the directory that should become a brain** — either an empty repo or an existing one with
-no brain in it yet. This is the plugin-resident half of `/walk`: it exists so a fresh install has
-*something* to answer `/walk` with. It does exactly one job — emit the scaffold and hand off — and
-never duplicates the brain-resident wizard (`setup/README.md` + `.claude/commands/walk.md`, both
+no brain in it yet. This is the plugin-resident half of `/forge`: it exists so a fresh install has
+*something* to answer `/forge` with. It does exactly one job — emit the scaffold and hand off — and
+never duplicates the brain-resident wizard (`setup/README.md` + `.claude/commands/forge.md`, both
 emitted below) that actually drives the domain-by-domain setup loop.
 
 **Arguments:** none. The org name is confirmed interactively (guard 4).
@@ -24,7 +24,7 @@ emitted below) that actually drives the domain-by-domain setup loop.
 ## 1. Guards — all before any write
 
 1. **Already a brain?** If `sources.json` exists in the current directory, this is not a fresh
-   install — it's a scaffolded brain. Say so, tell the user to run the **brain-resident** `/walk`
+   install — it's a scaffolded brain. Say so, tell the user to run the **brain-resident** `/forge`
    (it drives the whole setup loop — this command has nothing further to do here), and **STOP**.
    No writes.
 2. **Git repo?** `git rev-parse --git-dir` must succeed in the cwd. If it doesn't, **ask** the user
@@ -93,10 +93,10 @@ chore(brain): scaffold from brainforge v<V>
 
 ## 5. Hand off
 
-Tell the user, in one sentence: the brain now carries its own `/walk`
-(`.claude/commands/walk.md`), so running `/walk` again — restarting the session first if the new
-project commands haven't loaded yet — starts the real depth-first setup wizard. Point at
-`setup/README.md` for what that wizard does. Do not restate its loop here.
+Tell the user, in one sentence: the brain now carries its own `/forge`
+(`.claude/commands/forge.md`); restart the session so it loads, then run `/forge` again — that
+starts the real depth-first setup wizard. Point at `setup/README.md` for what that wizard does. Do
+not restate its loop here.
 
 ## Never
 

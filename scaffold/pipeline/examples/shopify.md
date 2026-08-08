@@ -2,7 +2,7 @@
 
 > **This file is an example, not a built-in.** It shows what `/add-adapter` produces when you
 > extend Brainforge to a source it doesn't ship — here, a Shopify store. It fills
-> `../ADAPTER-TEMPLATE.md` and honors the five golden rules. Use it as the reference for writing
+> `../ADAPTER-TEMPLATE.md` and honors the six golden rules. Use it as the reference for writing
 > your own adapter; copy the *shape*, not the Shopify specifics.
 
 Covers store catalog, collections, and store config. Auth: see below (Shopify-specific).
@@ -61,6 +61,7 @@ shop        → shop.updated_at          (REST: GET /shop.json; MCP fallback: gr
   `pipeline/examples/shopify.md (Shopify MCP graphql_query; REST token revoked 2026-01-01)` for
   the fallback, or `pipeline/examples/shopify.md (Shopify Admin REST)` once a token exists.
 - Update `.sync-state.json` → `shopify[<id>]` with new `max(updated_at)` + counts.
+- The emitted `_index.md` frontmatter MUST include `kinds: [product-catalog]`.
 - Branch + PR.
 
 ## Never

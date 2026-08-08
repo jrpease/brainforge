@@ -15,7 +15,7 @@ paths may contain spaces).
 ## 0. Guards — all four before any write
 
 1. **You are in Brainforge:** `.claude-plugin/plugin.json` and `scaffold/` exist here.
-2. **The target is a brain:** `<brain>/sources.json` exists (the `/walk` guard — never run against
+2. **The target is a brain:** `<brain>/sources.json` exists (the `/forge` guard — never run against
    an arbitrary directory).
 3. **The brain working tree is clean:** `git -C "<brain>" status --porcelain` is empty — otherwise
    stop and ask the user to commit or stash first.
@@ -45,7 +45,7 @@ org name in guard 4.
 ## 3. Classify + apply — the script is the contract
 
 Save the script below to a scratch file (e.g. `bf-upgrade.py`) and run it. Dry run first, then
-`--apply` **on the upgrade branch** (§5). It prints one `ACTION<TAB>file` line per file:
+`--apply` **on the upgrade branch** (§6). It prints one `ACTION<TAB>file` line per file:
 
 | Action | Meaning | Writes |
 |---|---|---|
@@ -61,7 +61,7 @@ Save the script below to a scratch file (e.g. `bf-upgrade.py`) and run it. Dry r
 | `FLAG-UNVERIFIABLE-UNSHIPPED` | adoption pass: under a bump glob but not currently shipped (legacy runtime, or yours) | none — reconcile by hand in the PR |
 | `LIST-CONSUMER` | yours (steady-state: not shipped, not in manifest) | none — listed for transparency |
 
-**Load-bearing for `/walk`:** `commands/walk.md` §3 extracts exactly this fence
+**Load-bearing for `/forge`:** `commands/forge.md` §3 extracts exactly this fence
 (`awk '/^```python$/,/^```$/'` — it must remain the FIRST ```python block in this file) and calls
 the script with this CLI signature; keep both stable or the fresh-install bootstrap silently
 breaks.
@@ -152,7 +152,21 @@ dropped.
 manifest yet → adoption pass → every bump file is `ADOPT-CLEAN`) with `--apply`. That writes the
 birth manifest — the emission contract in one command.
 
-## 4. Ref-scan (both passes)
+## 4. Superseded files (`runtime.remove`)
+
+For each brain-relative path in `runtime.remove`: if the file is absent, skip. If present and
+its hash matches `.brainforge/runtime-manifest.json` (unmodified since emit), delete it in the
+upgrade PR — it has been renamed/superseded by this runtime version. If present but modified,
+do NOT delete: flag it in the PR body (`superseded but locally modified — remove by hand`).
+A brain must never end up answering to both the old and new name of the same command.
+
+After applying removals, grep the brain's `once` paths (`README.md`, `CLAUDE.md`,
+`templates/**`) for the bare command name(s) being removed (e.g. `/walk`) and list every hit
+in the upgrade PR body as a "hand-edit needed" checklist — **never auto-edit a `once` path**,
+those are consumer-owned. Pre-0.4.0 brains predate `templates/brain-pointer-snippet.md`; since
+`once` paths are never re-emitted, their owners should manually copy it in from the plugin.
+
+## 5. Ref-scan (both passes)
 
 After applying, scan the brain's markdown for runtime-path references and check each still exists:
 
@@ -166,7 +180,7 @@ to a file this run flagged or deleted — add a checklist line to the PR body (f
 missing/flagged target). Fixing them is human work inside the PR (the generalized Shopify lesson:
 stale `/sync` dispatch pointers are exactly what humans miss).
 
-## 5. Land as a PR (golden rule #4) — never a direct write
+## 6. Land as a PR (golden rule #4) — never a direct write
 
 All writes happen on a branch: `git -C "<brain>" checkout -b upgrade/runtime-<V>` **before**
 `--apply`. Stage only the emitted paths + the manifest — **never a blanket `git add -A`** — so a
@@ -185,6 +199,9 @@ Emitted from Brainforge `<emitted-from SHA>`.
 
 ### Ref-scan — stale runtime pointers
 - [ ] <file>:<line> → references `<missing/flagged path>`
+
+### Hand-edit needed — superseded command names in `once` paths
+- [ ] <file>:<line> → still references `<removed command name>`
 
 ### Yours, untouched
 - <file>

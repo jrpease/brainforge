@@ -9,6 +9,11 @@
       "name": "brainforge",
       "source": "./",
       "description": "Build and operate a product-org brain — a tool-agnostic git repo of authored truth + synced facts that any LLM can read."
+    },
+    {
+      "name": "synapse",
+      "source": "./synapse",
+      "description": "The shared Brainforge reader — subscribe any Claude Code session to a brain: auto-pull, session map, intent routing."
     }
   ]
 }
