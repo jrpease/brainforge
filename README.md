@@ -84,11 +84,11 @@ from reality.
 Building a brain is one person's job; reading it is everyone's. Teammates don't install the
 brain — they subscribe to it:
 
-- **Claude Code** → install the **synapse** plugin (`claude plugin install synapse@brainforge`)
-  or just open a product repo that commits the subscription settings
-  (see `synapse/templates/product-repo-settings.md`). Every session auto-pulls the brain,
-  shows a ~300-token map, and routes prompts to only the slice they need — announcing what it
-  loaded and skipped.
+- **Claude Code** → install the **synapse** plugin (`claude plugin install synapse@brainforge`),
+  then run `/synapse:subscribe <brain-git-url>` once — or just open a product repo that commits
+  the subscription settings (see `synapse/templates/product-repo-settings.md`). Every session
+  auto-pulls the brain, shows a ~300-token map, and routes prompts to only the slice they
+  need — announcing what it loaded and skipped.
 - **Cursor / Codex / any file-aware tool** → paste the pointer block
   (`scaffold/templates/brain-pointer-snippet.md`) into the repo's rules file. Same manifest,
   same reading rules.
