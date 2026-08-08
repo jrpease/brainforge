@@ -78,11 +78,43 @@ scaffold domain folders/templates + context/canon/<domain>/_index.md
    → wire its one adapter         (/add-source if a built-in exists, else /add-adapter)
    → first sync                   (/sync <type> — effectively full; lands via PR)
    → READ IT BACK                 (surface the freshly-synced facts; answer a real question)
+   → SHARE IT                     (§3a — print the team subscription handout, real URL filled in)
 ```
 
 The **read-back is the payoff** — show what just populated `derived/` and demonstrate the brain
-answering something concrete. Then return to §2 to offer the next domain, or stop (resumable later
-via §1).
+answering something concrete. Then run the share rung (§3a) before returning to §2 to offer the
+next domain, or stop (resumable later via §1).
+
+## 3a. Share the brain (after read-back, when a remote exists)
+
+A brain nobody reads is worth nothing — so the moment it has something to show, hand the owner
+the exact instructions their team needs. After each read-back:
+
+1. **Check for a remote:** `git config --get remote.origin.url`. If there is none, say one
+   line — "once this brain is on GitHub, I'll give you the subscription handout for your
+   team" — and move on. Never print a handout with placeholder values.
+2. **If a remote exists, print the handout with the real URL filled in** (substitute
+   `<remote-url>` with the actual value — never leave a placeholder):
+
+   ```
+   Your team subscribes in three lines (once, ever):
+
+     claude plugin marketplace add jrpease/brainforge
+     claude plugin install synapse@brainforge
+     /synapse:subscribe <remote-url>        ← run inside any Claude Code session
+
+   Then restart the session — the brain appears in every session from then on.
+   (Requires read access to <remote-url> — normal GitHub org membership.)
+   ```
+
+3. **Offer (once) to write it into the brain's README.** If `README.md`'s "Consuming this
+   repo" section does not already mention `/synapse:subscribe`, offer to replace its
+   placeholder subscription lines with the concrete handout above — real URL, no
+   placeholders — so the instructions live in the brain itself, where anyone landing on the
+   repo finds them. Idempotence check: skip the offer entirely if the README already
+   contains `/synapse:subscribe` with this remote's URL.
+4. This rung is **skippable and repeatable** — it costs one question at most, fires only
+   when the remote first appears or the URL changed, and never blocks the domain loop.
 
 ## 4. Domain-shape adaptation
 The loop flexes to each domain's lean (the catalog in `context/canon/README.md` notes which lean

@@ -1,7 +1,7 @@
 {
   "$comment": "synapse — the shared Brainforge reader (DESIGN.md §12). Consumption behavior lives HERE, never vendored into brains: routing improvements reach every subscriber via ordinary plugin update, with zero brain-owner action. The brain carries only data (.brainforge/brain-manifest.json).",
   "name": "synapse",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Read a Brainforge brain the smart way — auto-pull on session start, a ~300-token map, and intent routing that opens only the slice a prompt needs.",
   "author": { "name": "jrpease" },
   "keywords": ["brain", "context", "routing", "reader", "subscribe"],

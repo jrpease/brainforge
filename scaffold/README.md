@@ -53,9 +53,20 @@ site   ─┘                                                         (read-only
 
 Pick the path that matches the tool you use:
 
-- **Claude Code / Cursor / any file-aware LLM** → clone it locally. It auto-pulls on session
-  start (see `.claude/settings.json`), so your copy stays fresh without you remembering to
-  `git pull`. Native file search/read is faster, cheaper, and works offline.
+- **Claude Code** → subscribe once via the [synapse](https://github.com/jrpease/brainforge)
+  reader plugin — three lines, then every session auto-pulls this brain and routes prompts to
+  the right slice:
+
+  ```
+  claude plugin marketplace add jrpease/brainforge
+  claude plugin install synapse@brainforge
+  /synapse:subscribe <brain-git-url>
+  ```
+
+  <!-- brainforge: /forge replaces <brain-git-url> with this repo's real remote once it exists -->
+- **Cursor / Codex / any other file-aware LLM** → clone it locally and paste
+  `templates/brain-pointer-snippet.md` into your repo's rules file. The brain auto-pulls on
+  session start for synapse users; plain clones should `git pull` now and then.
 - **ChatGPT / browser / non-technical** → read it on GitHub directly (always current).
 
 **Do your actual work elsewhere.** Open *your* workspace folder, point your LLM at this repo
