@@ -1,7 +1,7 @@
 {
   "$comment": "Brainforge is packaged as a Claude plugin from day one (DESIGN.md §6B). The BUILDER layer (commands/) is Claude-first; the brain it scaffolds (scaffold/) is tool-agnostic markdown+JSON readable by any LLM.",
   "name": "brainforge",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "Build and operate a product-org brain — a tool-agnostic git repo of authored truth + synced facts that any LLM can read.",
   "author": { "name": "jrpease" },
   "keywords": ["brain", "context", "source-of-truth", "canon", "sync", "design-system"],
@@ -16,7 +16,11 @@
       "setup/README.md",
       ".claude/commands/**",
       ".claude/settings.json",
-      ".brainforge/README.md"
+      ".brainforge/README.md",
+      ".brainforge/gen-manifest.sh"
+    ],
+    "remove": [
+      ".claude/commands/walk.md"
     ],
     "once": [
       "README.md", "CLAUDE.md", "CONTRIBUTING.md",
@@ -34,6 +38,8 @@
       ".claude-plugin/**",
       "commands/**",
       "scaffold/**",
+      "synapse/**",
+      "evals/**",
       "docs/proofs/**",
       "LICENSE"
     ],

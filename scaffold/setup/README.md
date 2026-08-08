@@ -11,7 +11,7 @@ user is bought in.
 
 ## 0. Guard — confirm this is a brain
 The concrete check is a `sources.json` at the repo root (the scaffold always emits one). If it is
-absent, stop and tell the user to run `/walk` from inside a scaffolded brain — never run the loop
+absent, stop and tell the user to run `/forge` from inside a scaffolded brain — never run the loop
 against an arbitrary directory.
 
 ## 1. Compute the status ladder (derive — never store)
@@ -28,6 +28,33 @@ derive exactly one status:
 
 `<rung>` is the next incomplete rung of the loop in §3.
 
+## 1a. Kinds — what each domain IS (machine-readable)
+
+Every domain folder carries an `_index.md` whose frontmatter declares its `kinds:` — the
+catalog one level down (DESIGN.md §10). Routing (the synapse reader) inherits from kinds;
+a brain never authors routing rules. Stamp kinds at domain creation from this table:
+
+| Domain | Kinds emitted |
+|---|---|
+| `brand/` | `brand-voice`, `brand-messaging`, `naming`, `positioning`, `user-archetypes` |
+| `product/` | `product-principles`, `product-roadmap`, `project-tracking` |
+| `design/` | `design-principles`, `design-system`, `art-direction`, `ui-build-standards` |
+| `eng/` | `repo-summaries`, `architecture-decisions`, `eng-conventions` |
+| `analytics/` | `analytics`, `metric-definitions` |
+| (adapter-emitted) | `site-inventory` (website), `product-catalog` (shopify/SKUs), `digital-experience` (flows/pages) |
+
+Frontmatter shape (list syntax, within the first 20 lines):
+
+    ---
+    kinds: [brand-voice, brand-messaging, naming]
+    title: Brand
+    ---
+
+A canon domain's `_index.md` lists only the kinds its docs actually cover — start with the
+subset you scaffold, extend as docs land. A domain with no `kinds:` is **unclassified**: it
+appears in the manifest's `unclassified` list and the reader's map, and `/sync` proposes a
+classification at its next run (never silently).
+
 ## 2. Route
 - If any domain is `in-progress`, offer to **resume** it at its exact next rung.
 - Otherwise present the à la carte menu of `not-started` domains and **recommend the most
@@ -42,7 +69,8 @@ One seamless flow. Perform each rung yourself, reusing the instructions the sub-
 and the sync PR.
 
 ```
-scaffold domain folders/templates
+scaffold domain folders/templates + context/canon/<domain>/_index.md
+                                    (kinds: from §1a + title:, plus a doc table)
    → ingest real material        (authoring/README.md §1)
    → interview gaps only          (authoring/README.md §2 — one question per turn)
    → draft loudly provisional     (/draft-canon — status: draft + DRAFT banner + provenance/[GAP])
@@ -69,5 +97,6 @@ derived):
 - **Canon four-point guardrail** (`authoring/README.md`): drafts stay loudly provisional; approve
   refuses on any `[GAP]`; brand held hardest. When approve refuses, run one interview turn to fill
   the gap, then retry — never bypass the gate.
-- **Five golden rules** (`pipeline/README.md`): cheap-gate-first, REST-not-MCP, deterministic
-  extraction, **every sync lands via PR**, provenance + state always stamped.
+- **Six golden rules** (`pipeline/README.md`): cheap-gate-first, REST-not-MCP, deterministic
+  extraction, **every sync lands via PR**, provenance + state always stamped, extraction stays
+  reference not mirrors (flag it in the PR if a derived doc outgrows its size envelope).

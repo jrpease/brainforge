@@ -60,15 +60,15 @@ claude plugin marketplace add ./brainforge
 claude plugin install brainforge@brainforge
 ```
 
-Then make a home for your brain and start the walk:
+Then make a home for your brain and start the forge:
 
 ```
 mkdir my-brain && cd my-brain && git init
 ```
 
-In a Claude Code session inside that folder, run `/brainforge:walk`. The first run bootstraps the
-brain — it lays down the scaffold, commits, and hands off to the brain's own `/walk` (restart the
-session so the new commands load, then run `/walk` again).
+In a Claude Code session inside that folder, run `/brainforge:forge`. The first run bootstraps the
+brain — it lays down the scaffold, commits, and hands off to the brain's own `/forge` (restart the
+session so the new commands load, then run `/forge` again).
 
 From there it's a guided setup. It picks one domain to start with — the fastest, most derivable win —
 and drives the whole loop for you: scaffold the folders, pull real material into a draft, pause for
@@ -76,6 +76,24 @@ your approval, wire up an adapter, run the first sync, then read the result back
 facts land in `derived/` before it offers you the next domain. It never tracks progress in a state
 file — it recomputes where you are from the brain's actual contents every time, so it can't drift
 from reality.
+
+---
+
+## Reading a brain (your whole team)
+
+Building a brain is one person's job; reading it is everyone's. Teammates don't install the
+brain — they subscribe to it:
+
+- **Claude Code** → install the **synapse** plugin (`claude plugin install synapse@brainforge`)
+  or just open a product repo that commits the subscription settings
+  (see `synapse/templates/product-repo-settings.md`). Every session auto-pulls the brain,
+  shows a ~300-token map, and routes prompts to only the slice they need — announcing what it
+  loaded and skipped.
+- **Cursor / Codex / any file-aware tool** → paste the pointer block
+  (`scaffold/templates/brain-pointer-snippet.md`) into the repo's rules file. Same manifest,
+  same reading rules.
+- **Web-only tools (ChatGPT, Claude.ai)** → on the roadmap: a read-only MCP endpoint over the
+  same manifest.
 
 ---
 
@@ -100,9 +118,9 @@ built-in fills. The Shopify adapter above was built exactly this way; the
 
 ## Under the hood
 
-### The five golden rules
+### The six golden rules
 
-Every sync playbook in `scaffold/pipeline/` follows the same five rules ([full detail](scaffold/pipeline/README.md)):
+Every sync playbook in `scaffold/pipeline/` follows the same six rules ([full detail](scaffold/pipeline/README.md)):
 
 1. **Work scales with the delta, not the corpus** — run a cheap change-detection gate first; do
    expensive extraction only on what changed.
@@ -113,6 +131,9 @@ Every sync playbook in `scaffold/pipeline/` follows the same five rules ([full d
 4. **Every sync lands via PR, never a direct write** — a sync proposes a branch; a human merges.
 5. **Always update provenance + state** — every derived file carries `source`/`last-synced`, and
    `.sync-state.json` records the fingerprint at the end of a successful sync.
+6. **Extraction produces reference, not mirrors** — derived docs are reference material an LLM
+   reasons from, not full replicas of the source; a sync that lands a doc over its expected size
+   envelope must say so in the PR.
 
 ### How upgrades work
 

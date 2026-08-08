@@ -11,7 +11,7 @@ reverse-engineering style.** `pipeline/examples/shopify.md` is a worked example 
 
 Steps:
 1. Read `pipeline/ADAPTER-TEMPLATE.md` — the canonical gate → extract → emit → provenance →
-   command skeleton. The new adapter must honor all five golden rules (`pipeline/README.md`).
+   command skeleton. The new adapter must honor all six golden rules (`pipeline/README.md`).
 2. Interview the user for the source's specifics:
    - **Cheap change gate** — what's the cheapest fingerprint that says "nothing changed"?
      (a version field, a `max(updated_at)`, an ETag, a git SHA.) This is rule #1; get it right.

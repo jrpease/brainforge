@@ -112,7 +112,7 @@ context/
   derived/           ← 🤖 machine-extracted, regenerable
 
 pipeline/            ← ⚙️  the sync runtime (not consumed by readers)
-  README.md          ← the five golden rules
+  README.md          ← the six golden rules
   adapters/          ← one playbook per source type (figma, github, website, …)
   examples/          ← worked extension examples (e.g. shopify)
   ADAPTER-TEMPLATE.md← the skeleton every adapter fills
@@ -121,8 +121,8 @@ authoring/           ← ✍️  the canon builder method (counterpart to pipeli
   templates/         ← per-domain starter canon skeletons
 setup/               ← 🧭 the guided walk (fill one domain end-to-end, then offer the next)
   README.md          ← guard → status ladder → fast-win routing → inline loop → read it back
-templates/           ← reference-don't-duplicate snippets for other repos/workspaces
+templates/           ← reference-don't-duplicate snippets (see `brain-pointer-snippet.md`)
 .claude/
-  commands/          ← /walk, /sync, /add-source, /add-adapter, /drift, /sync-health, /draft-canon, /approve-canon
+  commands/          ← /forge, /sync, /add-source, /add-adapter, /drift, /sync-health, /draft-canon, /approve-canon
   settings.json      ← auto-pull-on-session-start hook (keeps clones fresh)
 ```

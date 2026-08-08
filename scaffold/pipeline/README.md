@@ -36,6 +36,15 @@ merges. Garbage never silently propagates to everyone's LLM. This is the human t
 - Write `source` / `last-synced` / `generated-by` frontmatter on every derived file.
 - Update `.sync-state.json` with the new fingerprint at the end of a successful sync.
 
+## 6. Extraction produces reference, not mirrors
+A derived doc is what an LLM reasons *from* — inventories, definitions, aggregates — never a
+replica of the source's records. (Measured failure this rule exists to prevent: one synced
+task-board doc grew to ~30k tokens, 48% of an entire brain.) Every adapter declares an
+**expected size envelope** per emitted doc (see `ADAPTER-TEMPLATE.md`). Golden rule 6: A sync
+that lands a doc over its envelope — or grows one past 3× its previous size — MUST say so in the
+PR body: what grew, by how much, and whether the extraction should aggregate harder. The human
+decides at the gate; the rule makes the growth loud, not forbidden.
+
 ## Adapters & playbooks
 Built-in **adapters** (one per source type) live in `adapters/`; cross-source orchestration and
 analysis live here. Every adapter fills the same skeleton — see `ADAPTER-TEMPLATE.md`.

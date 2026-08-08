@@ -1,0 +1,43 @@
+schema_version: "1.0"
+name: unclassified-visible
+description: >-
+  The mystery domain has no kinds and is listed under "unclassified" in the
+  manifest — it must stay visible in an overview, never vanish silently.
+context:
+  scaffold_script: scaffold.sh
+execution:
+  prompt: "Give me a one-paragraph overview of what our brain covers."
+  max_turns: 12
+  timeout_seconds: 300
+  allowed_tools: [Read, Glob, Grep, Skill]
+graders:
+  - type: regex
+    name: mentions-brand
+    target: last_message
+    pattern: "brand"
+    flags: i
+  - type: regex
+    name: mentions-design
+    target: last_message
+    pattern: "design"
+    flags: i
+  - type: regex
+    name: mentions-design-system
+    target: last_message
+    pattern: "design system"
+    flags: i
+  - type: regex
+    name: mentions-tracker
+    target: last_message
+    pattern: "tracker"
+    flags: i
+  - type: regex
+    name: mentions-mystery
+    target: last_message
+    pattern: "mystery"
+    flags: i
+  - type: regex
+    name: names-it-unclassified
+    target: last_message
+    pattern: "unclassified"
+    flags: i

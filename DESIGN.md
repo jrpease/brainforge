@@ -84,7 +84,7 @@ approves → only then it's canon.**
 **Prose-but-contractual.** An adapter = a markdown playbook filling a fixed skeleton +
 a `sources.json` schema entry + a generated slash command.
 
-- The five golden rules *are* the contract, inherited from that original production pipeline:
+- The six golden rules *are* the contract, inherited from that original production pipeline:
   1. **Work scales with the delta, not the corpus** — cheap change-detection gate first,
      expensive extraction only on what changed.
   2. **REST, not MCP** for sync — MCP is heavy/token-hungry, reserved for interactive work.
@@ -92,6 +92,9 @@ a `sources.json` schema entry + a generated slash command.
   4. **Every sync lands via PR, never a direct write** — the human trust gate.
   5. **Always update provenance + state** — `source` / `last-synced` / `generated-by`
      frontmatter + the sync-state fingerprint.
+  6. **Extraction produces reference, not mirrors** — a derived doc is what an LLM reasons
+     *from*, never a replica of the source's records. Adapters declare an expected size
+     envelope; a sync that grows a doc past it says so in the PR body.
 - Ship `pipeline/ADAPTER-TEMPLATE.md` (the canonical skeleton: gate / extract / emit /
   provenance / command) + an `/add-adapter` scaffolder. Consumers extend by filling the
   skeleton, not reverse-engineering style.
@@ -117,7 +120,7 @@ a `sources.json` schema entry + a generated slash command.
 - **(C) commercial product** — still deferred. Hosting, auth, billing, multi-tenant are a
   different company; the honest path to C runs through a battle-tested B anyway.
 
-## 7. Builder UX — the "walk"
+## 7. Builder UX — `/forge`
 
 **Depth-first, one loop at a time** (this is the roadmap philosophy turned into UX).
 
@@ -158,3 +161,82 @@ brain). Not passive tools you have to remember to run.
   spine it produced.
 - **MCP universal reader, access tiers, autonomous scheduling, declarative adapters** — all
   parked, all additive.
+
+---
+
+## Amendments — 2026-08-08 (consumer layer design session)
+
+Decided while designing subscribe + routing. The founding sections above stand; these extend
+them.
+
+### 9. The Consumer is a first-class role
+
+§2 declared "every LLM is a reader" and then treated reading as a free capability of plain files.
+It isn't. The reader has a contract of its own, parallel to the builder (§7) and manager (§8):
+
+- **Presence** — the brain is on disk (or reachable) from the session that needs it.
+- **Invocation** — the model consults the brain without a human remembering to ask.
+- **Selection** — the model opens the *relevant slice*, scaled to what the slice costs.
+- **Freshness** — already solved by §5/§8; the consumer layer only surfaces it (`last-synced`,
+  commit age), never re-implements it.
+
+Consequences: `.brainforge/brain-manifest.json` is a **core brain artifact** alongside
+`sources.json` (regenerated deterministically on every sync, not only on demand), and the
+index contract (`_index.md`) becomes **universal across canon and derived** — previously only
+adapters emitted indexes, leaving the human-authored half of the brain unindexed.
+
+### 10. Kinds — the catalog, one level down
+
+Routing needs a machine-readable vocabulary for what a domain *is*. That vocabulary is not a
+second taxonomy — it is the §4 catalog zoomed in one level. Each catalog preset defines the
+`kinds` it emits, and `/forge` stamps them at scaffold time:
+
+| Domain | Kinds emitted |
+|---|---|
+| `brand/` | `brand-voice`, `brand-messaging`, `naming`, `positioning`, `user-archetypes` |
+| `product/` | `product-principles`, `product-roadmap`, `project-tracking` |
+| `design/` | `design-principles`, `design-system`, `art-direction`, `ui-build-standards` |
+| `eng/` | `repo-summaries`, `architecture-decisions`, `eng-conventions` |
+| `analytics/` | `analytics`, `metric-definitions` |
+
+A domain declares `kinds:` (a list — one folder may hold several) in its `_index.md` frontmatter.
+Non-catalog brains (differently structured, hand-grown) route correctly by declaring kinds from
+this same vocabulary; they never author routing rules. Growing the vocabulary is a Brainforge
+change, not a per-brain one.
+
+### 11. Sixth golden rule — extraction produces reference, not mirrors
+
+The five golden rules govern how a sync runs; nothing governed what it may produce. Measured
+consequence: one synced task-board doc grew to ~30k tokens — 48% of an entire brain — a record
+mirror, not reference. The rule: **a derived doc is what an LLM reasons *from* —
+inventories, definitions, aggregates — never a replica of the source's records.** Mechanically:
+adapters declare an expected size envelope in `ADAPTER-TEMPLATE.md`, and a sync PR that exceeds
+it (or grows a doc dramatically) says so in the PR body. Cheap, deterministic, rides the existing
+trust gate.
+
+### 12. Three layers of behavior, not two
+
+§1's two-layer form factor (brain vendors its runtime) gains a third layer for consumption:
+
+| Layer | Lives in | Updates via | Why |
+|---|---|---|---|
+| Data (context + manifest) | the brain repo | sync PRs | the artifact itself |
+| Maintenance behavior | vendored in the brain (`bump` paths) | `/upgrade` PR | the owner's toolchain must be self-sufficient |
+| Consumption behavior | the **synapse** plugin, shipped by Brainforge | ordinary plugin update | routing improvements must reach every reader with zero brain-owner action |
+
+Corollary: the intent table (intent → kinds) ships **in synapse only** — never vendored into
+brains, or routing forks per brain and rots, the §1 disease.
+
+### 13. Topology consequence (extends §3)
+
+Subscribing the org means the whole org reads the whole brain. Access tiers stay deferred, but
+the domain folder seams of §3 are now explicitly the future split points, and the sixth rule
+(§11) is the interim control on what lands in front of every reader.
+
+### 14. Rename: `/walk` → `/forge`
+
+The flagship guided build is `/forge` (builder-side `/brainforge:forge` bootstraps; the
+brain-resident `/forge` drives the loop). Same two-stage pattern, renamed only. `/upgrade`
+learns to remove superseded command files it re-emits under a new name, so existing brains
+don't keep both. All other command names stand. The shared consumer plugin (§12) is named
+**synapse**.
