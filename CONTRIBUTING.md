@@ -56,10 +56,10 @@ For a full worked example of this path end to end — including the moment a liv
 real bug — see the Shopify walkthrough:
 [`docs/walkthroughs/shopify-add-adapter.md`](docs/walkthroughs/shopify-add-adapter.md).
 
-## The two corollary rules
+## The three corollary rules
 
-Two mechanical seams in this repo mean a change can be *correct* and still silently fail to
-reach anyone. Both are enforced by convention, not by CI, so hold yourself to them:
+Three mechanical seams in this repo mean a change can be *correct* and still silently fail to
+reach anyone. All three are enforced by convention, not by CI, so hold yourself to them:
 
 1. **Touching a `runtime.bump` path** (see the `runtime.bump` globs in
    [`.claude-plugin/plugin.json`](.claude-plugin/plugin.json)) **⇒ bump `plugin.json`'s
@@ -68,6 +68,23 @@ reach anyone. Both are enforced by convention, not by CI, so hold yourself to th
 2. **Touching a published path** (a `publish.include` match, or a `publish.map` source — both
    defined in the same `plugin.json`) **⇒ re-run `/publish` before the next release**, or the
    public tree drifts from what's actually in this repo.
+3. **Touching published *behavior* ⇒ bump `plugin.json`'s `version`.** A same-version republish is
+   **invisible to `claude plugin update`** — installed users keep the old behavior until they force
+   a reinstall (proven the hard way during Phase 4: a republished `plugin.json` at the same `0.3.0`
+   needed a forced reinstall to take). Published behavior is anything a plugin install *executes,
+   dispatches on, or emits*: `commands/**`, `.claude-plugin/**`, `scaffold/**`, `synapse/**`.
+   Docs-only published paths (`README.md`, `DESIGN.md`, `ROADMAP.md`, this file, `docs/**`) and
+   `evals/**` need rule 2 but **not** a bump. Nor does a comment-only edit *inside* a behavior file
+   — a `$comment` in `plugin.json`, a `#` line in a script — since nothing an install executes
+   actually changed. **When the line between comment and behavior is at all unclear, bump.** A
+   spurious version bump costs nothing; a behavior change that never reaches installed users is the
+   failure this rule exists to prevent.
+
+   Rule 3 is not implied by rule 1. `runtime.bump` covers what `/upgrade` re-emits into *existing*
+   brains; rule 3 covers what a *plugin install* carries. The gap between them is real: `scaffold/`
+   **`once`** paths (`CLAUDE.md`, `sources.json`, `templates/**`) sit outside `runtime.bump` by
+   design, so changing one is correctly invisible to `/upgrade` — but without a version bump it also
+   never reaches the next brain anyone forges.
 
 ## PR expectations
 
