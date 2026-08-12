@@ -6,7 +6,7 @@ the builder. If you landed here from an emitted brain instead, see the next sect
 ## What this repo is
 
 This repo is the **builder**: the generator, the sync-pipeline scaffold, and the Claude Code
-commands that stand up and operate a "product-org brain" (`/walk`, `/sync`, `/add-adapter`,
+commands that stand up and operate a "product-org brain" (`/forge`, `/sync`, `/add-adapter`,
 `/publish`, `/upgrade`, …). Its output is a separate artifact — a **brain** — a self-sufficient
 git repo scaffolded from `scaffold/` that a team owns and runs on its own.
 
