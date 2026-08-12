@@ -32,7 +32,7 @@
     ]
   },
   "publish": {
-    "$comment": "The distribution seam (Phase 4). include = allowlist globs copied verbatim; anything unmatched is private by default. map = authored public variants renamed at emit (never scrub the private originals). Corollary: touching a published path means re-running /publish before the next release. The audit leak-denylist lives in publish-audit.json at repo root — private by design (matched by no include glob), so the denylist never ships with the set it polices.",
+    "$comment": "The distribution seam (Phase 4). include = allowlist globs copied verbatim; anything unmatched is private by default. map = authored public variants renamed at emit (never scrub the private originals). Corollary: touching a published path means re-running /publish before the next release. Second corollary: touching published BEHAVIOR (commands/**, .claude-plugin/**, scaffold/**, synapse/** — anything an install executes, dispatches on, or emits) means bumping version above, or the change is invisible to `claude plugin update` and installed users keep the old behavior until a forced reinstall. Docs-only published paths and evals/** need the re-publish but not the bump. See CONTRIBUTING.md's three corollary rules. The audit leak-denylist lives in publish-audit.json at repo root — private by design (matched by no include glob), so the denylist never ships with the set it polices.",
     "repo": "jrpease/brainforge",
     "include": [
       ".claude-plugin/**",
