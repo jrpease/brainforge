@@ -16,8 +16,9 @@ against an arbitrary directory.
 
 ## 1. Compute the status ladder (derive — never store)
 There is **no walk-state file.** Progress is read from the brain's real materialized state on
-demand, so it can never drift from reality. For each of the five catalog domains (`brand`,
-`product`, `design`, `eng`, `analytics` — the à la carte catalog in `context/canon/README.md`),
+demand, so it can never drift from reality. For each of the six catalog domains (`brand`,
+`product`, `design`, `eng`, `analytics`, `company` — the à la carte catalog in
+`context/canon/README.md`),
 derive exactly one status:
 
 | Status | Derived from |
@@ -41,6 +42,7 @@ a brain never authors routing rules. Stamp kinds at domain creation from this ta
 | `design/` | `design-principles`, `design-system`, `art-direction`, `ui-build-standards` |
 | `eng/` | `repo-summaries`, `architecture-decisions`, `eng-conventions` |
 | `analytics/` | `analytics`, `metric-definitions` |
+| `company/` | `company-principles`, `org-design` |
 | (adapter-emitted) | `site-inventory` (website), `product-catalog` (shopify/SKUs), `digital-experience` (flows/pages) |
 
 Frontmatter shape (list syntax, within the first 20 lines):

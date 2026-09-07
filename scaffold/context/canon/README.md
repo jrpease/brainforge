@@ -33,6 +33,7 @@ Domains are **à la carte** — only what this brain set up. The out-of-box cata
 - `brand/` — voice & tone, positioning, messaging, naming, user archetypes
 - `product/` — product principles, roadmap
 - `design/` — design principles, art direction, packaging, UI/web build standards
+- `company/` — mission & values, operating principles, org design
 
 (`eng/` and `analytics/` lean derived — their canon is light, e.g. architecture decisions or
 metric definitions; most of their content lives in `../derived/`.)

@@ -1,14 +1,17 @@
 {
+  "schema": 2,
   "brain": "acme-brain",
   "remote": "",
   "generatedFrom": "unborn",
-  "generatedAt": "2026-08-08",
+  "generatedAt": "2026-09-07",
   "domains": [
     {
       "path": "context/canon/brand",
       "title": "Brand",
       "kinds": ["brand-voice", "brand-messaging", "naming"],
-      "tokens": 959,
+      "tokens": 995,
+      "docTokens": 959,
+      "indexTokens": 36,
       "band": "cheap",
       "files": [
         { "path": "naming.md", "title": "Naming Rules", "tokens": 484 },
@@ -16,10 +19,25 @@
       ]
     },
     {
+      "path": "context/canon/company",
+      "title": "Company",
+      "kinds": ["company-principles", "org-design"],
+      "tokens": 387,
+      "docTokens": 345,
+      "indexTokens": 42,
+      "band": "cheap",
+      "files": [
+        { "path": "org.md", "title": "Org Design", "tokens": 167 },
+        { "path": "principles.md", "title": "Mission, Values & Operating Principles", "tokens": 178 }
+      ]
+    },
+    {
       "path": "context/canon/design",
       "title": "Design",
       "kinds": ["design-principles", "ui-build-standards"],
-      "tokens": 530,
+      "tokens": 556,
+      "docTokens": 530,
+      "indexTokens": 26,
       "band": "cheap",
       "files": [
         { "path": "principles.md", "title": "Design Principles", "tokens": 530 }
@@ -29,7 +47,9 @@
       "path": "context/canon/pricing",
       "title": "Pricing",
       "kinds": ["pricing-model"],
-      "tokens": 295,
+      "tokens": 323,
+      "docTokens": 295,
+      "indexTokens": 28,
       "band": "cheap",
       "files": [
         { "path": "model.md", "title": "Pricing Model", "tokens": 295 }
@@ -39,7 +59,9 @@
       "path": "context/derived/design-system",
       "title": "Design system",
       "kinds": ["design-system"],
-      "tokens": 3387,
+      "tokens": 3417,
+      "docTokens": 3387,
+      "indexTokens": 30,
       "band": "normal",
       "files": [
         { "path": "tokens.md", "title": "Design Tokens", "tokens": 3387 }
@@ -49,7 +71,9 @@
       "path": "context/derived/mystery",
       "title": "Mystery",
       "kinds": [],
-      "tokens": 270,
+      "tokens": 276,
+      "docTokens": 270,
+      "indexTokens": 6,
       "band": "cheap",
       "files": [
         { "path": "notes.md", "title": "Notes", "tokens": 270 }
@@ -59,7 +83,9 @@
       "path": "context/derived/tracker",
       "title": "Tracker",
       "kinds": ["project-tracking"],
-      "tokens": 18199,
+      "tokens": 18237,
+      "docTokens": 18199,
+      "indexTokens": 38,
       "band": "expensive",
       "files": [
         { "path": "milestones.md", "title": "Milestones", "tokens": 18003 },

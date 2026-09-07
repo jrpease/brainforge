@@ -1,0 +1,33 @@
+schema_version: "1.0"
+name: org-ownership
+description: >-
+  An ownership/escalation question must reach the company domain via the
+  org-design kind. Guards the second of the two company intents: the domain
+  declares both kinds, so a passing company-mission case does not prove this
+  one routes.
+context:
+  scaffold_script: scaffold.sh
+execution:
+  prompt: "Billing UI is broken for customers. Which team owns it, and who do I escalate to if it's still broken this afternoon?"
+  max_turns: 12
+  timeout_seconds: 300
+  allowed_tools: [Read, Glob, Grep, Skill]
+graders:
+  - type: tool_used
+    name: reads-org-design
+    tool: Read
+    input_match: "company/org"
+    min: 1
+  - type: regex
+    name: names-the-owning-team
+    target: last_message
+    pattern: "(?i)growth"
+  - type: regex
+    name: names-the-escalation-path
+    target: last_message
+    pattern: "(?i)COO"
+  - type: regex
+    name: has-announce-line
+    target: last_message
+    pattern: "loaded:.*skipped:"
+    flags: s
