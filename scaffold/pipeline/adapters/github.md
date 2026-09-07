@@ -7,6 +7,21 @@ private-repo read access (read-only contents scope is enough).
 - `sources.json` → `repos[]`
 - `.sync-state.json` → `repos[<id>].lastSha`
 
+## 0a. Size envelope  — golden rule #6
+
+| Emitted doc | Envelope |
+|---|---|
+| `repos/<repo-name>.md` | ≤ 2,500 each |
+| `repos/_index.md` | ≤ 1,500 |
+| **domain total** | **≤ 8,000** |
+
+**Emit reference, not a file listing.** Directory *names* and counts, the stack table, the route or
+page registry, key components, and what changed since the last sha. Never per-file inventories, never
+source excerpts, never a dependency dump — a package manifest can carry well over a hundred entries
+of which perhaps thirty define the stack. A repo holds thousands of files and the summary must not
+scale with them: if a repo doc is growing with the codebase rather than with its architecture, the
+extraction is wrong, not the envelope.
+
 ## 1. Cheap change gate (always)
 ```
 git -C <clone> fetch --quiet
@@ -23,10 +38,11 @@ git -C <clone> diff <lastSha>..origin/<branch> --name-only
   flow do"), keep it short and factual. A wrong word here becomes "truth" — be conservative.
 - Write to `context/derived/repos/<repo-name>.md`: stack, routes/pages, key components, notable
   changes since last sync.
-
 ## 3. Finish
 - Stamp `source` / `last-synced` / `generated-by`.
 - Update `.sync-state.json` → `repos[<id>].lastSha = origin/<branch> HEAD`.
+- Set `.sync-state.json` → `lastFullSync` to today (`YYYY-MM-DD`). Disarms the session-start
+  sync-health tripwire, which stays lit while that field is `null`.
 - The emitted `_index.md` frontmatter MUST include `kinds: [repo-summaries]`.
 - Branch + PR.
 

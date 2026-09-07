@@ -63,8 +63,11 @@ apath = BF / "publish-audit.json"
 if not apath.is_file(): die("NO-AUDIT-FILE\tpublish-audit.json missing at repo root")
 AUD = json.loads(apath.read_text())
 def under(rel, g): return rel == g or (g.endswith("/**") and rel.startswith(g[:-2]))
-files = [str(p.relative_to(BF)) for p in sorted(BF.rglob("*"))
-         if p.is_file() and ".git" not in p.parts]
+# the committed set IS the publishable set — never the working directory (a gitignored
+# file under an include glob would otherwise ship: .env, .DS_Store)
+files = sorted(f for f in run("git", "-C", str(BF), "ls-files", "-z").split("\0") if f)
+nonfiles = [f for f in files if not (BF / f).is_file()]   # submodule gitlink, or tracked-but-deleted
+if nonfiles: die("NOT-A-FILE\t" + "\t".join(nonfiles))
 inc_matches = {g: [f for f in files if under(f, g)] for g in INC}
 empty = [g for g, m in inc_matches.items() if not m]
 if empty: die("EMPTY-GLOB\t" + "\t".join(empty))
@@ -138,7 +141,7 @@ print(f"PR\t{pr.stdout.strip()}" if pr.returncode == 0
 
 | Tag | Meaning |
 |---|---|
-| `DIRTY-TREE` / `MAP-MISSING` / `NO-LICENSE` / `EMPTY-GLOB` / `NO-AUDIT-FILE` | Preflight abort — nothing assembled. Fix and re-run. |
+| `DIRTY-TREE` / `MAP-MISSING` / `NO-LICENSE` / `EMPTY-GLOB` / `NO-AUDIT-FILE` / `NOT-A-FILE` | Preflight abort — nothing assembled. Fix and re-run. |
 | `AUDIT-SKIPPED-BINARY` | Transparency lines — files the tripwire cannot grep. |
 | `LEAK-TRIPWIRE` + `file:line` lines | Abort — a denylisted pattern reached the assembled tree. Fix the file, or add a per-file exception **only** if the mention is legitimately public. |
 | `UP-TO-DATE` | Staging already matches this commit's publishable set. Zero writes. |

@@ -1,0 +1,32 @@
+schema_version: "1.0"
+name: pricing-question
+description: >-
+  A pricing question must reach the pricing domain via the pricing-model kind.
+  Regression guard for the class of bug where a brain declares a kind no intent
+  points at: the domain renders normally in the map and routes to nothing.
+context:
+  scaffold_script: scaffold.sh
+execution:
+  prompt: "What do we charge for the Pro tier, and how much can sales discount it?"
+  max_turns: 12
+  timeout_seconds: 300
+  allowed_tools: [Read, Glob, Grep, Skill]
+graders:
+  - type: tool_used
+    name: reads-pricing-model
+    tool: Read
+    input_match: "pricing/model"
+    min: 1
+  - type: regex
+    name: cites-pro-price
+    target: last_message
+    pattern: "\\$?29"
+  - type: regex
+    name: cites-discount-ceiling
+    target: last_message
+    pattern: "15\\s*%"
+  - type: regex
+    name: has-announce-line
+    target: last_message
+    pattern: "loaded:.*skipped:"
+    flags: s

@@ -96,13 +96,18 @@ open suggestion.
 
 **In scope:** brand identity & voice, positioning & messaging, naming conventions, product
 principles & roadmap, design principles, design tokens, component inventory, SKU/dieline
-reference, web/site inventory, repo summaries.
+reference, web/site inventory, repo summaries, a synced read-only roadmap reference, metric
+definitions and trend reference.
 
 **Explicitly out of scope (non-goals):**
 - ❌ A digital asset manager for raw photography / video / hi-res masters (those stay in Figma / a DAM / drive)
-- ❌ A project tracker or task manager
-- ❌ Analytics or dashboards
+- ❌ A tracker or task manager you work **in** — the source stays the system of record; a synced, read-only roadmap reference is in scope
+- ❌ Live dashboards or raw event data — aggregated metrics and their definitions are in scope
 - ❌ A general file dump
+
+Scope is about **where you work**, not what subject. How much detail a synced doc may carry is a
+separate question, governed by golden rule 6 (`pipeline/README.md`): extraction produces reference,
+not mirrors.
 
 A tight, trusted scope beats a sprawling junk drawer. If it isn't reference context someone's
 LLM should reason from, it doesn't go here.

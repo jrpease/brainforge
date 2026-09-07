@@ -7,15 +7,15 @@
         "hooks": [
           {
             "type": "command",
-            "command": "git -C \"$CLAUDE_PROJECT_DIR\" pull --ff-only --quiet 2>/dev/null && echo '{{ORG}} context: pulled latest.' || echo '{{ORG}} context: could not fast-forward (local changes or offline) — using current copy.'"
+            "command": "git -C \"$CLAUDE_PROJECT_DIR\" pull --ff-only --quiet 2>/dev/null && echo 'Context: pulled latest.' || echo 'Context: could not fast-forward (local changes or offline) — using current copy.'"
           },
           {
             "type": "command",
-            "command": "WM=\"$CLAUDE_PROJECT_DIR/.brainforge/last-drift-review\"; if [ -s \"$WM\" ]; then SHA=\"$(cat \"$WM\")\"; if git -C \"$CLAUDE_PROJECT_DIR\" cat-file -e \"$SHA^{commit}\" 2>/dev/null && ! git -C \"$CLAUDE_PROJECT_DIR\" diff --quiet \"$SHA\" HEAD -- context/canon context/derived 2>/dev/null; then echo '⚠️  {{ORG}} context changed since last drift review — run /drift to check canon vs. reality.'; fi; elif [ ! -e \"$WM\" ] && [ -n \"$(find \"$CLAUDE_PROJECT_DIR/context/derived\" -name '*.md' ! -name 'README.md' ! -name '_index.md' -print -quit 2>/dev/null)\" ]; then echo '⚠️  {{ORG}} context has never had a drift review — run /drift to check canon vs. reality.'; fi"
+            "command": "WM=\"$CLAUDE_PROJECT_DIR/.brainforge/last-drift-review\"; if [ -s \"$WM\" ]; then SHA=\"$(cat \"$WM\")\"; if git -C \"$CLAUDE_PROJECT_DIR\" cat-file -e \"$SHA^{commit}\" 2>/dev/null && ! git -C \"$CLAUDE_PROJECT_DIR\" diff --quiet \"$SHA\" HEAD -- context/canon context/derived 2>/dev/null; then echo '⚠️  Context changed since last drift review — run /drift to check canon vs. reality.'; fi; elif [ ! -e \"$WM\" ] && [ -n \"$(find \"$CLAUDE_PROJECT_DIR/context/derived\" -name '*.md' ! -name 'README.md' ! -name '_index.md' -print -quit 2>/dev/null)\" ]; then echo '⚠️  Context has never had a drift review — run /drift to check canon vs. reality.'; fi"
           },
           {
             "type": "command",
-            "command": "D=\"$CLAUDE_PROJECT_DIR\"; S=\"$D/.sync-state.json\"; N=\"\"; if [ -d \"$D/context/derived\" ] && grep -rqE '^source:[[:space:]]*TODO' \"$D/context/derived\" 2>/dev/null; then N=1; fi; if [ -f \"$S\" ] && grep -qE '\"lastFullSync\":[[:space:]]*null' \"$S\" 2>/dev/null && grep -qE '\"[a-zA-Z0-9_-]+\":[[:space:]]*\\{$' \"$S\" 2>/dev/null; then N=1; fi; if [ -n \"$N\" ]; then echo '⚠️  {{ORG}} sync health: a source is unsynced or still has a TODO — run /sync-health.'; fi"
+            "command": "D=\"$CLAUDE_PROJECT_DIR\"; S=\"$D/.sync-state.json\"; N=\"\"; if [ -d \"$D/context/derived\" ] && grep -rqE '^source:[[:space:]]*TODO' \"$D/context/derived\" 2>/dev/null; then N=1; fi; if [ -f \"$S\" ] && grep -qE '\"lastFullSync\":[[:space:]]*null' \"$S\" 2>/dev/null && grep -qE '\"[a-zA-Z0-9_-]+\":[[:space:]]*\\{$' \"$S\" 2>/dev/null; then N=1; fi; if [ -n \"$N\" ]; then echo '⚠️  Sync health: a source is unsynced or still has a TODO — run /sync-health.'; fi"
           }
         ]
       }

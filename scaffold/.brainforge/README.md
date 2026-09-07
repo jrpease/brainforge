@@ -51,6 +51,24 @@ artifact**, regenerated on every sync (not only on demand), and is what the syna
 and tier-2 pointer snippets consult to route a prompt to the relevant slice instead of loading the
 whole brain. Do not hand-edit it; it is regenerated, never authored.
 
+**`"schema": 2`** — token accounting is honest. Schema 1 counted only `*.md` excluding
+`_index.md`, so every domain under-reported its real read cost: index files and emitted data
+files (e.g. `design-system/tokens.json`) were invisible. In one real brain that hid ~10,000
+tokens across `context/` (33,031 reported vs 43,386 actual), enough for a domain to sit in the
+`cheap` band while actually being `normal`. Per domain you now get:
+
+| Key | Meaning |
+|---|---|
+| `tokens` | `docTokens + indexTokens` — the honest total; **bands are computed from this** |
+| `docTokens` | sum of `files[]` — what schema 1 called `tokens`, kept for continuity |
+| `indexTokens` | the domain's own `_index.md` |
+
+`files[]` now also lists `*.json` data files. **Line format is unchanged** (single-line objects,
+2-space indent), so `grep`/`sed`/`awk` consumers keep working — only the arithmetic changed, which
+is why a brain still on schema 1 stays readable by the same hooks. Note the estimator is
+word-based (`words * 4 / 3`), tuned for prose and under-counting punctuation-dense JSON: treat
+`.json` figures as a floor.
+
 ## `gen-manifest.sh`
 
 The **deterministic generator** for `brain-manifest.json`. No LLM, no network — `git`/`find`/`sed`/

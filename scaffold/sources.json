@@ -11,6 +11,7 @@
       "extract": ["variables", "styles", "components"],
       "into": "context/derived/design-system/",
       "enabled": true,
+      "cadence": "weekly",
       "$note": "Free-form note: quirks, auth path, what to skip. See pipeline/adapters/figma.md."
     },
     "repos": {
@@ -22,6 +23,7 @@
       "summarize": ["routes", "components", "stack", "key-readmes"],
       "into": "context/derived/repos/",
       "enabled": true,
+      "cadence": "weekly",
       "$note": "Cheap gate: git diff <lastSha>..origin/<branch> --name-only. See pipeline/adapters/github.md."
     },
     "websites": {
@@ -31,6 +33,7 @@
       "sitemap": "https://<domain>/sitemap.xml",
       "into": "context/derived/web/",
       "enabled": true,
+      "cadence": "weekly",
       "$note": "Cheap gate: sitemap <lastmod> + ETag/If-Modified-Since. See pipeline/adapters/website.md."
     },
     "monday": {
@@ -40,6 +43,7 @@
       "extract": ["items", "groups", "column-values"],
       "into": "context/derived/monday/",
       "enabled": true,
+      "cadence": "daily",
       "$note": "GraphQL-only (no REST). Cheap gate: boards(ids){updated_at items_count}. Delta via activity_logs(from:lastSync). Allowlist board IDs — never crawl the workspace. See pipeline/adapters/monday.md."
     },
     "ga": {
@@ -52,6 +56,7 @@
       "rollupDays": 28,
       "into": "context/derived/ga/",
       "enabled": true,
+      "cadence": "daily",
       "$note": "GA4 Data API (runReport). First metrics/time-series source: cheap gate = sessions-by-date over a trailing window; delta = new/restated days, not a stop-if-unchanged hash. Auth: ADC (gcloud, for viewer-only props) or GOOGLE_APPLICATION_CREDENTIALS service account added as property Viewer. See pipeline/adapters/ga.md."
     }
   },

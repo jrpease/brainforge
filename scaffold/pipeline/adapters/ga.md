@@ -29,6 +29,25 @@ whole-source fingerprint (§1), and the delta is a **date window** (§2).
   `{ "lastSyncedThrough": "<YYYY-MM-DD>", "trailingSessionHashes": { "<YYYYMMDD>": <sessions>, … } }`
   (the last `lookbackDays` of the sessions-by-date series).
 
+## 0a. Size envelope  — golden rule #6
+
+| Emitted doc | Envelope |
+|---|---|
+| `ga/_index.md` | ≤ 1,000 |
+| `ga/traffic-overview.md` | ≤ 1,500 |
+| `ga/acquisition.md` | ≤ 1,000 |
+| `ga/top-pages.md` | ≤ 1,500 |
+| `ga/ecommerce.md` | ≤ 1,000 |
+| **domain total** | **≤ 5,000** |
+
+**A time series is the one emit shape that grows on its own, so bound it explicitly.** The
+append-merge series must stay inside the configured trailing window: when `traffic-overview.md` or
+`ecommerce.md` reaches its envelope, roll the days that have fallen out of the window into
+period aggregates (month totals, period-over-period deltas) and drop the rows, rather than letting
+history accumulate a row at a time. Rollups (`acquisition.md`, `top-pages.md`) refresh in full and
+stay capped by their own top-N. GA answers "what happened on 14 March" better than a file can; the
+brain's job is the shape and the direction of travel.
+
 ## 1. Cheap change gate (always)  — golden rule #1  (metrics reframe)
 A GA report carries no ETag/version and always "changes," so the cheapest "did anything change?" probe
 is a **tiny report**: `sessions` by `date` over the trailing window
@@ -81,11 +100,12 @@ Re-pull the reports **only for the delta window**, in two shapes:
   - `acquisition.md` — channel · sessions · users · conversions   *(trailing `rollupDays`)*
   - `top-pages.md` — page path · views · avg session duration   *(trailing `rollupDays`, top 50)*
   - `_index.md` — property id · date range covered · per-report last-synced · `lookbackDays`/`backfillDays`/`rollupDays` in effect
-
 ## 3. Finish  — golden rule #5
 - Stamp `source` / `last-synced` / `generated-by` on every file touched.
 - Update `.sync-state.json` → `ga[<propertyId>]` = `{ lastSyncedThrough: <yesterday>,
   trailingSessionHashes: {last lookbackDays of the sessions-by-date series} }`.
+- Set `.sync-state.json` → `lastFullSync` to today (`YYYY-MM-DD`). Disarms the session-start
+  sync-health tripwire, which stays lit while that field is `null`.
 - The emitted `_index.md` frontmatter MUST include `kinds: [analytics]`.
 - **Branch + PR — never push to main directly (golden rule #4).**
 

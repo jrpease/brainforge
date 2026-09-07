@@ -194,7 +194,7 @@ second taxonomy. It is the §4 catalog zoomed in one level. Each catalog preset 
 | Domain | Kinds emitted |
 |---|---|
 | `brand/` | `brand-voice`, `brand-messaging`, `naming`, `positioning`, `user-archetypes` |
-| `product/` | `product-principles`, `product-roadmap`, `project-tracking` |
+| `product/` | `product-principles`, `product-roadmap`, `project-tracking`, `pricing-model` |
 | `design/` | `design-principles`, `design-system`, `art-direction`, `ui-build-standards` |
 | `eng/` | `repo-summaries`, `architecture-decisions`, `eng-conventions` |
 | `analytics/` | `analytics`, `metric-definitions` |

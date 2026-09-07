@@ -28,13 +28,22 @@ did, and never appear grounded when you are not.
    collect their kinds.
 2. From the brain's manifest, select domains whose `kinds` intersect the collected kinds —
    skipping nothing silently: unmatched but plausibly relevant domains may load per band.
-3. Apply the band gate:
-   - **cheap** — load on a weak match (any collected kind, or clear topical adjacency).
-   - **normal** — load on a direct intent match only.
-   - **expensive** — direct match only — not even an index peek on an unmatched-but-plausible
-     domain, that's for cheap/normal only — and NEVER the whole domain: read the domain's
-     `_index.md`, then open only the specific files the task needs.
-4. Read the chosen domains' `_index.md` files, then the specific content files. Prefer
+3. Apply the band gate. It has **two levels**, because an `_index.md` is a separate and much
+   smaller cost than the domain it indexes — the manifest reports it as `indexTokens`,
+   distinct from the domain's total `tokens`:
+   - **Index peek — permitted at any band**, on any domain that is plausibly relevant,
+     including one whose kinds did not match and one that declares no kinds at all. A peek
+     costs `indexTokens`, not `tokens`. This is the only way to find a file whose topic its
+     domain's kinds do not cover: kinds are declared per *domain*, files are per *file*, and
+     the `_index.md` doc table is the one place that gap is visible. Never skip a plausible
+     domain for being expensive — expensive gates the *read*, not the *peek*.
+   - **Full read** — **cheap**: on a weak match (any collected kind, or clear topical
+     adjacency). **normal**: on a direct intent match only. **expensive**: on a direct match
+     only, and NEVER the whole domain — open only the specific files the peek showed you need.
+4. If the map flagged a domain's kind as **unroutable** (`⚠ unroutable kind ...`), that domain
+   holds content routing cannot reach by intent. Treat it as plausibly relevant and peek its
+   index whenever the task is anywhere near its subject; say so in the announce line.
+5. Read the chosen domains' `_index.md` files, then the specific content files. Prefer
    targeted reads; the disclosure ladder is map → index → files.
 
 ## Announce (one line, every grounded response)
