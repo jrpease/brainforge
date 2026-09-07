@@ -15,6 +15,31 @@ Auth: `<CREDENTIAL_ENV_VAR>` from `.env` (add it to `.env.example`). <One line o
 - Source entries from `sources.json` → `<source-type>[]` (filter `enabled: true`, or the one passed as arg)
 - Last fingerprint from `.sync-state.json` → `<source-type>[<key>]`
 
+## 0a. Size envelope  — golden rule #6
+> An envelope is a number, not an intention. Declare one per emitted doc **before** the first live
+> run, then hold the sync to it. This table MAY be omitted — the shipped default (any derived doc
+> ≤ 8k, see `../README.md` § Defaults) then applies, so golden rule 6 always has something to
+> compare against. Declare one when this source's docs are legitimately bigger or smaller than
+> that, which is most of them.
+
+| Emitted doc | Envelope |
+|---|---|
+| `<folder>/_index.md` | ≤ <n> |
+| `<folder>/<doc>.md` | ≤ <n> |
+| **domain total** | **≤ <n>** |
+
+An `_index.md` row is a **manual** check for now: `/sync` resolves per-doc envelopes from the
+manifest's `files[]`, which does not list index files (they are counted once, as the domain's
+`indexTokens`). Declare the row anyway and hold it by hand — the domain-total row is the one that
+fires automatically.
+
+**<One paragraph: what "reference, not a mirror" means for THIS source.>** Name the specific thing
+that would balloon the doc if extracted faithfully — every layer, every row, every file, every day —
+and say what to emit instead (counts, aggregates, a link back to the source). If a doc approaches its
+envelope, aggregate harder; never raise the envelope to fit the extraction. A breach the brain
+knowingly accepts goes in `acceptedSize` on the `sources.json` entry with a reason — that is the
+escape hatch, not a bigger number here.
+
 ## 1. Cheap change gate (always)  — golden rule #1
 > The cheapest call that answers "did anything change?" — a version field, a `max(updated_at)`,
 > an ETag, a git SHA. This is the whole game: an unchanged source must cost ~one cheap call.
@@ -46,8 +71,13 @@ Auth: `<CREDENTIAL_ENV_VAR>` from `.env` (add it to `.env.example`). <One line o
 - **Emit to:** `context/derived/<folder>/…` — <which files, in what shape (table-first).>
   - `_index.md` frontmatter MUST declare `kinds: [<one or more from setup/README.md §1a>]`
     — this is how the consumer layer routes to what you emit.
-  - **Size envelope:** expected tokens per emitted doc (e.g. `_index.md ≤ 1k`, `inventory.md ≤ 5k`).
-    Golden rule 6: if a sync exceeds an envelope or 3×-grows a doc, flag it in the PR body.
+  - **Size envelope:** declared in **§0a** above, per emitted doc. MAY be omitted — the shipped
+    default (any derived doc ≤ 8k) then applies, so golden rule 6 fires for every doc the manifest
+    measures even when this adapter declares nothing. Declare one when this source type's docs are
+    legitimately bigger or smaller than the default. Golden rule 6: if a sync exceeds the resolved
+    envelope or 3×-grows a doc, flag it in the PR body — what grew, by how much, and whether the
+    extraction should aggregate harder. A breach the brain accepts goes in `acceptedSize` on the
+    `sources.json` entry, never here — this file is re-emitted on every `/upgrade`.
 
 ## 3. Finish  — golden rule #5
 - Stamp `source` / `last-synced` / `generated-by` frontmatter on every file touched.
@@ -73,6 +103,10 @@ flow here on the next sync — never the reverse.
   "extract": ["<what>", "<to>", "<pull>"],
   "into": "context/derived/<folder>/",
   "enabled": true,
+  "cadence": "daily | weekly | monthly | manual",
+  "acceptedSize": [
+    { "doc": "<file.md>", "tokens": 32000, "since": "<YYYY-MM-DD>", "why": "<why this is fine>" }
+  ],
   "$note": "<quirks, auth path, what to skip>"
 }
 ```

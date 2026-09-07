@@ -56,6 +56,7 @@ for src in sorted(SRC.rglob("*")):
     dst = DST / rel
     dst.parent.mkdir(parents=True, exist_ok=True)
     dst.write_bytes(src.read_bytes().replace(b"{{ORG}}", ORG))
+    dst.chmod(src.stat().st_mode)
 print("EMITTED", sum(1 for p in SRC.rglob("*") if p.is_file()), "files")
 PYEOF
 ```

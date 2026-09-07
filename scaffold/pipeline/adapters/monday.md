@@ -11,6 +11,26 @@ IS the cheap direct call golden rule #2 means — the heavy, token-hungry MCP is
   `boardId` passed as arg). Locator field: `boardId`.
 - `.sync-state.json` → `monday[<boardId>]` (last fingerprint).
 
+## 0a. Size envelope  — golden rule #6
+
+| Emitted doc | Envelope |
+|---|---|
+| `monday/<board>.md` | ≤ 3,000 each |
+| `monday/_index.md` | ≤ 1,500 |
+| **domain total** | **≤ 4,500** |
+
+**This is the envelope most likely to be breached, and it has been breached badly.** In one real
+brain a single board doc reached ~30k tokens — around half of the entire brain — as a faithful 1,054-row
+mirror of a board that was 92.5% `Done`. A closed item is not reference material, and an open item is
+not reference material either: it is **live state**, which the tracker owns and which a file is wrong
+about within days of being written.
+
+So when a board will not fit its envelope, **aggregate rather than page**: status distribution per
+board, open counts per group, health signals (unowned, status-unset, needs-attention) as counts with
+their largest cluster named, and the initiative or roadmap layer with its items named — an initiative
+*is* the roadmap, so that is the one place named rows are correct. Derive every number from a single
+full pass, then emit the numbers and not the rows. Never raise the envelope to fit the board.
+
 ## 1. Cheap change gate (always)  — golden rule #1
 One GraphQL call covering every allowlisted board:
 ```
@@ -70,10 +90,18 @@ query ($ids:[ID!]) { boards (ids:$ids) { id name updated_at items_count } }
   groups (one table per group: item · owner · status · timeline/due · the board's key columns). A
   roadmap board becomes `roadmap.md`. Also refresh `context/derived/monday/_index.md` (cross-board
   overview: board · item count · last-synced).
+  - **If a board's tables would blow its envelope (§0a), emit the aggregates instead of the rows.**
+    The group tables are the shape for a board a human could read in one sitting; past that, status
+    distributions and per-group open counts say the same thing in a tenth of the tokens and stay
+    true for longer.
+  - **A breach the brain knowingly accepts** goes in `acceptedSize` on the `sources.json` entry with a
+    reason, rather than letting the warning repeat forever. Never raise the envelope to fit the board.
 
 ## 3. Finish  — golden rule #5
 - Stamp `source` / `last-synced` / `generated-by` on every file touched.
 - Update `.sync-state.json` → `monday[<boardId>]` with the new `(updated_at, items_count)` fingerprint.
+- Set `.sync-state.json` → `lastFullSync` to today (`YYYY-MM-DD`). Disarms the session-start
+  sync-health tripwire, which stays lit while that field is `null`.
 - The emitted `_index.md` frontmatter MUST include `kinds: [project-tracking]`.
 - **Branch + PR — never push to main directly (golden rule #4).**
 

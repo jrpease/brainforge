@@ -7,6 +7,21 @@ needs rendered/JS understanding, scoped to that one URL.
 - `sources.json` → `websites[]`
 - `.sync-state.json` → `websites[<id>]` (per-URL lastmod + etag)
 
+## 0a. Size envelope  — golden rule #6
+
+| Emitted doc | Envelope |
+|---|---|
+| `web/site-map.md` | ≤ 2,000 |
+| `web/_index.md` | ≤ 800 |
+| per-page file | ≤ 800 each |
+| **domain total** | **≤ 3,000** |
+
+**Emit the page *inventory* — path, title, page type, purpose — never the page copy.** Marketing copy
+belongs in `canon/brand/`, where a human owns it and reviews it; a crawled copy of it is a second,
+unowned version that will disagree with the first. A per-page file is for structure worth reasoning
+about (the sections a template has, what a flow asks for), not a transcript. If the site map is
+growing with every new blog post, cap it: list the sections and their counts, not every leaf URL.
+
 ## 1. Cheap change gate (always)
 ```
 GET <sitemap>            → list of <loc> + <lastmod>
@@ -19,10 +34,11 @@ GET <sitemap>            → list of <loc> + <lastmod>
 - Fetch changed URLs, extract title, page type, headings/structure, and key copy.
 - Update `context/derived/web/site-map.md` (the inventory table) and, for significant pages,
   a per-page file.
-
 ## 3. Finish
 - Stamp `source` / `last-synced` / `generated-by` provenance frontmatter.
 - Update `.sync-state.json` with new per-URL lastmod + etag.
+- Set `.sync-state.json` → `lastFullSync` to today (`YYYY-MM-DD`). Disarms the session-start
+  sync-health tripwire, which stays lit while that field is `null`.
 - The emitted `_index.md` frontmatter MUST include `kinds: [site-inventory]`.
 - Branch + PR.
 

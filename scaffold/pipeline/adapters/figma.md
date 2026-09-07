@@ -14,6 +14,25 @@ documented exceptions to golden rule #2, each because REST genuinely cannot reac
 - `sources.json` → `figma[]` (filter `enabled: true`, or the one passed as arg)
 - `.sync-state.json` → `figma[<fileKey>]`
 
+## 0a. Size envelope  — golden rule #6
+
+One Figma file can feed several domains (design system, flows, dielines). Budget each one it touches.
+
+| Emitted doc | Envelope |
+|---|---|
+| `design-system/tokens.json` | ≤ 1,500 |
+| `design-system/figma-library.md` (style + component-set inventory) | ≤ 2,500 |
+| any `_index.md` this adapter refreshes | ≤ 2,000 |
+| **per-domain total** | **≤ 5,000 each** |
+
+**Emit reference, not a mirror.** For a design file that means page and frame *structure* with node
+IDs and image links, style and component-set *names*, token keys and values. It does **not** mean
+per-layer trees, per-variant property dumps, or a bundled icon set enumerated one icon at a time — an
+icon library alone can run to well over a thousand components, so record the count and the containing
+frame instead. If a doc approaches its envelope, drop to counts plus a link to the Figma node —
+an inventory grows with the library, so aggregate rows rather than splitting one doc into several,
+which only hides the growth from the envelope.
+
 ## 1. Cheap change gate (always)
 ```
 GET https://api.figma.com/v1/files/:fileKey?depth=1
@@ -78,13 +97,14 @@ GET https://api.figma.com/v1/files/:fileKey?depth=1
 **Frames / dielines:**
 - For each changed frame: `GET /v1/images/:fileKey?ids=<node>&format=png` → store the **export
   URL as a link** (or Git-LFS the file), never a committed binary; update the relevant `_index.md`.
-
 ## 3. Finish
 - Stamp `last-synced` (today) + `source` + `generated-by` on every file touched.
 - Update `.sync-state.json` → `figma[<fileKey>]` with the new file-level `version` +
   `lastModified`. A version bump with no material change to tracked resources (variables, styles,
   component sets) is a legitimate outcome: re-stamp the fingerprint, note "no content change,"
   and skip the rewrite — the gate flagging an edit does not oblige an extraction.
+- Set `.sync-state.json` → `lastFullSync` to today (`YYYY-MM-DD`). Disarms the session-start
+  sync-health tripwire, which stays lit while that field is `null`.
 - The emitted `_index.md` frontmatter MUST include `kinds: [design-system]` (add
   `digital-experience` if this brain syncs frames/flows from this file).
 - Branch + PR. Do not push to main directly.

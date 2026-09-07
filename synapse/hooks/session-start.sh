@@ -64,6 +64,36 @@ for remote in "${remotes[@]}"; do
   # Unclassified domains stay visible, never vanish.
   sed -n '/"unclassified": \[/,/\]/p' "$m" | sed -n 's/^    "\(.*\)",\{0,1\}$/   - unclassified: \1/p'
 
+  # Unroutable kinds. A domain with NO kinds is at least a visible orphan (the line above).
+  # A domain declaring a kind no intent points at is a SILENT one: it renders like any
+  # healthy domain, is never made a routing candidate, and so is neither loaded nor named
+  # in the skill's "skipped:" slot. Warn per KIND, not per domain — a domain can declare
+  # one good kind and one dead one, and it is the dead kind that names the gap.
+  #
+  # The routable vocabulary IS the union of intents.json's values: a kind no intent
+  # references is unroutable whether or not a catalog table lists it. So there is no second
+  # list here to drift. This check cannot live in the brain (gen-manifest.sh) — a
+  # brain-local copy updates only by /upgrade PR, so it would start false-alarming the
+  # moment the plugin's vocabulary grows and the brain hasn't upgraded.
+  #
+  # Relies on intents.json's one-intent-per-line layout (a parsing contract, see
+  # routing/README.md), since this hook stays dependency-free.
+  intents="${CLAUDE_PLUGIN_ROOT:-$(dirname "$0")/..}/routing/intents.json"
+  if [ -r "$intents" ]; then
+    vocab=$(sed -n 's/^[[:space:]]*"[^"]*"[[:space:]]*:[[:space:]]*\[\(.*\)\],\{0,1\}[[:space:]]*$/\1/p' "$intents" \
+            | tr ',' '\n' | tr -d ' "' | grep -v '^$' | sort -u)
+    if [ -n "$vocab" ]; then
+      awk '
+        /^      "path": /  { sub(/^      "path": "/,"");  sub(/",$/,""); path=$0 }
+        /^      "kinds": / { sub(/^      "kinds": \[/,""); sub(/\],$/,""); gsub(/"/,""); gsub(/ /,"")
+                             n=split($0, a, ","); for (i=1; i<=n; i++) if (a[i] != "") print a[i], path }
+      ' "$m" | while read -r kind path; do
+        printf '%s\n' "$vocab" | grep -qxF "$kind" \
+          || echo "   ⚠ unroutable kind \"$kind\" ($path) — no intent points at it; this content never routes."
+      done
+    fi
+  fi
+
   echo "   canon/ = authored truth · derived/ = synced mirror (check last-synced) · routing via the brain-routing skill"
 done
 exit 0

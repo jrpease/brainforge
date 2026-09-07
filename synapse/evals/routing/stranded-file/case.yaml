@@ -1,0 +1,42 @@
+schema_version: "1.0"
+name: stranded-file
+description: >-
+  Kinds are declared per domain; files are per file. vendor-contracts.md sits in
+  the expensive tracker domain, which declares only project-tracking — no intent
+  collects a kind that reaches it. Before the two-level band gate, expensive
+  forbade even an index peek on an unmatched domain, so this file was
+  unreachable. What is asserted is REACHABILITY, not one route to it: a reader
+  may peek tracker/_index.md, or go straight from the manifest's files[] entry,
+  which already carries per-file titles. Both are correct and this case scores
+  both. (An earlier tool_order grader required the index read first and would
+  have failed the manifest-direct path — a correct behaviour scored as a
+  regression.) NOTE: this scaffold makes the brain the cwd, so the reader sees
+  the manifest, files[] included. A SUBSCRIBED reader sees only the hook's map,
+  which prints domain lines with no file list — that is where the index peek is
+  the only route, and no case covers it yet.
+context:
+  scaffold_script: scaffold.sh
+execution:
+  prompt: "When does our hosting contract come up for renewal, and when do we have to decide by?"
+  max_turns: 12
+  timeout_seconds: 300
+  allowed_tools: [Read, Glob, Grep, Skill]
+graders:
+  - type: tool_used
+    name: reads-the-stranded-file
+    tool: Read
+    input_match: "tracker/vendor-contracts"
+    min: 1
+  - type: regex
+    name: cites-renewal-date
+    target: last_message
+    pattern: "2027-03-01|March\\s*1"
+  - type: regex
+    name: cites-decision-deadline
+    target: last_message
+    pattern: "2026-12-01|December\\s*1"
+  - type: regex
+    name: has-announce-line
+    target: last_message
+    pattern: "loaded:.*skipped:"
+    flags: s

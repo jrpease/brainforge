@@ -39,11 +39,62 @@ merges. Garbage never silently propagates to everyone's LLM. This is the human t
 ## 6. Extraction produces reference, not mirrors
 A derived doc is what an LLM reasons *from* — inventories, definitions, aggregates — never a
 replica of the source's records. (Measured failure this rule exists to prevent: one synced
-task-board doc grew to ~30k tokens, 48% of an entire brain.) Every adapter declares an
-**expected size envelope** per emitted doc (see `ADAPTER-TEMPLATE.md`). Golden rule 6: A sync
-that lands a doc over its envelope — or grows one past 3× its previous size — MUST say so in the
-PR body: what grew, by how much, and whether the extraction should aggregate harder. The human
-decides at the gate; the rule makes the growth loud, not forbidden.
+task-board doc grew to ~30k tokens, 48% of an entire brain.) Every emitted doc has a
+**size envelope** — the adapter's, declared in its own `0a. Size envelope` section (see
+`ADAPTER-TEMPLATE.md`), otherwise the shipped default (see § Defaults below). Golden rule 6: A sync that lands a doc over its envelope — or grows one past 3×
+its previous size — MUST say so in the PR body: what grew, by how much, and whether the extraction
+should aggregate harder. The human decides at the gate; the rule makes the growth loud, not
+forbidden. A breach the owner accepts is recorded as an `acceptedSize` entry, not ignored.
+
+## Defaults — so a rule always has something to compare against
+
+A rule whose data nobody remembered to write down cannot fire. These defaults always apply, so
+every check has a value even when no adapter or source declares one. Declaring a value is a
+refinement, never a precondition.
+
+**Sync cadence** (staleness expectation, not a schedule — nothing runs syncs on a timer):
+
+| Value | Means | Stale after |
+|---|---|---|
+| `daily` | expected every day | 1 day |
+| `weekly` | expected weekly | 7 days |
+| `monthly` | expected monthly | 31 days |
+| `manual` | run by hand | never stale |
+
+A source entry sets `"cadence"` in `sources.json`. **A source with no `cadence` is treated as
+`weekly`.** `/sync-health` resolves the value, compares it to the derived output's `last-synced`,
+and reports ✅ current / ⚠️ stale / ❌ never.
+
+**Size envelope** (expected tokens per emitted doc, golden rule 6). Most specific wins:
+
+| Precedence | Where | Owner |
+|---|---|---|
+| 1 | `acceptedSize[<doc>]` on the `sources.json` entry | the brain |
+| 2 | the adapter's `0a. Size envelope` table | the adapter |
+| 3 | the default below | shipped |
+
+**Default: any derived doc ≤ 8k tokens.**
+
+`_index.md` is measured as of manifest schema 2: `.brainforge/gen-manifest.sh` records it as the
+domain's `indexTokens` and folds it into the domain `tokens` total, so a domain-total envelope
+has a real figure to compare against. It is still absent from `files[]`, and `/sync` resolves
+per-doc envelopes from `files[]`, so a per-`_index.md` envelope does not fire yet. Declare one
+anyway and keep them short by hand until `/sync` reads `indexTokens`.
+
+`acceptedSize` records a knowingly-oversized doc so the warning stops without being ignored. It is
+an array on the source entry, with `doc` relative to that entry's `into:` folder:
+
+    "acceptedSize": [
+      { "doc": "milestones.md", "tokens": 32000, "since": "2026-08-12",
+        "why": "item-level detail is what cross-team reads use this board for" }
+    ]
+
+It lives on the source entry, in `sources.json`, because it is **brain-specific**. An adapter
+playbook is under the `pipeline/**` bump glob and would be overwritten on the next `/upgrade`.
+
+The 3× growth check is independent of acceptance: an accepted doc that triples again still gets
+flagged. A doc with no previous manifest entry is compared against its envelope only — there is no
+growth baseline, and none is invented.
 
 ## Adapters & playbooks
 Built-in **adapters** (one per source type) live in `adapters/`; cross-source orchestration and

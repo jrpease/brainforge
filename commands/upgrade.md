@@ -59,6 +59,8 @@ Save the script below to a scratch file (e.g. `bf-upgrade.py`) and run it. Dry r
 | `FLAG-CONSUMER-DELETED` | in manifest, missing on disk | none — not resurrected; dropped from the manifest |
 | `FLAG-UNVERIFIABLE-DIFFERS` | adoption pass: differs from the current shipped version, no baseline | none — reconcile by hand in the PR |
 | `FLAG-UNVERIFIABLE-UNSHIPPED` | adoption pass: under a bump glob but not currently shipped (legacy runtime, or yours) | none — reconcile by hand in the PR |
+| `SUPERSEDED-FLAG` | listed in `runtime.remove`, present, but no manifest baseline proves it unmodified | none — remove by hand, listed in the PR body |
+| `SUPERSEDED-REFUSED` | listed in `runtime.remove` but brain-owned — a `once` path, or anything under `context/` | none — the deletion is refused and the misconfigured `remove` entry is listed in the PR body |
 | `LIST-CONSUMER` | yours (steady-state: not shipped, not in manifest) | none — listed for transparency |
 
 **Load-bearing for `/forge`:** `commands/forge.md` §3 extracts exactly this fence
@@ -125,13 +127,27 @@ else:                                           # STEADY-STATE PASS — pure set
         elif inB:             acts[f] = "LIST-CONSUMER"
         # in M only (gone both sides): dropped from the manifest silently
 
+# runtime.remove — superseded paths, independent of the bump globs. Runs last so it wins.
+# Delete only with a manifest baseline proving the file is unmodified since emit; otherwise
+# flag for hand removal. Never earns a manifest entry.
+ONCE = plug["runtime"].get("once", [])
+for f in plug["runtime"].get("remove", []):
+    p = BRAIN / f
+    if not p.exists():                                 continue
+    # brain-owned paths are never deletable, whatever the config says — and never skipped
+    # quietly either: a remove entry that names one is a misconfiguration the operator must see
+    if under(f, ONCE) or f.startswith("context/"):     acts[f] = "SUPERSEDED-REFUSED"
+    elif M and f in M and sha(p.read_bytes()) == M[f]: acts[f] = "DELETE-SUPERSEDED"
+    else:                                              acts[f] = "SUPERSEDED-FLAG"
+    newman.pop(f, None)
+
 for f, a in sorted(acts.items(), key=lambda kv: kv[1]): print(f"{a}\t{f}")
 
 if APPLY:
     for f, a in acts.items():
         if a in ("OVERWRITE", "ADD"):
             dst = BRAIN / f; dst.parent.mkdir(parents=True, exist_ok=True)
-            dst.write_bytes(emit_bytes(SCAF / f))
+            dst.write_bytes(emit_bytes(SCAF / f)); dst.chmod((SCAF / f).stat().st_mode)
         elif a == "DELETE-SUPERSEDED":
             (BRAIN / f).unlink()
     sha_bf = subprocess.run(["git", "-C", str(BF), "rev-parse", "HEAD"],
@@ -154,10 +170,30 @@ birth manifest — the emission contract in one command.
 
 ## 4. Superseded files (`runtime.remove`)
 
-For each brain-relative path in `runtime.remove`: if the file is absent, skip. If present and
-its hash matches `.brainforge/runtime-manifest.json` (unmodified since emit), delete it in the
-upgrade PR — it has been renamed/superseded by this runtime version. If present but modified,
-do NOT delete: flag it in the PR body (`superseded but locally modified — remove by hand`).
+The classifier walks `runtime.remove` directly, **independent of the bump globs** — a superseded
+path that sits outside every bump glob is invisible to the set logic, and this pass is the only
+thing that sees it. It runs last, so it wins over any bump classification for the same path.
+
+For each brain-relative path in `runtime.remove`:
+
+- **Absent** → skip.
+- **Present, and brain-owned** — a `runtime.once` path, or anything under `context/` →
+  `SUPERSEDED-REFUSED`. Never deleted, whatever the hash says. Canon, derived context, and the
+  `once` files are the brain's own work, and no runtime upgrade may remove them. It is reported
+  rather than skipped so a `remove` entry that names one is visible as the misconfiguration it is,
+  instead of quietly doing nothing.
+- **Present, and its hash matches `.brainforge/runtime-manifest.json`** (unmodified since emit) →
+  `DELETE-SUPERSEDED`, deleted in the upgrade PR. It has been renamed or superseded by this
+  runtime version.
+- **Present, but no manifest baseline proves it unmodified** — either locally modified, or an
+  adoption pass with no manifest at all → `SUPERSEDED-FLAG`. Never deleted. It gets a hand-removal
+  line in the PR body (`superseded but unverifiable — remove by hand`), because deleting a file we
+  cannot prove is untouched would destroy consumer work.
+
+Neither a `SUPERSEDED-FLAG` nor a `SUPERSEDED-REFUSED` path earns a manifest entry, so the next
+upgrade does not adopt either as a baseline. The adoption-pass branch matters most: old brains that
+still answer to `/walk` are exactly the brains with no manifest, and before this pass existed they
+were told nothing.
 A brain must never end up answering to both the old and new name of the same command.
 
 After applying removals, grep the brain's `once` paths (`README.md`, `CLAUDE.md`,
@@ -185,17 +221,27 @@ stale `/sync` dispatch pointers are exactly what humans miss).
 All writes happen on a branch: `git -C "<brain>" checkout -b upgrade/runtime-<V>` **before**
 `--apply`. Stage only the emitted paths + the manifest — **never a blanket `git add -A`** — so a
 brain's untracked local files (e.g. Claude Code's per-user `.claude/settings.local.json`) never
-ride into the PR. Commit, push, open the PR with this body shape:
+ride into the PR. Stage every `DELETE-SUPERSEDED` path too — `git add -- <path>` records a
+deletion. A `runtime.remove` path can sit outside every bump glob, so it is not an emitted path:
+miss it and the deletion stays in the working tree, the PR never carries it, a fresh checkout
+after merge resurrects the file, and the next upgrade flags it again forever. Commit, push, open
+the PR with this body shape:
 
 ```markdown
 ## Runtime upgrade → v<V>
 Emitted from Brainforge `<emitted-from SHA>`.
 
-### Overwritten (clean) / Added / Adopted (byte-match) / Deleted (superseded)
+### Overwritten (clean) / Added / Adopted (byte-match)
 - <file> — <action>
+
+### Deleted (superseded)
+- <file> — deleted, staged in this PR
 
 ### ⚠️ Flagged — human reconciliation needed in this PR
 - [ ] <file> — <flag reason>; shipped version: `scaffold/<file>` @ <SHA>
+
+### ⚠️ Refused — `runtime.remove` names a brain-owned path
+- [ ] <file> — `SUPERSEDED-REFUSED`; not deleted, fix the `remove` list in `plugin.json`
 
 ### Ref-scan — stale runtime pointers
 - [ ] <file>:<line> → references `<missing/flagged path>`
@@ -213,8 +259,9 @@ same set logic, same result.
 ## Never
 
 - Never touch `context/canon/`, `context/derived/`, `sources.json`, `.sync-state.json`, `.env*`,
-  or any `once` path — the script only writes under bump globs plus the manifest, and nothing else
-  may either.
+  or any `once` path — the script writes only under bump globs plus the manifest, and its one
+  action that reaches outside them, deleting a `runtime.remove` path, refuses every path on that
+  list (`SUPERSEDED-REFUSED`). Nothing else may either.
 - Never overwrite a file whose hash differs from its manifest baseline, and never touch a
   consumer-added file — flag, don't clobber.
 - Never merge content (no LLM-mediated three-way merges) — byte-exact set logic only; humans

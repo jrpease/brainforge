@@ -31,6 +31,23 @@ broken path" discipline — not these Shopify-specific token/revocation details.
 - `sources.json` → `shopify[]`
 - `.sync-state.json` → `shopify[<id>]` (catalog fingerprint + per-resource counts)
 
+## 0a. Size envelope  — golden rule #6
+
+| Emitted doc | Envelope |
+|---|---|
+| `shopify/catalog.md` | ≤ 4,000 |
+| `shopify/collections.md` | ≤ 1,500 |
+| `shopify/store-config.md` | ≤ 1,000 |
+| `shopify/_index.md` | ≤ 800 |
+| **domain total** | **≤ 6,000** |
+
+**A catalog is the honest growth case: it scales with the store, not with the extraction.** Hold the
+line by changing the *unit* rather than the envelope. Under roughly 100 SKUs, a row per product with
+its variants is fine. Past that, collapse variants to a count and a price range; past a few hundred,
+group by product type and collection and name only what is distinctive. Never emit inventory
+quantities, order data, or customer data — those are live state Shopify owns, and a snapshot of them
+is wrong the moment it lands.
+
 ## 1. Cheap change gate (always)
 ```
 products    → max(updated_at) + count  (REST: GET /products.json?fields=id,updated_at&limit=250, paginate;

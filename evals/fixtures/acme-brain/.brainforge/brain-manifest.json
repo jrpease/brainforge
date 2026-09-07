@@ -26,6 +26,16 @@
       ]
     },
     {
+      "path": "context/canon/pricing",
+      "title": "Pricing",
+      "kinds": ["pricing-model"],
+      "tokens": 295,
+      "band": "cheap",
+      "files": [
+        { "path": "model.md", "title": "Pricing Model", "tokens": 295 }
+      ]
+    },
+    {
       "path": "context/derived/design-system",
       "title": "Design system",
       "kinds": ["design-system"],
@@ -49,10 +59,11 @@
       "path": "context/derived/tracker",
       "title": "Tracker",
       "kinds": ["project-tracking"],
-      "tokens": 18003,
+      "tokens": 18199,
       "band": "expensive",
       "files": [
-        { "path": "milestones.md", "title": "Milestones", "tokens": 18003 }
+        { "path": "milestones.md", "title": "Milestones", "tokens": 18003 },
+        { "path": "vendor-contracts.md", "title": "Vendor Contracts", "tokens": 196 }
       ]
     }
   ],
