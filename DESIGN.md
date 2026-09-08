@@ -62,6 +62,7 @@ A catalog of presets, each a pair: *(starter canon set) + (default sync adapter)
 | `design/` | mixed | design principles, art direction | Figma (tokens, components) |
 | `eng/` | derived | architecture decisions, conventions | GitHub repos |
 | `analytics/` | derived | metric / north-star definitions | GA |
+| `company/` | authored | mission & values, operating principles, org design | none |
 
 This table is the product. Bounded, defensible, a straight generalization of that source
 pattern.
@@ -198,6 +199,7 @@ second taxonomy. It is the §4 catalog zoomed in one level. Each catalog preset 
 | `design/` | `design-principles`, `design-system`, `art-direction`, `ui-build-standards` |
 | `eng/` | `repo-summaries`, `architecture-decisions`, `eng-conventions` |
 | `analytics/` | `analytics`, `metric-definitions` |
+| `company/` | `company-principles`, `org-design` |
 
 A domain declares `kinds:` (a list: one folder may hold several) in its `_index.md` frontmatter.
 Non-catalog brains (differently structured, hand-grown) route correctly by declaring kinds from

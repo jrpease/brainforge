@@ -9,7 +9,8 @@ Kinds are the domain catalog one level down (DESIGN.md §10). Current vocabulary
 `product-principles`, `product-roadmap`, `project-tracking`, `design-principles`,
 `design-system`, `art-direction`, `ui-build-standards`, `repo-summaries`,
 `architecture-decisions`, `eng-conventions`, `analytics`, `metric-definitions`,
-`site-inventory`, `product-catalog`, `digital-experience`, `pricing-model`.
+`site-inventory`, `product-catalog`, `digital-experience`, `pricing-model`,
+`company-principles`, `org-design`.
 
 **`intents.json`'s ONE-INTENT-PER-LINE LAYOUT IS A PARSING CONTRACT.** The session hook
 (`hooks/session-start.sh`) is dependency-free and derives the routable vocabulary from this
