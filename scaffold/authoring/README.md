@@ -32,6 +32,21 @@ the banner, sets `status: approved` + `last-reviewed: <today>` + `owner`, and la
 the only path from draft to trusted canon. **Brand is the most dangerous domain to bootstrap**
 (subjective, low source material) — hold the line hardest there.
 
+## 5. Approval starts a clock, it does not stop one
+`approved` means "a human confirmed this was true **on `last-reviewed`**." It does not mean true
+forever, and canon has no upstream to re-derive it from — the whole reason it is authored is that
+it lives in people's heads. Stale-but-trusted is the failure mode: a doc that reads authoritative,
+carries `status: approved`, and quietly stopped being true.
+
+`/canon-health` reads `last-reviewed` against each doc's review cadence — its own
+`review-cadence:` frontmatter, else the shipped `biannual` (180 days) — and a session-start
+tripwire nudges when anything is past it, never reviewed at all, or a draft left stalled. Closing
+the loop is running `/approve-canon` again after a real review, which re-stamps the date.
+
+**Never bump `last-reviewed` by hand to clear a nudge.** The field's entire value is that it
+records a human actually re-confirming the content. A date written without the confirming makes
+every other reading of that field worthless.
+
 ## The DRAFT banner (verbatim)
 > ⚠️ **DRAFT — Brainforge-generated, not yet approved.** Provisional until a human owner verifies
 > and runs `/approve-canon`. Do not treat as authoritative truth.
