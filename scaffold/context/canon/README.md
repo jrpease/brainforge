@@ -11,8 +11,16 @@ the heart of the source of truth.
 - **Every doc has frontmatter:**
   - `owner` — who is accountable for this being correct
   - `last-reviewed` — date someone last confirmed it's still true (stale-but-trusted is the
-    enemy; revisit on a cadence)
+    enemy; revisit on a cadence). **Only `/approve-canon` writes it, after a real review** —
+    hand-bumping it to silence a nudge destroys the only thing the field is good for.
   - `status` — `draft` | `approved`
+  - `review-cadence` — *optional.* How often this doc needs re-confirming:
+    `quarterly` · `biannual` · `annual` · `never`. Omit it and `biannual` (180 days) applies;
+    declaring a value is a refinement, never a precondition. `never` is the honest opt-out for
+    canon that genuinely does not rot — use it deliberately, not to clear a report.
+
+  `/canon-health` reports what is past its cadence, what was approved but never reviewed, and
+  what is a stalled draft. A session-start tripwire nudges you to run it.
 - **Keep it tight.** Canon is reference an LLM reasons from, not an essay. Bullets and clear
   statements beat prose.
 

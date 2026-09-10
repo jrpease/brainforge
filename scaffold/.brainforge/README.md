@@ -114,6 +114,18 @@ An empty `contextFingerprint` means *not computable*, which a reader treats as *
 as stale. A manifest with no such key is pre-schema-3: the reader says so and names the command
 that fixes it. Both clear on the next run of the generator.
 
+## `canon-health.sh`
+
+The **deterministic checker** behind `/canon-health` and the session-start canon tripwire. No LLM,
+no network — `git`/`find`/`sed`/`awk`/`date` only. Two modes: bare prints the full report and
+exits 1 when approved canon is past review or was never reviewed; `--tripwire` prints at most one
+summary line and always exits 0, because a session hook must never fail.
+
+It is a script rather than another inline one-liner in `.claude/settings.json` (as the drift and
+sync-health tripwires are) because it needs frontmatter parsing and date arithmetic, and both
+carry BSD-versus-GNU portability traps. A check whose failure looks identical to "nothing to
+report" is the exact bug class this repo keeps finding, so this one is testable and tested.
+
 ## `gen-manifest.sh`
 
 The **deterministic generator** for `brain-manifest.json`. No LLM, no network — `git`/`find`/`sed`/
