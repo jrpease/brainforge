@@ -9,6 +9,7 @@
   "citing engineering architecture or conventions": ["repo-summaries", "architecture-decisions", "eng-conventions"],
   "answering what exists on the site or in the product catalog": ["site-inventory", "product-catalog", "digital-experience"],
   "understanding users or audience": ["user-archetypes", "positioning"],
+  "understanding another team's product or unit context": ["unit-context"],
   "understanding company mission, values, or operating principles": ["company-principles"],
   "understanding org structure or team ownership": ["org-design"]
 }

@@ -69,6 +69,51 @@ is why a brain still on schema 1 stays readable by the same hooks. Note the esti
 word-based (`words * 4 / 3`), tuned for prose and under-counting punctuation-dense JSON: treat
 `.json` figures as a floor.
 
+**`"schema": 3`** — the map can finally say whether it is current, and where it looked.
+
+Schema 2 stamped `generatedFrom` = `HEAD`. You then had to *commit* the manifest, which creates a
+new `HEAD`, so the reader's staleness check could never pass: the commit that lands a fresh map is
+the commit that invalidates it. The warning was on permanently, on every healthy brain, and a
+warning that is always on is not a warning — people learn to scroll past it.
+
+No commit sha fixes that. `/sync` lands the derived change and the regenerated manifest in **one**
+commit, so the sha carrying the manifest cannot be known while the manifest is being written.
+(Under the sha scheme that also ruled out a CI job. Under *this* scheme it does not: a
+post-merge job that regenerates and commits touches only `.brainforge/`, leaving the context
+tree — and therefore the fingerprint — unchanged. That makes CI regeneration the clean fix for
+two PRs conflicting on the manifest, which they otherwise always do.) Two keys replace it:
+
+| Key | Meaning |
+|---|---|
+| `contextRoot` | the directory domains were found under — `BRAIN_CONTEXT_DIR`, default `context` — so a reader never has to assume it |
+| `contextFingerprint` | the git **tree object id** of that root, as the generator saw it |
+
+**FINGERPRINT CONTRACT.** The fingerprint is the git tree oid of `contextRoot`, and nothing else.
+A reader recomputes it as `git rev-parse HEAD:<contextRoot>` and compares. Identical content gives
+an identical oid because git trees are content-addressed, so this holds across commits, rebases
+and squashes — including the same-commit case above — and the read side is a single `rev-parse`
+with no file hashing. `gen-manifest.sh` and the synapse hook both encode this definition. Change
+one and you change the other in the same breath, or the warning comes back on permanently in the
+other direction.
+
+`generatedFrom` is **kept, as provenance only.** Nothing compares against it any more.
+
+**`contextRoot` precedence, and its limits.** The generator takes the root from
+`BRAIN_CONTEXT_DIR`, else from the `contextRoot` already recorded here, else `context`. The
+read-back matters: the env var is not committed and every documented regenerate path (`/sync`,
+`/upgrade` §5a, the command below) calls the generator bare, so without it a non-default root
+silently reverted and emitted a zero-domain map.
+
+`BRAIN_CONTEXT_DIR` exists so a **source repo** whose docs do not live under `context/` can emit
+a valid manifest for a reader. It is not a general setting for a brain. The brain-side hooks in
+`.claude/settings.json` — the drift gate and the sync-health tripwire — assume `context/canon`
+and `context/derived` literally, so a brain that moves its root loses both without a word. Move
+a brain's root only if you are also prepared to change those two hooks.
+
+An empty `contextFingerprint` means *not computable*, which a reader treats as **unknown**, never
+as stale. A manifest with no such key is pre-schema-3: the reader says so and names the command
+that fixes it. Both clear on the next run of the generator.
+
 ## `gen-manifest.sh`
 
 The **deterministic generator** for `brain-manifest.json`. No LLM, no network — `git`/`find`/`sed`/

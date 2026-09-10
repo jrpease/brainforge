@@ -91,6 +91,18 @@
         { "path": "milestones.md", "title": "Milestones", "tokens": 18003 },
         { "path": "vendor-contracts.md", "title": "Vendor Contracts", "tokens": 196 }
       ]
+    },
+    {
+      "path": "context/derived/units/orion",
+      "title": "Orion (unit)",
+      "kinds": ["unit-context"],
+      "tokens": 367,
+      "docTokens": 327,
+      "indexTokens": 40,
+      "band": "cheap",
+      "files": [
+        { "path": "overview.md", "title": "Orion — unit overview", "tokens": 327 }
+      ]
     }
   ],
   "unclassified": [

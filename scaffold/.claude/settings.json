@@ -11,7 +11,7 @@
           },
           {
             "type": "command",
-            "command": "WM=\"$CLAUDE_PROJECT_DIR/.brainforge/last-drift-review\"; if [ -s \"$WM\" ]; then SHA=\"$(cat \"$WM\")\"; if git -C \"$CLAUDE_PROJECT_DIR\" cat-file -e \"$SHA^{commit}\" 2>/dev/null && ! git -C \"$CLAUDE_PROJECT_DIR\" diff --quiet \"$SHA\" HEAD -- context/canon context/derived 2>/dev/null; then echo '⚠️  Context changed since last drift review — run /drift to check canon vs. reality.'; fi; elif [ ! -e \"$WM\" ] && [ -n \"$(find \"$CLAUDE_PROJECT_DIR/context/derived\" -name '*.md' ! -name 'README.md' ! -name '_index.md' -print -quit 2>/dev/null)\" ]; then echo '⚠️  Context has never had a drift review — run /drift to check canon vs. reality.'; fi"
+            "command": "WM=\"$CLAUDE_PROJECT_DIR/.brainforge/last-drift-review\"; if [ -e \"$WM\" ] && [ ! -s \"$WM\" ]; then echo '⚠️  Drift watermark is empty — run /drift to check canon vs. reality.'; elif [ -s \"$WM\" ]; then SHA=\"$(cat \"$WM\")\"; if ! git -C \"$CLAUDE_PROJECT_DIR\" cat-file -e \"$SHA^{commit}\" 2>/dev/null; then echo '⚠️  Drift watermark names a commit this clone does not have (squash-merged, rebased, or pruned) — run /drift to re-establish it.'; elif ! git -C \"$CLAUDE_PROJECT_DIR\" diff --quiet \"$SHA\" HEAD -- context/canon context/derived 2>/dev/null; then echo '⚠️  Context changed since last drift review — run /drift to check canon vs. reality.'; fi; elif [ ! -e \"$WM\" ] && [ -n \"$(find \"$CLAUDE_PROJECT_DIR/context/derived\" -name '*.md' ! -name 'README.md' ! -name '_index.md' -print -quit 2>/dev/null)\" ]; then echo '⚠️  Context has never had a drift review — run /drift to check canon vs. reality.'; fi"
           },
           {
             "type": "command",

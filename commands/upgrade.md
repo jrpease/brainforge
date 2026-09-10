@@ -56,7 +56,8 @@ Save the script below to a scratch file (e.g. `bf-upgrade.py`) and run it. Dry r
 | `FLAG-MODIFIED` | shipped but locally modified | none — PR body, with pointer to the new shipped version; **baseline kept in the manifest** |
 | `FLAG-SUPERSEDED-MODIFIED` | gone upstream but locally modified | none — PR body; baseline kept |
 | `FLAG-COLLISION` | consumer file sits where a *new* shipped file landed | none — PR body; never overwrite consumer work |
-| `FLAG-CONSUMER-DELETED` | in manifest, missing on disk | none — not resurrected; dropped from the manifest |
+| `FLAG-CONSUMER-DELETED` | in manifest, missing on disk | none — not resurrected; **tombstoned** (`null`) in the manifest |
+| `LIST-CONSUMER-DELETED` | tombstoned by an earlier upgrade, still absent | none — the deletion is remembered, never re-added |
 | `FLAG-UNVERIFIABLE-DIFFERS` | adoption pass: differs from the current shipped version, no baseline | none — reconcile by hand in the PR |
 | `FLAG-UNVERIFIABLE-UNSHIPPED` | adoption pass: under a bump glob but not currently shipped (legacy runtime, or yours) | none — reconcile by hand in the PR |
 | `SUPERSEDED-FLAG` | listed in `runtime.remove`, present, but no manifest baseline proves it unmodified | none — remove by hand, listed in the PR body |
@@ -92,9 +93,14 @@ def tree(root, xform):
 
 mpath = BRAIN / ".brainforge" / "runtime-manifest.json"
 try:
-    m = json.loads(mpath.read_text()); M = dict(m["files"]); MV = m["runtime-version"]; vt(MV)
+    m = json.loads(mpath.read_text()); _F = dict(m["files"]); MV = m["runtime-version"]; vt(MV)
+    # null value = TOMBSTONE: shipped once, deleted by the consumer on purpose. Dropping the
+    # entry entirely made the NEXT upgrade see a shipped file that is absent and unknown, call
+    # it ADD, and write it back -- resurrecting a deletion, against this command's own Never.
+    M = {k: v for k, v in _F.items() if v is not None}
+    TOMB = {k for k, v in _F.items() if v is None}
 except Exception:
-    M, MV = None, None  # missing/malformed → adoption pass; never guess a baseline
+    M, MV, TOMB = None, None, set()  # missing/malformed → adoption pass; never guess a baseline
 
 if MV is not None:
     if vt(MV) == vt(V): print(f"UP-TO-DATE\t{V}"); sys.exit(0)
@@ -111,7 +117,9 @@ if M is None:                                   # ADOPTION PASS — overwrite NO
         elif B[f] == S[f]:    acts[f] = "ADOPT-CLEAN";                newman[f] = S[f]
         else:                 acts[f] = "FLAG-UNVERIFIABLE-DIFFERS"
 else:                                           # STEADY-STATE PASS — pure set logic
-    for f in sorted(set(S) | set(B) | set(M)):
+    for f in sorted(set(S) | set(B) | set(M) | TOMB):
+        if f in TOMB and f not in B:      # still deleted, still deliberate — never re-add
+            acts[f] = "LIST-CONSUMER-DELETED"; newman[f] = None; continue
         inS, inB, inM = f in S, f in B, f in M
         if inS and inB and inM:
             if B[f] == M[f]:  acts[f] = "OVERWRITE";                  newman[f] = S[f]
@@ -119,7 +127,7 @@ else:                                           # STEADY-STATE PASS — pure set
         elif inS and inB:
             if B[f] == S[f]:  acts[f] = "ADOPT-CLEAN";                newman[f] = S[f]
             else:             acts[f] = "FLAG-COLLISION"
-        elif inS and inM:     acts[f] = "FLAG-CONSUMER-DELETED"       # dropped from manifest
+        elif inS and inM:     acts[f] = "FLAG-CONSUMER-DELETED";      newman[f] = None  # tombstoned
         elif inS:             acts[f] = "ADD";                        newman[f] = S[f]
         elif inB and inM:
             if B[f] == M[f]:  acts[f] = "DELETE-SUPERSEDED"
@@ -161,8 +169,10 @@ if APPLY:
 **Manifest rewrite rules (encoded above, restated):** emitted files (`OVERWRITE`/`ADD`) and
 byte-match adoptions get the new shipped hash; `FLAG-MODIFIED`/`FLAG-SUPERSEDED-MODIFIED` keep
 their **old** baseline entry so the next upgrade still knows their true baseline; consumer files
-and collisions stay out of the manifest; `FLAG-CONSUMER-DELETED` and gone-both-sides entries are
-dropped.
+and collisions stay out of the manifest; `FLAG-CONSUMER-DELETED` is written as a **`null`
+tombstone** and stays one while the file is absent, so a deliberate deletion survives every
+later upgrade; gone-both-sides entries are dropped. Re-creating a tombstoned file by hand clears
+the tombstone and it is classified normally from then on.
 
 **Scaffold-time bootstrap:** on a freshly copied + templated brain, run the same script (no
 manifest yet → adoption pass → every bump file is `ADOPT-CLEAN`) with `--apply`. That writes the
@@ -215,6 +225,27 @@ For every referenced path that does **not** exist on disk after the apply — pl
 to a file this run flagged or deleted — add a checklist line to the PR body (file:line →
 missing/flagged target). Fixing them is human work inside the PR (the generalized Shopify lesson:
 stale `/sync` dispatch pointers are exactly what humans miss).
+
+## 5a. Regenerate the map when the generator changed
+
+If this run emitted a new `.brainforge/gen-manifest.sh` (`OVERWRITE` or `ADD` on that path), run
+it **from inside the brain** and include the result in the PR:
+
+```bash
+( cd "<brain>" && bash .brainforge/gen-manifest.sh )
+```
+
+The `cd` is load-bearing: the generator resolves its own repo with `git rev-parse --show-toplevel`,
+so running it by path from the Brainforge checkout would regenerate the wrong repo's manifest.
+
+The manifest is generated, never authored, and its schema travels with the generator — a brain
+that takes a new script but keeps yesterday's map sits on a manifest the current reader cannot
+fully check (a pre-schema-3 map, for instance, cannot answer whether it is stale). The generator
+is deterministic and writes nothing but `.brainforge/brain-manifest.json`, so this stays inside
+the zero-judgment-in-the-write-path rule.
+
+If the generator came back `FLAG-MODIFIED`, do **not** run it. Say so in the PR body and let the
+human reconcile the local change first.
 
 ## 6. Land as a PR (golden rule #4) — never a direct write
 

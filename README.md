@@ -36,7 +36,7 @@ Brainforge calls these two halves **Canon** and **Derived**.
 | | **Canon** ✍️ | **Derived** 🤖 |
 |---|---|---|
 | **What** | Human-authored truth: voice, positioning, principles, conventions | Machine-extracted facts: tokens, components, routes, metrics |
-| **Source of truth** | These files *are* the truth | A regenerable mirror of an upstream source |
+| **Source of truth** | These files *are* the truth | Regenerated from an upstream source |
 | **Who writes it** | A human, via reviewed PR | The sync pipeline, automatically |
 | **Editing** | By hand, with review | Never by hand: a sync overwrites it |
 

@@ -40,9 +40,19 @@ did, and never appear grounded when you are not.
    - **Full read** — **cheap**: on a weak match (any collected kind, or clear topical
      adjacency). **normal**: on a direct intent match only. **expensive**: on a direct match
      only, and NEVER the whole domain — open only the specific files the peek showed you need.
-4. If the map flagged a domain's kind as **unroutable** (`⚠ unroutable kind ...`), that domain
-   holds content routing cannot reach by intent. Treat it as plausibly relevant and peek its
-   index whenever the task is anywhere near its subject; say so in the announce line.
+4. Three map signals mean "peek this index even though the intent match did not select it."
+   Treat the domain as plausibly relevant whenever the task is near its subject, and say so in
+   the announce line.
+   - `⚠ unroutable kind ...` — the domain declares a kind no intent points at, so that content
+     cannot be reached by intent at all. A defect, and the owner is being told.
+   - `· single-intent` on a domain line — exactly one intent reaches that whole domain. Not a
+     defect: most kinds are single-intent by design and every adapter emits one. It matters
+     because a domain that is *also* `expensive` needs a direct match for a full read, so if
+     the task is not phrased as that one intent, the index peek is the only way in. This is the
+     shape that hides a large domain holding the only accurate doc on its subject.
+   - `- unindexed: <path>` — a directory holding content with no `_index.md`. Routing cannot
+     reach it at all and the map cannot describe it. If it is plausibly relevant, read the
+     files directly and say that you did.
 5. Read the chosen domains' `_index.md` files, then the specific content files. Prefer
    targeted reads; the disclosure ladder is map → index → files.
 
@@ -59,8 +69,9 @@ never omit it when you loaded (or deliberately skipped) brain content.
   cite which file informed the result, and flag stale `last-synced` rather than asserting
   currency.
 - If canon and derived contradict, surface the conflict (that is drift); never silently pick one.
-- If the map warned the manifest predates the latest change, trust `_index.md` files over the
-  map's numbers.
+- If the map warned that it **predates the current content**, or that staleness **cannot be
+  checked** (a pre-schema-3 map), trust domain `_index.md` files over the map's token counts and
+  band assignments. Both warnings are about the map's numbers, never about the content itself.
 - If the prompt has nothing to do with the brain: do nothing, say nothing.
 - Write outputs to the user's workspace, never into the brain (it is read-only reference;
   suggest changes via its CONTRIBUTING.md).

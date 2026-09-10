@@ -32,7 +32,8 @@ First keep a copy of the previous manifest — the generator overwrites
 numbers:
 
 ```bash
-git show HEAD:.brainforge/brain-manifest.json > /tmp/brain-manifest.prev.json 2>/dev/null || true
+PREV="$(mktemp -t brain-manifest.prev)"
+git show HEAD:.brainforge/brain-manifest.json > "$PREV" 2>/dev/null || true
 ```
 
 On a brain's first sync there is no committed manifest, so that file will be missing or empty.
@@ -54,17 +55,26 @@ measures**, take its `tokens` from `.brainforge/brain-manifest.json` and resolve
 specific first:
 
 1. an `acceptedSize` entry for that doc on the source's `sources.json` entry,
-2. the adapter's declared `Size envelope:` in its §2,
+2. the adapter's declared size envelope in its `0a. Size envelope` section,
 3. the shipped default — any derived doc ≤ 8k (`pipeline/README.md` § Defaults).
 
 The generator excludes `_index.md` from every domain's `files[]`, so an `_index.md` has no `tokens`
 figure to read. Rule 6 cannot be applied to one — do not guess a count for it.
 
 Flag a doc that is over the resolved value, **or** that grew ≥3× since the copy of the previous
-manifest captured above (`/tmp/brain-manifest.prev.json`) — the growth check applies even to an
+manifest captured above (`$PREV`; a fixed `/tmp` name collided between two brains, or two
+sessions on one machine, and silently compared each against the other's baseline) — the growth check applies even to an
 accepted doc. A doc absent from that captured copy, or a first sync where no copy exists, is
 checked against the envelope only. Each flagged doc gets a line in the PR body:
 `⚠ rule-6: <path> is <N> tokens (envelope <M> / was <P>) — consider aggregating.`
+
+**Then check the domain total, which is the row `ADAPTER-TEMPLATE.md` says "fires
+automatically" and which nothing has ever compared against.** Per-doc checks all pass while a
+domain quietly accumulates: three 2,000-token docs clear every per-doc envelope and blow a
+4,500-token domain total. Take the domain's `tokens` from the manifest (schema 2 folded
+`indexTokens` in precisely so this figure is honest) and compare it to the adapter's
+`0a. Size envelope` **domain total** row. Over it gets the same line:
+`⚠ rule-6: <domain> totals <N> tokens (envelope <M>) — consider aggregating.`
 
 If the owner decides a breach is correct, add an `acceptedSize` entry (doc, tokens, since, why) to
 that source in `sources.json` in the same PR. That silences the line until the doc exceeds the
