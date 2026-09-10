@@ -96,6 +96,22 @@ The 3× growth check is independent of acceptance: an accepted doc that triples 
 flagged. A doc with no previous manifest entry is compared against its envelope only — there is no
 growth baseline, and none is invented.
 
+## Source-declared scope — the boundary travels with the source
+
+Registry config in `sources.json` says what a brain *wants* from a source. A source repo can
+also declare what it will **never** hand over, in a `.brainforge-source.yml` at its own root.
+The two compose in one direction only: the in-repo declaration narrows scope, never widens it.
+
+This exists because the alternative does not survive time. A prose note in a registry entry the
+source's owners cannot edit protects nothing the day someone re-scopes that source for perfectly
+good reasons and never reads the paragraph. The people who own named-customer material are the
+people who should be able to see and change the rule that protects it, in their own review,
+next to the content it covers.
+
+`adapters/github.md` §0b defines the file and its force order. An adapter whose source can carry
+a file honours it identically; one whose source cannot (Figma, Monday, GA) falls back to
+registry scope alone.
+
 ## Adapters & playbooks
 Built-in **adapters** (one per source type) live in `adapters/`; cross-source orchestration and
 analysis live here. Every adapter fills the same skeleton — see `ADAPTER-TEMPLATE.md`.

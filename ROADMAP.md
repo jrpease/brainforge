@@ -167,3 +167,17 @@ read-it-back loop works for real.
 ## Deferred (C-tier and additive)
 
 - MCP universal reader · access tiers · autonomous scheduled sync · declarative/executable adapters.
+
+- **Source-side sync trigger.** A source repo runs a CI job that opens a sync issue on the brain
+  when in-scope paths change, so the pull stops depending on one laptop noticing. Cheaper than the
+  autonomous scheduled sync above, and it unpicks a coupling worth losing: today a source's
+  freshness depends on a clone path on one machine (`git -C <clone>`). Undesigned: cross-repo
+  issue-open auth, and it needs a live proof before it ships (see CONTRIBUTING's adapter bar).
+
+- **Federation — team brains alongside the org brain.** `SYNAPSE_BRAINS` already takes a list,
+  `brain-routing` already handles a brain being the working directory, and as of v0.9.0 the
+  context root is configurable, so a repo whose docs do not live under `context/` can emit a valid
+  manifest. What is left is the decision, not the code: a team keeps its own brain, and org canon
+  holds a pointer to it for that team's facts instead of a hand-curated copy that can only rot.
+  The thing to think hardest about first: federation makes "which brain owns this fact" a runtime
+  question rather than a curation-time one. Probably the right trade. Still a real one.

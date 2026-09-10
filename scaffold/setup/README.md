@@ -43,7 +43,15 @@ a brain never authors routing rules. Stamp kinds at domain creation from this ta
 | `eng/` | `repo-summaries`, `architecture-decisions`, `eng-conventions` |
 | `analytics/` | `analytics`, `metric-definitions` |
 | `company/` | `company-principles`, `org-design` |
+| `units/` | `unit-context` — plus whatever the unit's own docs cover |
 | (adapter-emitted) | `site-inventory` (website), `product-catalog` (shopify/SKUs), `digital-experience` (flows/pages) |
+
+`unit-context` is for a domain holding **another team's or business unit's own material** —
+their positioning, their audience, their roadmap, as they describe it. Stamp it rather than
+reaching for the company-level kind that looks closest. Tagging a unit's audience doc
+`user-archetypes` does route it, but it also means every company audience question drags in
+unit material and every unit question competes with company canon on the same kinds. Keeping
+the unit scope separate is what stops the two from colliding.
 
 Frontmatter shape (list syntax, within the first 20 lines):
 
