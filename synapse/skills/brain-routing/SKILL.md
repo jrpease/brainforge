@@ -65,9 +65,10 @@ never omit it when you loaded (or deliberately skipped) brain content.
 
 ## Ground rules
 
-- Canon (`context/canon/`) is authored truth; derived (`context/derived/`) is a synced mirror —
-  cite which file informed the result, and flag stale `last-synced` rather than asserting
-  currency.
+- Canon (`context/canon/`) is authored truth; derived (`context/derived/`) is regenerated from
+  an upstream source — cite which file informed the result, and flag stale `last-synced` rather
+  than asserting currency. Derived is deliberately *not* a copy of its source, so treat it as a
+  summary that may omit detail the source holds, never as the source itself.
 - If canon and derived contradict, surface the conflict (that is drift); never silently pick one.
 - If the map warned that it **predates the current content**, or that staleness **cannot be
   checked** (a pre-schema-3 map), trust domain `_index.md` files over the map's token counts and

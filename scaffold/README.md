@@ -20,7 +20,7 @@ There are two kinds of content here, and they are treated completely differently
 | | `context/canon/` ✍️ | `context/derived/` 🤖 |
 |---|---|---|
 | **What** | Human-authored truth: voice, positioning, naming, principles | Machine-extracted facts: design tokens, component inventory, SKUs, site map |
-| **Source of truth** | These files *are* the truth | A *downstream mirror* of Figma / repos / the live site |
+| **Source of truth** | These files *are* the truth | *Regenerated from* Figma / repos / the live site |
 | **Who writes it** | A human, carefully, via reviewed PR | The sync pipeline, automatically |
 | **Trust** | Authoritative | Trust the upstream source; verify if unsure |
 | **Editing** | Edit by hand (with review) | **Never hand-edit** — a sync will overwrite it |
