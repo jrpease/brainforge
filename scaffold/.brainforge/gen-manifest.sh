@@ -131,8 +131,14 @@ fm_kinds() {
   ' "$1"
 }
 
-# escape_json <string> -> escape for safe JSON string interpolation (\\ then ")
-escape_json() { printf '%s' "$1" | sed 's/\\/\\\\/g; s/"/\\"/g'; }
+# escape_json <string> -> escape for safe JSON string interpolation: \\ and ", tab/CR as \t/\r,
+# newlines as \n, and every other control character stripped (JSON forbids them raw)
+tab=$(printf '\t'); cr=$(printf '\r')
+escape_json() {
+  printf '%s' "$1" | LC_ALL=C tr -d '\000-\010\013\014\016-\037' \
+    | sed 's/\\/\\\\/g; s/"/\\"/g; s/'"$tab"'/\\t/g; s/'"$cr"'/\\r/g' \
+    | awk 'NR > 1 { printf "\\n" } { printf "%s", $0 }'
+}
 
 domain_blocks=""
 unclassified=""
@@ -165,7 +171,9 @@ while IFS= read -r idx; do
   title=$(fm "$idx" title); [ -n "$title" ] || title=$(basename "$dir")
   kinds_raw=$(fm_kinds "$idx")
   if [ -n "$kinds_raw" ]; then
-    kinds_json=$(printf '%s' "$kinds_raw" | sed 's/[[:space:]]*,[[:space:]]*/", "/g; s/^/"/; s/$/"/')
+    kinds_json=$(printf '%s\n' "$kinds_raw" | sed 's/[[:space:]]*,[[:space:]]*/\
+/g' | while IFS= read -r k; do printf '"%s", ' "$(escape_json "$k")"; done)
+    kinds_json=${kinds_json%, }
   else
     kinds_json=""
     unclassified="${unclassified}    \"$(escape_json "$dir")\",
@@ -220,11 +228,12 @@ domain_blocks=$(printf '%s' "$domain_blocks" | sed '$ s/,$//')
 unclassified=$(printf '%s' "$unclassified" | sed '$ s/,$//')
 unindexed=$(printf '%s' "$unindexed" | sed '$ s/,$//')
 
+tmp=$(mktemp); trap 'rm -f "$tmp"' EXIT
 {
   printf '{\n'
   printf '  "schema": 3,\n'
-  printf '  "brain": "%s",\n' "$brain"
-  printf '  "remote": "%s",\n' "$remote"
+  printf '  "brain": "%s",\n' "$(escape_json "$brain")"
+  printf '  "remote": "%s",\n' "$(escape_json "$remote")"
   printf '  "contextRoot": "%s",\n' "$(escape_json "$root")"
   printf '  "contextFingerprint": "%s",\n' "$ctx_fp"
   printf '  "generatedFrom": "%s",\n' "$sha"
@@ -239,7 +248,17 @@ unindexed=$(printf '%s' "$unindexed" | sed '$ s/,$//')
   [ -n "$unindexed" ] && printf '%s\n' "$unindexed"
   printf '  ]\n'
   printf '}\n'
-} > "$out"
+} > "$tmp"
+
+# Escaping above is the fix; this is the backstop. python3 is optional (the script promises
+# git/find/sed/awk/wc only), so skip the check where it is absent rather than require it.
+if command -v python3 > /dev/null 2>&1; then
+  if ! err=$(python3 -m json.tool "$tmp" 2>&1 > /dev/null); then
+    echo "manifest: generated JSON is invalid, $out left unchanged: $err" >&2
+    exit 1
+  fi
+fi
+cat "$tmp" > "$out"
 
 echo "manifest: $(printf '%s' "$domain_blocks" | grep -c "\"path\": \"$root/" || true) domains ($root) -> $out"
 
@@ -253,5 +272,6 @@ if [ -n "$untracked" ]; then
   echo "    and will NOT be in your commit, so readers will see the map as stale. Commit or remove:"
   printf '%s\n' "$untracked" | sed 's/^/      /'
 fi
-[ -n "$unindexed" ] && echo "  ⚠ unindexed (content the map cannot see): $(printf '%s\n' "$unindexed" | grep -c .) dir(s)"
-exit 0
+if [ -n "$unindexed" ]; then
+  echo "  ⚠ unindexed (content the map cannot see): $(printf '%s\n' "$unindexed" | grep -c .) dir(s)"
+fi

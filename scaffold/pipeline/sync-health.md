@@ -28,7 +28,7 @@ free, take it. Fall back to cadence only where it is not, and always say which o
    - `not checked (offline)` — the fetch or API call failed.
 
 2. Read each source's derived output `last-synced` and resolve its expected cadence: the entry's
-   `cadence` in `sources.json`, else the `weekly` default (`../pipeline/README.md` § Defaults).
+   `cadence` in `sources.json`, else the `weekly` default (`pipeline/README.md` § Defaults).
    `manual` is never stale. Mark a defaulted value, e.g. `weekly (default)`, so the owner can see
    it was never configured. Never invent a cadence — resolve it, and say which value you used.
 

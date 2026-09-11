@@ -104,8 +104,9 @@ Re-pull the reports **only for the delta window**, in two shapes:
 - Stamp `source` / `last-synced` / `generated-by` on every file touched.
 - Update `.sync-state.json` → `ga[<propertyId>]` = `{ lastSyncedThrough: <yesterday>,
   trailingSessionHashes: {last lookbackDays of the sessions-by-date series} }`.
-- Set `.sync-state.json` → `lastFullSync` to today (`YYYY-MM-DD`). Disarms the session-start
-  sync-health tripwire, which stays lit while that field is `null`.
+- In `.sync-state.json`, set `"synced": true` in `ga[<propertyId>]` and `lastFullSync` to today
+  (`YYYY-MM-DD`). Disarms the session-start sync-health tripwire, which stays lit while any
+  source's `synced` is `false` or `lastFullSync` is `null`.
 - The emitted `_index.md` frontmatter MUST include `kinds: [analytics]`.
 - **Branch + PR — never push to main directly (golden rule #4).**
 

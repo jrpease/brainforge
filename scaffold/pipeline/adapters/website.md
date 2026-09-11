@@ -37,8 +37,9 @@ GET <sitemap>            → list of <loc> + <lastmod>
 ## 3. Finish
 - Stamp `source` / `last-synced` / `generated-by` provenance frontmatter.
 - Update `.sync-state.json` with new per-URL lastmod + etag.
-- Set `.sync-state.json` → `lastFullSync` to today (`YYYY-MM-DD`). Disarms the session-start
-  sync-health tripwire, which stays lit while that field is `null`.
+- In `.sync-state.json`, set `"synced": true` in `websites[<id>]` and `lastFullSync` to today
+  (`YYYY-MM-DD`). Disarms the session-start sync-health tripwire, which stays lit while any
+  source's `synced` is `false` or `lastFullSync` is `null`.
 - The emitted `_index.md` frontmatter MUST include `kinds: [site-inventory]`.
 - Branch + PR.
 

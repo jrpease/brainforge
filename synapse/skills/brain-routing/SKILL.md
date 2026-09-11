@@ -40,6 +40,10 @@ did, and never appear grounded when you are not.
    - **Full read** — **cheap**: on a weak match (any collected kind, or clear topical
      adjacency). **normal**: on a direct intent match only. **expensive**: on a direct match
      only, and NEVER the whole domain — open only the specific files the peek showed you need.
+     A peek shows you need a file only when its index row names the task's subject outright
+     (a renewal question, a `vendor renewal dates` row). A row that merely *might* hold
+     something useful (a `milestone tracker` row, for a launch email) is not a match: do not
+     open that file, not even its first lines, to find out. No such row → the peek ends there.
 4. Three map signals mean "peek this index even though the intent match did not select it."
    Treat the domain as plausibly relevant whenever the task is near its subject, and say so in
    the announce line.

@@ -20,10 +20,11 @@ Always:
    If nothing changed, say so and stop — do not extract.
 2. Use **REST APIs, not MCPs**, for extraction (except where an adapter documents an exception).
 3. Stamp `last-synced` / `source` / `generated-by` frontmatter and update `.sync-state.json`:
-   the per-source fingerprint **and** `lastFullSync` (set it to today, `YYYY-MM-DD`, on every
-   successful completion). The session-start tripwire in `.claude/settings.json` stays armed until
-   `lastFullSync` stops being `null`, so skipping it means nudging the owner forever after a sync
-   that actually worked.
+   the per-source fingerprint, that source's `"synced": true`, **and** `lastFullSync` (set it to
+   today, `YYYY-MM-DD`, on every successful completion). The session-start tripwire in
+   `.claude/settings.json` stays armed while any source's slot says `"synced": false`, or while
+   `lastFullSync` is `null`, so skipping either means nudging the owner forever after a sync that
+   actually worked.
 
 ### Regenerate the manifest (always, before the PR)
 
@@ -58,8 +59,13 @@ specific first:
 2. the adapter's declared size envelope in its `0a. Size envelope` section,
 3. the shipped default — any derived doc ≤ 8k (`pipeline/README.md` § Defaults).
 
-The generator excludes `_index.md` from every domain's `files[]`, so an `_index.md` has no `tokens`
-figure to read. Rule 6 cannot be applied to one — do not guess a count for it.
+An `_index.md` is not in any domain's `files[]`: the generator counts it once, as the domain's
+`indexTokens`. Check each one from that figure. Its `tokens` is the domain's `indexTokens` in
+`.brainforge/brain-manifest.json`, its path is `<domain>/_index.md`, and its envelope resolves by
+the same three steps, where step 2 is the adapter's `_index.md` row in `0a. Size envelope`. Its
+previous size is the same domain's `indexTokens` in `$PREV`; a `$PREV` without that field (a
+manifest older than schema 2) gives no baseline. It then takes the envelope and 3× growth checks
+below like any other doc, and a breach gets the same `⚠ rule-6:` line.
 
 Flag a doc that is over the resolved value, **or** that grew ≥3× since the copy of the previous
 manifest captured above (`$PREV`; a fixed `/tmp` name collided between two brains, or two
@@ -68,8 +74,7 @@ accepted doc. A doc absent from that captured copy, or a first sync where no cop
 checked against the envelope only. Each flagged doc gets a line in the PR body:
 `⚠ rule-6: <path> is <N> tokens (envelope <M> / was <P>) — consider aggregating.`
 
-**Then check the domain total, which is the row `ADAPTER-TEMPLATE.md` says "fires
-automatically" and which nothing has ever compared against.** Per-doc checks all pass while a
+**Then check the domain total.** Per-doc checks all pass while a
 domain quietly accumulates: three 2,000-token docs clear every per-doc envelope and blow a
 4,500-token domain total. Take the domain's `tokens` from the manifest (schema 2 folded
 `indexTokens` in precisely so this figure is honest) and compare it to the adapter's

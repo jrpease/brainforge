@@ -64,7 +64,7 @@ fm() {
   ' "$1"
 }
 
-stale=""; never=""; drafts=""; ok=0; unowned=""
+stale=""; never=""; drafts=""; ok=0
 n_stale=0; n_never=0; n_draft=0; n_stalled=0
 
 while IFS= read -r f; do

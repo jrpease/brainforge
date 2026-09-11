@@ -110,8 +110,9 @@ git -C <clone> diff <lastSha>..origin/<branch> --name-only
 ## 3. Finish
 - Stamp `source` / `last-synced` / `generated-by`.
 - Update `.sync-state.json` → `repos[<id>].lastSha = origin/<branch> HEAD`.
-- Set `.sync-state.json` → `lastFullSync` to today (`YYYY-MM-DD`). Disarms the session-start
-  sync-health tripwire, which stays lit while that field is `null`.
+- In `.sync-state.json`, set `"synced": true` in `repos[<id>]` and `lastFullSync` to today
+  (`YYYY-MM-DD`). Disarms the session-start sync-health tripwire, which stays lit while any
+  source's `synced` is `false` or `lastFullSync` is `null`.
 - The emitted `_index.md` frontmatter MUST include `kinds: [repo-summaries]`.
 - Branch + PR.
 

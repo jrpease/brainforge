@@ -5,7 +5,7 @@
 > from the built-ins — fill this. `/add-adapter` does exactly this. A worked example lives at
 > `examples/shopify.md`.
 >
-> **Every adapter must honor the six golden rules in `../README.md`.** The skeleton below is
+> **Every adapter must honor the six golden rules in `pipeline/README.md`.** The skeleton below is
 > structured so that filling it correctly *is* honoring them.
 
 Covers: <what this source contributes to the brain — e.g. "design tokens + component inventory">.
@@ -18,7 +18,7 @@ Auth: `<CREDENTIAL_ENV_VAR>` from `.env` (add it to `.env.example`). <One line o
 ## 0a. Size envelope  — golden rule #6
 > An envelope is a number, not an intention. Declare one per emitted doc **before** the first live
 > run, then hold the sync to it. This table MAY be omitted — the shipped default (any derived doc
-> ≤ 8k, see `../README.md` § Defaults) then applies, so golden rule 6 always has something to
+> ≤ 8k, see `pipeline/README.md` § Defaults) then applies, so golden rule 6 always has something to
 > compare against. Declare one when this source's docs are legitimately bigger or smaller than
 > that, which is most of them.
 
@@ -28,10 +28,8 @@ Auth: `<CREDENTIAL_ENV_VAR>` from `.env` (add it to `.env.example`). <One line o
 | `<folder>/<doc>.md` | ≤ <n> |
 | **domain total** | **≤ <n>** |
 
-An `_index.md` row is a **manual** check for now: `/sync` resolves per-doc envelopes from the
-manifest's `files[]`, which does not list index files (they are counted once, as the domain's
-`indexTokens`). Declare the row anyway and hold it by hand — the domain-total row is the one that
-fires automatically.
+`/sync` checks the `_index.md` row from the manifest's `indexTokens`, the figure the generator
+records for each domain's `_index.md`.
 
 **<One paragraph: what "reference, not a mirror" means for THIS source.>** Name the specific thing
 that would balloon the doc if extracted faithfully — every layer, every row, every file, every day —
@@ -82,6 +80,9 @@ escape hatch, not a bigger number here.
 ## 3. Finish  — golden rule #5
 - Stamp `source` / `last-synced` / `generated-by` frontmatter on every file touched.
 - Update `.sync-state.json` → `<source-type>[<key>]` with the new fingerprint.
+- In `.sync-state.json`, set `"synced": true` in `<source-type>[<key>]` and `lastFullSync` to
+  today (`YYYY-MM-DD`). Disarms the session-start sync-health tripwire, which stays lit while any
+  source's `synced` is `false` or `lastFullSync` is `null`.
 - **Branch + PR — never push to main directly (golden rule #4).**
 
 ## Never
@@ -117,6 +118,6 @@ the adapter has a bespoke mode — if so, add `.claude/commands/<name>.md` that 
 
 > **Replacing a built-in or flat playbook?** Then producing this file is only half the job — the
 > dispatch must be *repointed* to it. Update the `.claude/commands/sync.md` reference and the
-> `../README.md` Playbooks list to point at `adapters/<source-type>.md`, and supersede the old
+> `pipeline/README.md` Playbooks list to point at `adapters/<source-type>.md`, and supersede the old
 > flat `sync-<source-type>.md`. A leftover flat playbook or an unrepointed dispatch means `/sync`
 > still runs the stale path. (`/add-adapter` walks this.)

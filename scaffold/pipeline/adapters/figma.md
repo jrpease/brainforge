@@ -103,8 +103,9 @@ GET https://api.figma.com/v1/files/:fileKey?depth=1
   `lastModified`. A version bump with no material change to tracked resources (variables, styles,
   component sets) is a legitimate outcome: re-stamp the fingerprint, note "no content change,"
   and skip the rewrite — the gate flagging an edit does not oblige an extraction.
-- Set `.sync-state.json` → `lastFullSync` to today (`YYYY-MM-DD`). Disarms the session-start
-  sync-health tripwire, which stays lit while that field is `null`.
+- In `.sync-state.json`, set `"synced": true` in `figma[<fileKey>]` and `lastFullSync` to today
+  (`YYYY-MM-DD`). Disarms the session-start sync-health tripwire, which stays lit while any
+  source's `synced` is `false` or `lastFullSync` is `null`.
 - The emitted `_index.md` frontmatter MUST include `kinds: [design-system]` (add
   `digital-experience` if this brain syncs frames/flows from this file).
 - Branch + PR. Do not push to main directly.
