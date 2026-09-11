@@ -9,7 +9,10 @@ changes. Because each source short-circuits when unchanged, "sync all" is cheap 
 2. Collect the set of sources that actually changed.
 3. If nothing changed → report "all current" and exit. No PR.
 4. For changed sources only, run extraction (per adapter).
-5. Stamp provenance, update `.sync-state.json`.
+5. Stamp provenance, update `.sync-state.json`: each changed source's fingerprint and
+   `"synced": true` in its slot, per its adapter, then `lastFullSync` to today (`YYYY-MM-DD`).
+   The session-start sync-health tripwire stays lit while any source's `synced` is `false` or
+   `lastFullSync` is `null`.
 6. Open a single PR titled `sync: <date> — <which sources changed>`. Maintainer reviews + merges.
 
 ## Scheduled-agent recipe

@@ -100,6 +100,8 @@ reach anyone. All three are enforced by convention, not by CI, so hold yourself 
 - If your change touches `scaffold/`, keep the `{{ORG}}` templating intact. Those placeholders
   are filled in for each brain when it's created; a hardcoded value there breaks every brain
   built after your change.
+- The five authored public docs (`README.md`, `DESIGN.md`, `ROADMAP.md`, `CONTRIBUTING.md`, and
+  the Shopify adapter walkthrough) carry **no em dashes**. A check enforces it before each release.
 
 ## License
 

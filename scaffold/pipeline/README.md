@@ -75,11 +75,8 @@ and reports ✅ current / ⚠️ stale / ❌ never.
 
 **Default: any derived doc ≤ 8k tokens.**
 
-`_index.md` is measured as of manifest schema 2: `.brainforge/gen-manifest.sh` records it as the
-domain's `indexTokens` and folds it into the domain `tokens` total, so a domain-total envelope
-has a real figure to compare against. It is still absent from `files[]`, and `/sync` resolves
-per-doc envelopes from `files[]`, so a per-`_index.md` envelope does not fire yet. Declare one
-anyway and keep them short by hand until `/sync` reads `indexTokens`.
+`/sync` checks `_index.md` rows from the manifest's `indexTokens`, the figure
+`.brainforge/gen-manifest.sh` records for each domain's `_index.md`.
 
 `acceptedSize` records a knowingly-oversized doc so the warning stops without being ignored. It is
 an array on the source entry, with `doc` relative to that entry's `into:` folder:

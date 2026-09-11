@@ -30,7 +30,8 @@ hardcode paths.** Then read `<brain>/.brainforge/runtime-manifest.json` and rout
 
 | Manifest state | Route |
 |---|---|
-| `runtime-version` == `V` | Say **"up to date (v`V`)"** and STOP — zero file work. |
+| `runtime-version` == `V`, every shipped bump file matches its baseline hash | Say **"up to date (v`V`)"** and STOP — zero file work. |
+| `runtime-version` == `V`, some shipped bump file differs from its baseline | Changes shipped without a version bump: the script prints `UNBUMPED-CHANGE` — run the **steady-state pass**. |
 | `runtime-version` newer than `V` | STOP — this Brainforge checkout is stale; pull it first. |
 | file missing or malformed | **Adoption pass** — never guess a baseline. |
 | older than `V` | **Steady-state pass**. |
@@ -65,9 +66,9 @@ Save the script below to a scratch file (e.g. `bf-upgrade.py`) and run it. Dry r
 | `LIST-CONSUMER` | yours (steady-state: not shipped, not in manifest) | none — listed for transparency |
 
 **Load-bearing for `/forge`:** `commands/forge.md` §3 extracts exactly this fence
-(`awk '/^```python$/,/^```$/'` — it must remain the FIRST ```python block in this file) and calls
-the script with this CLI signature; keep both stable or the fresh-install bootstrap silently
-breaks.
+(`awk '/^```python$/,/^```$/'` — it must remain the ONLY ```python block in this file, because
+that awk range joins every python fence it finds into one script) and calls the script with this
+CLI signature; keep both stable or the fresh-install bootstrap silently breaks.
 
 ```python
 #!/usr/bin/env python3
@@ -102,11 +103,19 @@ try:
 except Exception:
     M, MV, TOMB = None, None, set()  # missing/malformed → adoption pass; never guess a baseline
 
+S = tree(SCAF, emit_bytes)                      # shipped, as-emitted
+
 if MV is not None:
-    if vt(MV) == vt(V): print(f"UP-TO-DATE\t{V}"); sys.exit(0)
+    if vt(MV) == vt(V):
+        # A matching version is not proof of matching bytes: a bump-path change shipped without
+        # a version bump leaves runtime-version equal. Short-circuit only when every shipped file
+        # equals its manifest baseline. A tombstone is a deliberate deletion, not a baseline.
+        # Compares hashes only -- emitted-from can be empty or name a commit in another repo.
+        drift = [f for f in S if f not in TOMB and M.get(f) != S[f]]
+        if not drift: print(f"UP-TO-DATE\t{V}"); sys.exit(0)
+        print(f"UNBUMPED-CHANGE\t{V}\t{len(drift)} file(s)")
     if vt(MV) > vt(V):  print(f"STALE-CHECKOUT\tbrain has {MV}, checkout ships {V} — pull Brainforge first"); sys.exit(1)
 
-S = tree(SCAF, emit_bytes)                      # shipped, as-emitted
 B = tree(BRAIN, lambda p: p.read_bytes())       # brain, on disk
 
 acts, newman = {}, {}
@@ -225,6 +234,35 @@ For every referenced path that does **not** exist on disk after the apply — pl
 to a file this run flagged or deleted — add a checklist line to the PR body (file:line →
 missing/flagged target). Fixing them is human work inside the PR (the generalized Shopify lesson:
 stale `/sync` dispatch pointers are exactly what humans miss).
+
+A path that still exists can still point at a section that does not. Check every
+`<path> § <section>` reference whose path is in the same runtime-path set: a numbered section
+(`§1a`, `§0a-bis`) must match a heading `^#+ +<n>\.`, a named one (`§ Defaults`) a heading
+`^#+ +<Word>`. Set `BRAIN` to the brain checkout and `ACTIONS` to a file holding the `--apply`
+run's output from §3 (e.g. `python3 bf-upgrade.py … --apply | tee bf-upgrade.out`). Each output
+line is a ready checklist line for the PR body's Ref-scan section; a miss whose target this run
+flagged or deleted is marked **Flagged**.
+
+```bash
+BRAIN="<brain>"; ACTIONS="<classifier-output>"
+( cd "$BRAIN" && grep -rnoE '(pipeline|\.claude/commands|authoring|setup)/[A-Za-z0-9._/-]+\.(md|json)`? +§( [A-Za-z]+|[A-Za-z0-9-]+)' \
+    --include='*.md' . 2>/dev/null ) | grep -v '/\.git/' | grep -v 'context/derived/' | sort -u |
+while IFS= read -r hit; do
+  file=${hit%%:*}; rest=${hit#*:}; line=${rest%%:*}; ref=${rest#*:}
+  path=$(printf '%s\n' "$ref" | sed -E 's/`? +§.*//')
+  sec=$(printf '%s\n' "$ref" | sed -E 's/.*§//')
+  case "$sec" in
+    " "*) sec=${sec# }; pat="^#+ +$sec";   label="§ $sec" ;;
+    *)                  pat="^#+ +$sec\\."; label="§$sec" ;;
+  esac
+  grep -qE "$pat" "$BRAIN/$path" 2>/dev/null && continue
+  if awk -F'\t' -v p="$path" '($1 ~ /^FLAG-/ || $1 == "SUPERSEDED-FLAG" || $1 == "DELETE-SUPERSEDED") && $2 == p { f = 1 }
+                              END { exit !f }' "$ACTIONS" 2>/dev/null
+  then echo "- [ ] **Flagged** ${file#./}:$line → \`$path\` $label"
+  else echo "- [ ] ${file#./}:$line → \`$path\` $label: no such section"
+  fi
+done
+```
 
 ## 5a. Regenerate the map when the generator changed
 

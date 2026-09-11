@@ -32,16 +32,16 @@ read-it-back loop works for real.
 
 ## Phase 2: The wizard + remaining adapters  ✅
 
-- [x] **Depth-first wizard (`/walk`): proven live.** Domain picker (à la carte) + depth-first
-      loop orchestration: guard → status ladder (derived from brain state, **no state file**) →
-      fast-win routing (defers brand) → inline loop (scaffold → ingest → draft → approve → wire
-      adapter → sync → read-back) → resumable. Ships as the third brain-resident half
-      `setup/README.md` + `/walk`, mirroring `pipeline/` and `authoring/`. Proven on a
-      throwaway brain: all 5 domains read `not-started` → a fast-win domain taken end-to-end
-      against a real repo (conventions canon drafted from source, **approve gate refused** on a
-      seeded `[GAP]` until an interview turn filled it, repo wired + first full sync, read it
-      back). Re-running `/walk` recomputed that domain as `complete` from brain state alone and
-      offered the next domain. ([proof](docs/proofs/depth-first-wizard.md))
+- [x] **Depth-first wizard (`/walk`, since renamed `/forge`): proven live.** Domain picker (à la
+      carte) + depth-first loop orchestration: guard → status ladder (derived from brain state,
+      **no state file**) → fast-win routing (defers brand) → inline loop (scaffold → ingest →
+      draft → approve → wire adapter → sync → read-back) → resumable. Ships as the third
+      brain-resident half `setup/README.md` + `/walk`, mirroring `pipeline/` and `authoring/`.
+      Proven on a throwaway brain: all 5 domains read `not-started` → a fast-win domain taken
+      end-to-end against a real repo (conventions canon drafted from source, **approve gate
+      refused** on a seeded `[GAP]` until an interview turn filled it, repo wired + first full
+      sync, read it back). Re-running `/walk` recomputed that domain as `complete` from brain
+      state alone and offered the next domain. ([proof](docs/proofs/depth-first-wizard.md))
 - [x] `ingest → interview → draft → approve` canon authoring, with the loudly-provisional
       guardrail. Built as `/draft-canon` + `/approve-canon` → brain-resident `authoring/` method
       doc + per-domain starter templates. Proven end-to-end on a throwaway brain: a brand canon
@@ -174,7 +174,7 @@ read-it-back loop works for real.
   freshness depends on a clone path on one machine (`git -C <clone>`). Undesigned: cross-repo
   issue-open auth, and it needs a live proof before it ships (see CONTRIBUTING's adapter bar).
 
-- **Federation — team brains alongside the org brain.** `SYNAPSE_BRAINS` already takes a list,
+- **Federation: team brains alongside the org brain.** `SYNAPSE_BRAINS` already takes a list,
   `brain-routing` already handles a brain being the working directory, and as of v0.9.0 the
   context root is configurable, so a repo whose docs do not live under `context/` can emit a valid
   manifest. What is left is the decision, not the code: a team keeps its own brain, and org canon

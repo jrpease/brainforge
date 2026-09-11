@@ -1,9 +1,11 @@
 {
-  "schema": 2,
+  "schema": 3,
   "brain": "acme-brain",
   "remote": "",
+  "contextRoot": "context",
+  "contextFingerprint": "44eec7f100f810ecc9321c49368d7923e86a3222",
   "generatedFrom": "unborn",
-  "generatedAt": "2026-09-07",
+  "generatedAt": "2026-09-11",
   "domains": [
     {
       "path": "context/canon/brand",
@@ -107,5 +109,7 @@
   ],
   "unclassified": [
     "context/derived/mystery"
+  ],
+  "unindexed": [
   ]
 }

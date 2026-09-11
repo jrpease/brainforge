@@ -12,12 +12,13 @@ Kinds are the domain catalog one level down (DESIGN.md §10). Current vocabulary
 `site-inventory`, `product-catalog`, `digital-experience`, `pricing-model`,
 `company-principles`, `org-design`, `unit-context`.
 
-**`intents.json`'s ONE-INTENT-PER-LINE LAYOUT IS A PARSING CONTRACT.** The session hook
-(`hooks/session-start.sh`) is dependency-free and derives the routable vocabulary from this
-file with `sed` — the union of its values — to warn about kinds a brain declares that no
-intent points at. Reformatting it (pretty-printing an array across lines, say) breaks that
-warning **silently**, which is the exact failure the warning exists to catch. Same contract
-`gen-manifest.sh` carries on its own output; treat it the same way.
+**`intents.json`'s ONE-INTENT-PER-LINE LAYOUT IS A PARSING CONTRACT.** `routing/coverage.sh`
+is dependency-free and derives the routable vocabulary from this file line by line — the union
+of its values — to warn about kinds a brain declares that no intent points at. The session hook
+(`hooks/session-start.sh`) hands off to it for that warning. Reformatting `intents.json`
+(pretty-printing an array across lines, say) breaks that warning **silently**, which is the
+exact failure the warning exists to catch. Same contract `gen-manifest.sh` carries on its own
+output; treat it the same way.
 
 Corollary: the routable vocabulary IS the union of `intents.json`'s values — a kind no intent
 points at is unroutable whether or not it appears in the list above or in a catalog table.

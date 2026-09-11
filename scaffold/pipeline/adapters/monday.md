@@ -100,8 +100,9 @@ query ($ids:[ID!]) { boards (ids:$ids) { id name updated_at items_count } }
 ## 3. Finish  — golden rule #5
 - Stamp `source` / `last-synced` / `generated-by` on every file touched.
 - Update `.sync-state.json` → `monday[<boardId>]` with the new `(updated_at, items_count)` fingerprint.
-- Set `.sync-state.json` → `lastFullSync` to today (`YYYY-MM-DD`). Disarms the session-start
-  sync-health tripwire, which stays lit while that field is `null`.
+- In `.sync-state.json`, set `"synced": true` in `monday[<boardId>]` and `lastFullSync` to today
+  (`YYYY-MM-DD`). Disarms the session-start sync-health tripwire, which stays lit while any
+  source's `synced` is `false` or `lastFullSync` is `null`.
 - The emitted `_index.md` frontmatter MUST include `kinds: [project-tracking]`.
 - **Branch + PR — never push to main directly (golden rule #4).**
 
