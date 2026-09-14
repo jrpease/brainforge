@@ -115,7 +115,7 @@ for remote in "${remotes[@]}"; do
   # Domain lines. Relies on the gen-manifest formatting contract:
   # domain keys at 6-space indent, one per line; file entries are single-line objects.
   # A domain only one intent reaches is marked ON ITS OWN LINE rather than warned about.
-  # 21 of the 24 kinds are single-intent and every adapter mandates one, so a per-domain ⚠
+  # 21 of the 24 kinds are single-intent and a synced domain usually carries one, so a per-domain ⚠
   # would be permanent — precisely the disease a staleness warning that never turns off is.
   # The marker costs ~3 tokens, tells the reader the same thing, and implies no defect.
   cov="${CLAUDE_PLUGIN_ROOT:-$(dirname "$0")/..}/routing/coverage.sh"

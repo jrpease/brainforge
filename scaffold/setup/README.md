@@ -44,7 +44,7 @@ a brain never authors routing rules. Stamp kinds at domain creation from this ta
 | `analytics/` | `analytics`, `metric-definitions` |
 | `company/` | `company-principles`, `org-design` |
 | `units/` | `unit-context` — plus whatever the unit's own docs cover |
-| (adapter-emitted) | `site-inventory` (website), `product-catalog` (shopify/SKUs), `digital-experience` (flows/pages) |
+| (synced domains, proposed by `/sync`) | `site-inventory` (website), `product-catalog` (shopify/SKUs), `digital-experience` (flows/pages) |
 
 `unit-context` is for a domain holding **another team's or business unit's own material** —
 their positioning, their audience, their roadmap, as they describe it. Stamp it rather than

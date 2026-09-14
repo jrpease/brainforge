@@ -13,6 +13,8 @@ Auth: `<CREDENTIAL_ENV_VAR>` from `.env` (add it to `.env.example`). <One line o
 
 ## 0. Inputs
 - Source entries from `sources.json` → `<source-type>[]` (filter `enabled: true`, or the one passed as arg)
+- Destination: the entry's `into:` — written `<into>` below. **No `into:` → stop; do not sync this
+  entry and do not fall back to a default folder** (`pipeline/README.md` § Where a sync writes).
 - Last fingerprint from `.sync-state.json` → `<source-type>[<key>]`
 
 ## 0a. Size envelope  — golden rule #6
@@ -22,10 +24,12 @@ Auth: `<CREDENTIAL_ENV_VAR>` from `.env` (add it to `.env.example`). <One line o
 > compare against. Declare one when this source's docs are legitimately bigger or smaller than
 > that, which is most of them.
 
+Paths are relative to `<into>`, the same base `acceptedSize[].doc` uses.
+
 | Emitted doc | Envelope |
 |---|---|
-| `<folder>/_index.md` | ≤ <n> |
-| `<folder>/<doc>.md` | ≤ <n> |
+| `_index.md` | ≤ <n> |
+| `<doc>.md` | ≤ <n> |
 | **domain total** | **≤ <n>** |
 
 `/sync` checks the `_index.md` row from the manifest's `indexTokens`, the figure the generator
@@ -66,9 +70,16 @@ escape hatch, not a bigger number here.
   A wrong word becomes "truth.">
 - **Transport (golden rule #2):** use **REST**, not MCP. If REST genuinely cannot reach the data,
   document the exception here and scope the MCP use as tightly as possible.
-- **Emit to:** `context/derived/<folder>/…` — <which files, in what shape (table-first).>
-  - `_index.md` frontmatter MUST declare `kinds: [<one or more from setup/README.md §1a>]`
-    — this is how the consumer layer routes to what you emit.
+- **Emit to:** `<into>` — <which files, in what shape (table-first).> Name the conventional
+  folder a new entry gets (e.g. "`<into>`, conventionally `<folder>/`") as an example only; never
+  write a literal `context/derived/<folder>/` path here.
+  - **Never write `kinds:`.** Refresh only this source's rows in `<into>_index.md`. If it exists,
+    change only `last-synced` in its frontmatter; if it does not, create it with provenance and
+    `title:` but no `kinds:`. `/sync` then proposes kinds for a human to confirm. You may name the
+    kind this source usually proposes (<one from setup/README.md §1a>) as that proposal, never as
+    a stamp.
+  - Do not spell a literal derived-root path in this playbook, not even in a prohibition:
+    `sync-contract.sh` cannot tell "write to" from "never write to" and fails both.
   - **Size envelope:** declared in **§0a** above, per emitted doc. MAY be omitted — the shipped
     default (any derived doc ≤ 8k) then applies, so golden rule 6 fires for every doc the manifest
     measures even when this adapter declares nothing. Declare one when this source type's docs are
@@ -78,7 +89,8 @@ escape hatch, not a bigger number here.
     `sources.json` entry, never here — this file is re-emitted on every `/upgrade`.
 
 ## 3. Finish  — golden rule #5
-- Stamp `source` / `last-synced` / `generated-by` frontmatter on every file touched.
+- Stamp `source` / `last-synced` / `generated-by` frontmatter on every doc this source writes.
+  `<into>_index.md` is the exception, per §2: only `last-synced` changes on an existing one.
 - Update `.sync-state.json` → `<source-type>[<key>]` with the new fingerprint.
 - In `.sync-state.json`, set `"synced": true` in `<source-type>[<key>]` and `lastFullSync` to
   today (`YYYY-MM-DD`). Disarms the session-start sync-health tripwire, which stays lit while any
@@ -107,10 +119,27 @@ flow here on the next sync — never the reverse.
   "cadence": "daily | weekly | monthly | manual",
   "acceptedSize": [
     { "doc": "<file.md>", "tokens": 32000, "since": "<YYYY-MM-DD>", "why": "<why this is fine>" }
-  ],
-  "$note": "<quirks, auth path, what to skip>"
+  ]
 }
 ```
+
+Every field here is read by a named step. A field no step reads looks authoritative and does
+nothing, which is worse than no field, so do not add one without the step that consumes it.
+
+| Field | Read by |
+|---|---|
+| `id` | `/sync <source-type> <id>` scoping; the `.sync-state.json` slot key unless the adapter keys by its locator |
+| `label` | `/sync-health`'s source column and the sync PR summary |
+| `<locator-field>` | this adapter's §1 cheap gate and §2 extraction |
+| `extract` | this adapter's §2 — only the named resources are extracted. Omit the field if the source has nothing to choose between |
+| `into` | this adapter's §0 and §2 (the destination), `acceptedSize[].doc` resolution, `sync-contract.sh` (required) |
+| `enabled` | `/sync`, `sync-all.md`, `/sync-health` |
+| `cadence` | `/sync-health` staleness (default `weekly`) |
+| `acceptedSize` | `/sync` golden rule 6 envelope resolution |
+
+Quirks, auth paths, and what to skip belong in this playbook, where a step reads them. A
+free-form note on the entry is read by nothing, and scope written there ("skip X") is not
+enforced.
 
 ### Generated command
 `/sync <source-type>` already dispatches here via `sources.json`. No new command needed unless

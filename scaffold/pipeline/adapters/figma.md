@@ -11,18 +11,23 @@ documented exceptions to golden rule #2, each because REST genuinely cannot reac
 (See "Design tokens" and "Components" in §2.)
 
 ## 0. Inputs
-- `sources.json` → `figma[]` (filter `enabled: true`, or the one passed as arg)
+- `sources.json` → `figma[]` (filter `enabled: true`, or the one passed as arg). Per entry:
+  `fileKey`, `extract` (§1–2), and `into`.
+- Destination: the entry's `into:` — written `<into>` below, conventionally `design-system/` under
+  the derived root. **No `into:` → stop; do not sync this entry and do not fall back to
+  `design-system/`** (`pipeline/README.md` § Where a sync writes).
 - `.sync-state.json` → `figma[<fileKey>]`
 
 ## 0a. Size envelope  — golden rule #6
 
-One Figma file can feed several domains (design system, flows, dielines). Budget each one it touches.
+One Figma file can feed several domains (design system, flows, dielines): register one entry per
+domain, each with its own `into:` and `extract`. Paths are relative to each entry's `<into>`.
 
 | Emitted doc | Envelope |
 |---|---|
-| `design-system/tokens.json` | ≤ 1,500 |
-| `design-system/figma-library.md` (style + component-set inventory) | ≤ 2,500 |
-| any `_index.md` this adapter refreshes | ≤ 2,000 |
+| `tokens.json` | ≤ 1,500 |
+| `figma-library.md` (style + component-set inventory) | ≤ 2,500 |
+| `_index.md` | ≤ 2,000 |
 | **per-domain total** | **≤ 5,000 each** |
 
 **Emit reference, not a mirror.** For a design file that means page and frame *structure* with node
@@ -39,6 +44,12 @@ GET https://api.figma.com/v1/files/:fileKey?depth=1
   → read `version` and `lastModified`
 ```
 - If `version` == stored version → **stop. Nothing changed.** (zero heavy calls)
+- Entries sharing a `fileKey` share its state slot: run the gate once, and if it trips, extract
+  for **every** enabled entry with that `fileKey` before writing the new `version`. Otherwise the
+  first entry's write makes the gate report "unchanged" for the rest. So `/sync figma <id>` widens
+  to every entry sharing that `fileKey`; say so in the PR body.
+- An enabled entry whose `<into>` holds none of its output yet (newly added on an already-synced
+  `fileKey`) extracts regardless of the gate. The shared slot's version says nothing about it.
 - Else → the file changed. Re-extract the configured `extract` types for this source
   (`variables` / `styles` / `components` / `frames`), each gated by its own cheap check in §2.
   `.sync-state.json` stores a **file-level** `version` per source — not per-node hashes — so the
@@ -49,7 +60,7 @@ GET https://api.figma.com/v1/files/:fileKey?depth=1
 ## 2. Extract only the delta
 
 **Design tokens (deterministic, preferred path):**
-- Figma variables → DTCG JSON at `context/derived/design-system/tokens.json`. Deterministic —
+- Figma variables → DTCG JSON at `<into>tokens.json`. Deterministic —
   no LLM guessing at hex values.
 - **Where to read the variables from (this matters):**
   - The Variables **REST** endpoint (`GET /v1/files/:fileKey/variables/local`) is
@@ -62,7 +73,7 @@ GET https://api.figma.com/v1/files/:fileKey?depth=1
     1. Probe the bridge with `figma_get_status` (`probe: true`). If it's not connected, that's a
        *setup* failure, not a data failure — tell the user to open the file in Figma desktop and
        run the bridge plugin; don't write a half-empty `tokens.json`.
-    2. Run `figma_export_tokens` with `format: "dtcg"`, `outputPath: "context/derived/design-system/tokens.json"`,
+    2. Run `figma_export_tokens` with `format: "dtcg"`, `outputPath: "<into>tokens.json"`,
        and `strategy: "merge"`. This tool **replaces** the old "export → transform → Style
        Dictionary" hop — it writes the DTCG file directly, and `merge` writes **only the tokens
        that changed since the last sync** (golden rule #1, enforced inside the tool). Use
@@ -96,9 +107,11 @@ GET https://api.figma.com/v1/files/:fileKey?depth=1
 
 **Frames / dielines:**
 - For each changed frame: `GET /v1/images/:fileKey?ids=<node>&format=png` → store the **export
-  URL as a link** (or Git-LFS the file), never a committed binary; update the relevant `_index.md`.
+  URL as a link** (or Git-LFS the file), never a committed binary; update this file's rows in
+  `<into>_index.md`, leaving other rows alone.
 ## 3. Finish
-- Stamp `last-synced` (today) + `source` + `generated-by` on every file touched.
+- Stamp `last-synced` (today) + `source` + `generated-by` on every file touched. Exception: an
+  existing `<into>_index.md`, where only `last-synced` changes (see below).
 - Update `.sync-state.json` → `figma[<fileKey>]` with the new file-level `version` +
   `lastModified`. A version bump with no material change to tracked resources (variables, styles,
   component sets) is a legitimate outcome: re-stamp the fingerprint, note "no content change,"
@@ -106,8 +119,11 @@ GET https://api.figma.com/v1/files/:fileKey?depth=1
 - In `.sync-state.json`, set `"synced": true` in `figma[<fileKey>]` and `lastFullSync` to today
   (`YYYY-MM-DD`). Disarms the session-start sync-health tripwire, which stays lit while any
   source's `synced` is `false` or `lastFullSync` is `null`.
-- The emitted `_index.md` frontmatter MUST include `kinds: [design-system]` (add
-  `digital-experience` if this brain syncs frames/flows from this file).
+- **Never write `kinds:`.** `<into>_index.md` follows the index rule in `pipeline/README.md`
+  § Where a sync writes: if it exists, change only `last-synced` in its frontmatter; if it does
+  not, create it with provenance and `title:` but no `kinds:`. `/sync` then proposes kinds for a
+  human to confirm (this source
+  usually proposes `design-system`, or `digital-experience` for an entry that syncs frames/flows).
 - Branch + PR. Do not push to main directly.
 
 ## Never

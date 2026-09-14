@@ -53,6 +53,6 @@ blindness in reverse is how a source sits 31 commits behind while reading ✅.
 
 ## Output
 
-A short status table: source · last-synced · expected · **upstream** · status. Read-only — no
+A short status table: source (its `label`, else its `id`) · last-synced · expected · **upstream** · status. Read-only — no
 PR. Run it before relying on the repo for anything important, and as part of the scheduled agent
 so a failed run is loud, not silent.

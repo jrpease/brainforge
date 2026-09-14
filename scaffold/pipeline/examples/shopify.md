@@ -28,17 +28,23 @@ Whichever is used, the extraction shape and derived output are identical.
 broken path" discipline — not these Shopify-specific token/revocation details.)*
 
 ## 0. Inputs
-- `sources.json` → `shopify[]`
+- `sources.json` → `shopify[]`. Per entry: `shopDomain` + `apiVersion` (Auth, above), `extract`
+  (which of the three §2 resources to pull; absent → all three), and `into`.
+- Destination: the entry's `into:` — written `<into>` below, conventionally `shopify/` under the
+  derived root. **No `into:` → stop; do not sync this entry and do not fall back to `shopify/`**
+  (`pipeline/README.md` § Where a sync writes).
 - `.sync-state.json` → `shopify[<id>]` (catalog fingerprint + per-resource counts)
 
 ## 0a. Size envelope  — golden rule #6
 
+Paths are relative to `<into>`.
+
 | Emitted doc | Envelope |
 |---|---|
-| `shopify/catalog.md` | ≤ 4,000 |
-| `shopify/collections.md` | ≤ 1,500 |
-| `shopify/store-config.md` | ≤ 1,000 |
-| `shopify/_index.md` | ≤ 800 |
+| `catalog.md` | ≤ 4,000 |
+| `collections.md` | ≤ 1,500 |
+| `store-config.md` | ≤ 1,000 |
+| `_index.md` | ≤ 800 |
 | **domain total** | **≤ 6,000** |
 
 **A catalog is the honest growth case: it scales with the store, not with the extraction.** Hold the
@@ -61,19 +67,22 @@ shop        → shop.updated_at          (REST: GET /shop.json; MCP fallback: gr
 - Else → the resources whose `updated_at` moved (or count changed) are the delta.
 
 ## 2. Extract only the delta
-- **Products** → `context/derived/shopify/catalog.md`: per-SKU title, handle, status, product
+Only the resources named in the entry's `extract` (`products`, `collections`, `shop-config`).
+- **Products** → `<into>catalog.md`: per-SKU title, handle, status, product
   type, price range, variants (SKU/option/price), and image URLs (link, do **not** commit
   binaries). Deterministic table first; keep any prose factual and short. **Read the variant
   count from `variantsCount.count` (or REST's paged count) — never from how many variants a
   narrative pass listed. A made-up count becomes "truth."**
-- **Collections** → `context/derived/shopify/collections.md`: title, handle, description,
+- **Collections** → `<into>collections.md`: title, handle, description,
   rule/membership summary.
-- **Shop config** → `context/derived/shopify/store-config.md`: name, domains, currency, plan,
+- **Shop config** → `<into>store-config.md`: name, domains, currency, plan,
   policies, and brand-relevant metafields.
-- Cross-link SKUs to their Figma dielines in `context/derived/products/skus/` where handles match.
+- Cross-link SKUs to Figma dielines where handles match, looking in the `<into>` of each enabled
+  `figma[]` entry whose `extract` includes `frames`. No match, no link.
 
 ## 3. Finish
-- Stamp `source` / `last-synced` / `generated-by` frontmatter on each file. Make `generated-by`
+- Stamp `source` / `last-synced` / `generated-by` frontmatter on each file (except an existing
+  `<into>_index.md`, where only `last-synced` changes; see below). Make `generated-by`
   **name the transport that actually ran**, so provenance stays honest — e.g.
   `pipeline/examples/shopify.md (Shopify MCP graphql_query; REST token revoked 2026-01-01)` for
   the fallback, or `pipeline/examples/shopify.md (Shopify Admin REST)` once a token exists.
@@ -81,7 +90,11 @@ shop        → shop.updated_at          (REST: GET /shop.json; MCP fallback: gr
 - In `.sync-state.json`, set `"synced": true` in `shopify[<id>]` and `lastFullSync` to today
   (`YYYY-MM-DD`). Disarms the session-start sync-health tripwire, which stays lit while any
   source's `synced` is `false` or `lastFullSync` is `null`.
-- The emitted `_index.md` frontmatter MUST include `kinds: [product-catalog]`.
+- **Never write `kinds:`.** `<into>_index.md` follows the index rule in `pipeline/README.md`
+  § Where a sync writes: if it exists, change only `last-synced` in its frontmatter; if it does
+  not, create it with provenance and `title:` but no `kinds:`. `/sync` then proposes kinds for a
+  human to confirm (this source
+  usually proposes `product-catalog`).
 - Branch + PR.
 
 ## Never
@@ -100,7 +113,6 @@ admin, then flow here on the next sync — never the reverse.
   "id": "<store-id>",
   "label": "Shopify store (catalog, collections, store config)",
   "shopDomain": "<store>.myshopify.com",
-  "storefrontDomain": "<your-store-domain>",
   "apiVersion": "2026-04",
   "extract": ["products", "collections", "shop-config"],
   "into": "context/derived/shopify/",
@@ -108,7 +120,6 @@ admin, then flow here on the next sync — never the reverse.
   "cadence": "weekly",
   "acceptedSize": [
     { "doc": "catalog.md", "tokens": 5200, "since": "<YYYY-MM-DD>", "why": "<why this is fine>" }
-  ],
-  "$note": "Admin REST + SHOPIFY_ADMIN_TOKEN (read_products), or fallback to Shopify MCP. Bump apiVersion to current stable as needed."
+  ]
 }
 ```

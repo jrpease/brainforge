@@ -16,6 +16,13 @@ Interpret the argument and scope accordingly:
   suspected drift). Confirm with the user before doing this — it's the expensive path.
 
 Always:
+0. **Run `bash .brainforge/sync-contract.sh` before anything else.** Exit 1 → relay its output and
+   **stop; sync nothing**. It fails when an enabled source entry has no `into:`, or one outside
+   `context/derived/` or missing its trailing `/`; when an adapter playbook hardcodes a destination
+   folder, writes a `kinds:` value, or never names `into:`; and when `python3` is missing, since
+   then nothing was checked. Never work around it by syncing to the
+   adapter's conventional folder: that is the fallback that writes a brain's moved docs back over
+   the move (`pipeline/README.md` § Where a sync writes).
 1. Run the **cheap change-detection gate first** (see the relevant `pipeline/adapters/<source>.md`).
    If nothing changed, say so and stop — do not extract.
 2. Use **REST APIs, not MCPs**, for extraction (except where an adapter documents an exception).
@@ -85,4 +92,5 @@ If the owner decides a breach is correct, add an `acceptedSize` entry (doc, toke
 that source in `sources.json` in the same PR. That silences the line until the doc exceeds the
 accepted number or triples again. Never silence it by removing the envelope.
 
-4. **Open a PR — never push derived changes to main directly.** Summarize what changed.
+4. **Open a PR — never push derived changes to main directly.** Summarize what changed, naming
+   each source by its `label` (else its `id`).
