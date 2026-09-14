@@ -9,14 +9,19 @@ IS the cheap direct call golden rule #2 means — the heavy, token-hungry MCP is
 ## 0. Inputs
 - `sources.json` → `monday[]` (explicit board allowlist — filter `enabled: true`, or the one
   `boardId` passed as arg). Locator field: `boardId`.
+- Destination: the entry's `into:` — written `<into>` below, conventionally `monday/` under the
+  derived root. **No `into:` → stop; do not sync this entry and do not fall back to `monday/`**
+  (`pipeline/README.md` § Where a sync writes).
 - `.sync-state.json` → `monday[<boardId>]` (last fingerprint).
 
 ## 0a. Size envelope  — golden rule #6
 
+Paths are relative to `<into>`.
+
 | Emitted doc | Envelope |
 |---|---|
-| `monday/<board>.md` | ≤ 3,000 each |
-| `monday/_index.md` | ≤ 1,500 |
+| `<board>.md` | ≤ 3,000 each |
+| `_index.md` | ≤ 1,500 |
 | **domain total** | **≤ 4,500** |
 
 **This is the envelope most likely to be breached, and it has been breached badly.** In one real
@@ -86,10 +91,10 @@ query ($ids:[ID!]) { boards (ids:$ids) { id name updated_at items_count } }
   faithfully. Add at most a one-line factual board summary if genuinely useful.
 - **Transport (golden rule #2):** Monday GraphQL over HTTP with the token — the cheap direct
   endpoint. Not the MCP.
-- **Emit to:** `context/derived/monday/<board>.md` — table-first, items grouped by the board's Monday
-  groups (one table per group: item · owner · status · timeline/due · the board's key columns). A
-  roadmap board becomes `roadmap.md`. Also refresh `context/derived/monday/_index.md` (cross-board
-  overview: board · item count · last-synced).
+- **Emit to:** `<into><board>.md` — table-first, items grouped by the board's Monday groups (one
+  table per group: item · owner · status · timeline/due · the board's key columns). A roadmap board
+  becomes `roadmap.md`. Also refresh this board's row in `<into>_index.md` (cross-board overview:
+  board · item count · last-synced), leaving other rows alone.
   - **If a board's tables would blow its envelope (§0a), emit the aggregates instead of the rows.**
     The group tables are the shape for a board a human could read in one sitting; past that, status
     distributions and per-group open counts say the same thing in a tenth of the tokens and stay
@@ -98,12 +103,17 @@ query ($ids:[ID!]) { boards (ids:$ids) { id name updated_at items_count } }
     reason, rather than letting the warning repeat forever. Never raise the envelope to fit the board.
 
 ## 3. Finish  — golden rule #5
-- Stamp `source` / `last-synced` / `generated-by` on every file touched.
+- Stamp `source` / `last-synced` / `generated-by` on every file touched. Exception: an existing
+  `<into>_index.md`, where only `last-synced` changes (see below).
 - Update `.sync-state.json` → `monday[<boardId>]` with the new `(updated_at, items_count)` fingerprint.
 - In `.sync-state.json`, set `"synced": true` in `monday[<boardId>]` and `lastFullSync` to today
   (`YYYY-MM-DD`). Disarms the session-start sync-health tripwire, which stays lit while any
   source's `synced` is `false` or `lastFullSync` is `null`.
-- The emitted `_index.md` frontmatter MUST include `kinds: [project-tracking]`.
+- **Never write `kinds:`.** `<into>_index.md` follows the index rule in `pipeline/README.md`
+  § Where a sync writes: if it exists, change only `last-synced` in its frontmatter; if it does
+  not, create it with provenance and `title:` but no `kinds:`. `/sync` then proposes kinds for a
+  human to confirm (this source
+  usually proposes `project-tracking`).
 - **Branch + PR — never push to main directly (golden rule #4).**
 
 ## Never

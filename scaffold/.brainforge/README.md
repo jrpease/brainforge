@@ -126,6 +126,19 @@ sync-health tripwires are) because it needs frontmatter parsing and date arithme
 carry BSD-versus-GNU portability traps. A check whose failure looks identical to "nothing to
 report" is the exact bug class this repo keeps finding, so this one is testable and tested.
 
+## `sync-contract.sh`
+
+The **deterministic gate** `/sync` and `sync-all` run before any change gate. It exits 1, and
+nothing syncs, when an enabled `sources.json` entry has no `into:` (or one outside
+`<contextRoot>/derived/`, or missing its trailing `/`), when an adapter playbook in
+`pipeline/adapters/` or `pipeline/examples/` spells a `<contextRoot>/derived/<folder>` path or
+writes a `kinds:` value, or when a playbook never names the `into:` field. The rule it enforces is `pipeline/README.md` § Where a sync writes.
+
+It exists because adapters once ignored `into:` and stamped their own kinds, so a brain that moved
+a source to a new domain had the move silently undone on the next sync. The playbooks now say not
+to; this makes a custom adapter that reintroduces either fail loudly. It needs `python3` to read
+`sources.json`, and without it exits 1 rather than passing unchecked.
+
 ## `gen-manifest.sh`
 
 The **deterministic generator** for `brain-manifest.json`. No LLM, no network — `git`/`find`/`sed`/

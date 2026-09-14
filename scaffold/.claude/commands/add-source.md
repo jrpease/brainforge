@@ -12,8 +12,12 @@ Steps:
 1. Detect the source type from the argument (Figma / repo / website / other built-in).
 2. Ask the user for anything missing (label, what to extract, target `into:` folder, cadence —
    one of `daily` / `weekly` / `monthly` / `manual`, see `pipeline/README.md` § Defaults).
-3. Append a well-formed entry to the correct array in `sources.json` with `enabled: true` and the
-   `cadence` collected in step 2. **Write the cadence** — `/sync-health`'s stale-versus-current
+   `into:` is **required** and must be a folder under `context/derived/`, ending in `/`: it is the only place the
+   adapter will write, and an entry without one does not sync. Offer the adapter's conventional
+   folder (e.g. `context/derived/repos/`) as the default, and let the user pick another domain.
+3. Append a well-formed entry to the correct array in `sources.json` with `enabled: true`, the
+   `into:`, and the `cadence` collected in step 2. Use only fields the adapter's playbook reads
+   (`ADAPTER-TEMPLATE.md` § entry shape); run `bash .brainforge/sync-contract.sh` to confirm. **Write the cadence** — `/sync-health`'s stale-versus-current
    verdict has no other basis, and an entry without it is silently treated as `weekly`.
 4. Add the source's slot in `.sync-state.json`, holding no fingerprint and only `"synced": false`
    (one key per line, per that file's `$comment`), so the first sync does a full extract. The

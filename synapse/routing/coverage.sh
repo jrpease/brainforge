@@ -142,7 +142,7 @@ END {
       printf "   ⚠ unroutable kind \"%s\" (%s) — no intent points at it; this content never routes.\n", \
              orphanKind[i], orphanPath[i]
     # Narrow gates are NOT warned about here. 21 of the 24 kinds appear in exactly one intent
-    # and every shipped adapter mandates a single-intent kind, so a ⚠ per expensive
+    # and a synced domain usually carries a single-intent kind, so a ⚠ per expensive
     # adapter-emitted domain would be permanent — the same disease as a staleness warning that
     # can never turn off. The map marks the domain line instead (--narrow-paths), which costs
     # ~3 tokens, carries the same signal to the reader, and implies no defect.

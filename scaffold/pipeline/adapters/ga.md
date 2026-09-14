@@ -24,20 +24,26 @@ whole-source fingerprint (§1), and the delta is a **date window** (§2).
 - `sources.json` → `ga[]` (filter `enabled: true`, or the one `propertyId` passed as arg). Locator
   field: `propertyId` (numeric GA4 property id). Per-source config: `lookbackDays` (default 3 —
   trailing days re-checked for restatement), `backfillDays` (default 90 — cold-start window),
-  `rollupDays` (default 28 — the rolling window for the refresh-in-full reports).
+  `rollupDays` (default 28 — the rolling window for the refresh-in-full reports), `extract` (which
+  of the four reports in §2 to pull; absent → all four).
+- Destination: the entry's `into:` — written `<into>` below, conventionally `ga/` under the
+  derived root. **No `into:` → stop; do not sync this entry and do not fall back to `ga/`**
+  (`pipeline/README.md` § Where a sync writes).
 - `.sync-state.json` → `ga[<propertyId>]` =
   `{ "lastSyncedThrough": "<YYYY-MM-DD>", "trailingSessionHashes": { "<YYYYMMDD>": <sessions>, … } }`
   (the last `lookbackDays` of the sessions-by-date series).
 
 ## 0a. Size envelope  — golden rule #6
 
+Paths are relative to `<into>`.
+
 | Emitted doc | Envelope |
 |---|---|
-| `ga/_index.md` | ≤ 1,000 |
-| `ga/traffic-overview.md` | ≤ 1,500 |
-| `ga/acquisition.md` | ≤ 1,000 |
-| `ga/top-pages.md` | ≤ 1,500 |
-| `ga/ecommerce.md` | ≤ 1,000 |
+| `_index.md` | ≤ 1,000 |
+| `traffic-overview.md` | ≤ 1,500 |
+| `acquisition.md` | ≤ 1,000 |
+| `top-pages.md` | ≤ 1,500 |
+| `ecommerce.md` | ≤ 1,000 |
 | **domain total** | **≤ 5,000** |
 
 **A time series is the one emit shape that grows on its own, so bound it explicitly.** The
@@ -69,7 +75,8 @@ POST .../properties/<propertyId>:runReport     header: Authorization: Bearer <to
 - **First run** (no stored state): the delta window is the whole `backfillDays` (cold-start backfill).
 
 ## 2. Extract only the delta
-Re-pull the reports **only for the delta window**, in two shapes:
+Re-pull the reports named in the entry's `extract` (all four when it is absent) **only for the
+delta window**, in two shapes. A report not in `extract` is neither pulled nor emitted:
 
 - **Time-series (append-merge)** — `traffic-overview`, `ecommerce`: daily rows keyed by `date`. Replace
   the file's overlapping trailing rows with the re-pulled window and append new days; rows older than
@@ -94,20 +101,25 @@ Re-pull the reports **only for the delta window**, in two shapes:
   on the first run and harden this list from what the API accepts.
 - **Transport (golden rule #2):** GA4 Data API `runReport` over HTTPS with a Bearer token — the cheap
   direct endpoint. Not an MCP.
-- **Emit to:** `context/derived/ga/…` — one file per report, table-first:
+- **Emit to:** `<into>` — one file per extracted report, table-first:
   - `traffic-overview.md` — date · sessions · total users · new users · engaged sessions · avg session duration
   - `ecommerce.md` — date · purchases · revenue · AOV
   - `acquisition.md` — channel · sessions · users · conversions   *(trailing `rollupDays`)*
   - `top-pages.md` — page path · views · avg session duration   *(trailing `rollupDays`, top 50)*
   - `_index.md` — property id · date range covered · per-report last-synced · `lookbackDays`/`backfillDays`/`rollupDays` in effect
 ## 3. Finish  — golden rule #5
-- Stamp `source` / `last-synced` / `generated-by` on every file touched.
+- Stamp `source` / `last-synced` / `generated-by` on every file touched. Exception: an existing
+  `<into>_index.md`, where only `last-synced` changes (see below).
 - Update `.sync-state.json` → `ga[<propertyId>]` = `{ lastSyncedThrough: <yesterday>,
   trailingSessionHashes: {last lookbackDays of the sessions-by-date series} }`.
 - In `.sync-state.json`, set `"synced": true` in `ga[<propertyId>]` and `lastFullSync` to today
   (`YYYY-MM-DD`). Disarms the session-start sync-health tripwire, which stays lit while any
   source's `synced` is `false` or `lastFullSync` is `null`.
-- The emitted `_index.md` frontmatter MUST include `kinds: [analytics]`.
+- **Never write `kinds:`.** `<into>_index.md` follows the index rule in `pipeline/README.md`
+  § Where a sync writes: if it exists, change only `last-synced` in its frontmatter; if it does
+  not, create it with provenance and `title:` but no `kinds:`. `/sync` then proposes kinds for a
+  human to confirm (this source
+  usually proposes `analytics`).
 - **Branch + PR — never push to main directly (golden rule #4).**
 
 ## Never

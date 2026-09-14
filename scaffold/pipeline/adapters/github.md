@@ -4,15 +4,21 @@ The cheapest source — change detection is just local git. `GITHUB_TOKEN` from 
 private-repo read access (read-only contents scope is enough).
 
 ## 0. Inputs
-- `sources.json` → `repos[]`
+- `sources.json` → `repos[]`. Per entry: `localClone` (the `<clone>` below), `branch` (the
+  `<branch>` below), `remote`, the registry `summarize` scope (§0b), and `into`.
+- Destination: the entry's `into:` — written `<into>` below, conventionally `repos/` under the
+  derived root. **No `into:` → stop; do not sync this entry and do not fall back to `repos/`**
+  (`pipeline/README.md` § Where a sync writes).
 - `.sync-state.json` → `repos[<id>].lastSha`
 
 ## 0a. Size envelope  — golden rule #6
 
+Paths are relative to `<into>`.
+
 | Emitted doc | Envelope |
 |---|---|
-| `repos/<repo-name>.md` | ≤ 2,500 each |
-| `repos/_index.md` | ≤ 1,500 |
+| `<repo-name>.md` | ≤ 2,500 each |
+| `_index.md` | ≤ 1,500 |
 | **domain total** | **≤ 8,000** |
 
 **Emit reference, not a file listing.** Directory *names* and counts, the stack table, the route or
@@ -81,6 +87,11 @@ No file → registry scope governs. Say that in the PR body too, so its absence 
 rather than an assumption.
 
 ## 1. Cheap change gate (always)
+First confirm the clone is the repo the entry names: `git -C <clone> remote get-url origin` must
+refer to the entry's `remote` (compare host/org/repo, ignoring scheme and a trailing `.git`).
+Mismatch → **stop and ask the owner.** Summarizing a different repo under this entry's name is
+worse than not syncing. An ssh host alias (`git@github-work:org/repo`) is a common harmless
+mismatch: say that is what you saw, so the owner can confirm rather than guess.
 ```
 git -C <clone> fetch --quiet
 git -C <clone> diff <lastSha>..origin/<branch> --name-only
@@ -105,15 +116,21 @@ git -C <clone> diff <lastSha>..origin/<branch> --name-only
   and no dependence on what this laptop has checked out.
 - **Narrative pass (LLM, gated):** only for changed areas that need description ("what does this
   flow do"), keep it short and factual. A wrong word here becomes "truth" — be conservative.
-- Write to `context/derived/repos/<repo-name>.md`: stack, routes/pages, key components, notable
-  changes since last sync.
+- Write to `<into><repo-name>.md`: stack, routes/pages, key components, notable changes since
+  last sync. Refresh this repo's row in `<into>_index.md`, leaving other rows alone.
 ## 3. Finish
-- Stamp `source` / `last-synced` / `generated-by`.
+- Stamp `source` / `last-synced` / `generated-by`. Exception: an existing
+  `<into>_index.md`, where only `last-synced` changes (see below).
 - Update `.sync-state.json` → `repos[<id>].lastSha = origin/<branch> HEAD`.
 - In `.sync-state.json`, set `"synced": true` in `repos[<id>]` and `lastFullSync` to today
   (`YYYY-MM-DD`). Disarms the session-start sync-health tripwire, which stays lit while any
   source's `synced` is `false` or `lastFullSync` is `null`.
-- The emitted `_index.md` frontmatter MUST include `kinds: [repo-summaries]`.
+- **Never write `kinds:`.** `<into>_index.md` follows the index rule in `pipeline/README.md`
+  § Where a sync writes: if it exists, change only `last-synced` in its frontmatter; if it does
+  not, create it with provenance and `title:` but no `kinds:`. `/sync` then proposes kinds for a
+  human to confirm (this source
+  usually proposes `repo-summaries`, unless the destination holds another team's material, which
+  is `unit-context`).
 - Branch + PR.
 
 ## Reminder: the repo owns its own truth
