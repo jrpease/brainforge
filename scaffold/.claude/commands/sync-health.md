@@ -4,7 +4,7 @@ description: Check sync freshness against upstream reality — flag behind, stal
 
 Run the health check in `pipeline/sync-health.md`.
 
-Produce a status table: each enabled source · its derived output's `last-synced` · expected
+Produce a status table: each enabled source (its `label`, else its `id`) · its derived output's `last-synced` · expected
 cadence · **upstream** · status.
 
 The **upstream** column is the point of this command. For each source, run its adapter's cheap

@@ -4,6 +4,7 @@ Runs every enabled source's cheap gate, extracts only deltas, and opens **one** 
 changes. Because each source short-circuits when unchanged, "sync all" is cheap by default.
 
 ## Steps
+0. Run `bash .brainforge/sync-contract.sh`. Exit 1 → report its output and exit. No gates, no PR.
 1. Load `sources.json`; for each `enabled: true` source, run its adapter's **cheap gate**
    (`adapters/<source-type>.md`).
 2. Collect the set of sources that actually changed.
@@ -13,7 +14,8 @@ changes. Because each source short-circuits when unchanged, "sync all" is cheap 
    `"synced": true` in its slot, per its adapter, then `lastFullSync` to today (`YYYY-MM-DD`).
    The session-start sync-health tripwire stays lit while any source's `synced` is `false` or
    `lastFullSync` is `null`.
-6. Open a single PR titled `sync: <date> — <which sources changed>`. Maintainer reviews + merges.
+6. Open a single PR titled `sync: <date> — <which sources changed>`, naming each by its `label`
+   (else its `id`). Maintainer reviews + merges.
 
 ## Scheduled-agent recipe
 Run this on a cadence (nightly or weekly) as a scheduled Claude agent:

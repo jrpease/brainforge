@@ -4,15 +4,21 @@ Plain HTTP — **not** the browser MCP. The MCP is the fallback only for a page 
 needs rendered/JS understanding, scoped to that one URL.
 
 ## 0. Inputs
-- `sources.json` → `websites[]`
+- `sources.json` → `websites[]`. Per entry: `sitemap` (absent → `<url>/sitemap.xml`), `url`,
+  and `into`.
+- Destination: the entry's `into:` — written `<into>` below, conventionally `web/` under the
+  derived root. **No `into:` → stop; do not sync this entry and do not fall back to `web/`**
+  (`pipeline/README.md` § Where a sync writes).
 - `.sync-state.json` → `websites[<id>]` (per-URL lastmod + etag)
 
 ## 0a. Size envelope  — golden rule #6
 
+Paths are relative to `<into>`.
+
 | Emitted doc | Envelope |
 |---|---|
-| `web/site-map.md` | ≤ 2,000 |
-| `web/_index.md` | ≤ 800 |
+| `site-map.md` | ≤ 2,000 |
+| `_index.md` | ≤ 800 |
 | per-page file | ≤ 800 each |
 | **domain total** | **≤ 3,000** |
 
@@ -32,15 +38,20 @@ GET <sitemap>            → list of <loc> + <lastmod>
 
 ## 2. Extract only the delta
 - Fetch changed URLs, extract title, page type, headings/structure, and key copy.
-- Update `context/derived/web/site-map.md` (the inventory table) and, for significant pages,
-  a per-page file.
+- Update `<into>site-map.md` (the inventory table) and, for significant pages, a per-page file
+  in `<into>`. Refresh this site's row in `<into>_index.md`, leaving other rows alone.
 ## 3. Finish
-- Stamp `source` / `last-synced` / `generated-by` provenance frontmatter.
+- Stamp `source` / `last-synced` / `generated-by` provenance frontmatter. Exception: an existing
+  `<into>_index.md`, where only `last-synced` changes (see below).
 - Update `.sync-state.json` with new per-URL lastmod + etag.
 - In `.sync-state.json`, set `"synced": true` in `websites[<id>]` and `lastFullSync` to today
   (`YYYY-MM-DD`). Disarms the session-start sync-health tripwire, which stays lit while any
   source's `synced` is `false` or `lastFullSync` is `null`.
-- The emitted `_index.md` frontmatter MUST include `kinds: [site-inventory]`.
+- **Never write `kinds:`.** `<into>_index.md` follows the index rule in `pipeline/README.md`
+  § Where a sync writes: if it exists, change only `last-synced` in its frontmatter; if it does
+  not, create it with provenance and `title:` but no `kinds:`. `/sync` then proposes kinds for a
+  human to confirm (this source
+  usually proposes `site-inventory`).
 - Branch + PR.
 
 ## Example

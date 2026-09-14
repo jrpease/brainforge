@@ -50,7 +50,7 @@ did, and never appear grounded when you are not.
    - `⚠ unroutable kind ...` — the domain declares a kind no intent points at, so that content
      cannot be reached by intent at all. A defect, and the owner is being told.
    - `· single-intent` on a domain line — exactly one intent reaches that whole domain. Not a
-     defect: most kinds are single-intent by design and every adapter emits one. It matters
+     defect: most kinds are single-intent by design, and a synced domain usually carries one. It matters
      because a domain that is *also* `expensive` needs a direct match for a full read, so if
      the task is not phrased as that one intent, the index peek is the only way in. This is the
      shape that hides a large domain holding the only accurate doc on its subject.

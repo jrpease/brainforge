@@ -79,7 +79,8 @@ and reports ✅ current / ⚠️ stale / ❌ never.
 `.brainforge/gen-manifest.sh` records for each domain's `_index.md`.
 
 `acceptedSize` records a knowingly-oversized doc so the warning stops without being ignored. It is
-an array on the source entry, with `doc` relative to that entry's `into:` folder:
+an array on the source entry, with `doc` relative to that entry's `into:` folder (the same folder
+the adapter writes to, § Where a sync writes):
 
     "acceptedSize": [
       { "doc": "milestones.md", "tokens": 32000, "since": "2026-08-12",
@@ -92,6 +93,33 @@ playbook is under the `pipeline/**` bump glob and would be overwritten on the ne
 The 3× growth check is independent of acceptance: an accepted doc that triples again still gets
 flagged. A doc with no previous manifest entry is compared against its envelope only — there is no
 growth baseline, and none is invented.
+
+## Where a sync writes — the entry decides, the domain classifies
+
+**Destination is the source entry's `into:`.** Every adapter writes to the `into:` folder on the
+`sources.json` entry it is syncing, and nowhere else. Playbooks write it `<into>`; the value always
+ends in `/`, so `<into>_index.md` is a path inside it. The folder names in the adapter playbooks
+(`repos/`, `ga/`, `monday/`, …) are the conventional default a new entry is given, never an
+instruction. A brain that moves a source's docs to another domain repoints `into:` and the next
+sync follows it.
+
+**No `into:`, no sync.** An enabled entry without `into:`, with one outside `context/derived/`, or
+with one that does not end in `/`, is not synced. Do not fall back to the conventional folder: a silent fallback writes back over whatever a
+brain deliberately moved, and nothing notices. `.brainforge/sync-contract.sh` enforces this before
+any gate runs (`/sync` step 0).
+
+**`kinds:` belong to the destination domain, not the adapter.** An adapter never writes, adds,
+replaces, or removes a `kinds:` line. The index rule: when `<into>_index.md` exists, the adapter
+updates only its own source's rows and, in the frontmatter, only `last-synced`. Every other key
+(`kinds:`, `title:`, `source:`) stays as found, because several sources can share one destination
+and none of them owns its index. When it does not exist, the adapter creates it with provenance
+and `title:` and no `kinds:`. The manifest then lists that domain as unclassified, and `/sync`'s
+classification step proposes kinds for a human to confirm. An adapter stamping kinds is an adapter deciding routing
+for a domain it does not own, which is how a moved domain gets silently re-routed.
+
+`sync-contract.sh` also fails an adapter playbook that spells a `context/derived/<folder>` path or
+writes a `kinds:` value, which catches the usual ways a custom adapter reintroduces either. It is a
+lint, not a proof: a path assembled some other way gets past it.
 
 ## Source-declared scope — the boundary travels with the source
 

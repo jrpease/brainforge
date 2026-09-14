@@ -17,7 +17,11 @@ Steps:
      (a version field, a `max(updated_at)`, an ETag, a git SHA.) This is rule #1; get it right.
    - **Extraction** — deterministic where possible (rule #3); REST not MCP (rule #2) unless the
      data is genuinely unreachable that way (document the exception if so).
-   - **Emit target** — which `context/derived/<folder>/` files, in what shape.
+   - **Emit target** — which files, in what shape, written under the entry's `into:` (never a
+     hardcoded folder; propose the conventional one as the entry's default). The adapter never
+     writes `kinds:`.
+   - **Entry fields** — every field the entry declares must be read by a named step in the
+     playbook (`ADAPTER-TEMPLATE.md` § entry shape). Drop any field nothing reads.
 3. Write `pipeline/adapters/<source-type>.md` from the filled skeleton.
 4. **If this replaces a legacy/flat playbook for the same source, reconcile dispatch.** An older
    brain may sync this source via a flat `pipeline/sync-<type>.md` and list it in the
@@ -33,6 +37,7 @@ Steps:
      stale "syncs via …" claim there survives an adapter swap and silently misleads readers.
 5. Add a `sources.json` array + entry schema for the new type, and a `.sync-state.json` slot.
 6. Note any new credential needed in `.env.example`.
-7. Offer to run the first `/sync <source-type>` to prove the loop.
+7. Run `bash .brainforge/sync-contract.sh`; it must pass before the first sync.
+8. Offer to run the first `/sync <source-type>` to prove the loop.
 
 Do not commit credentials.

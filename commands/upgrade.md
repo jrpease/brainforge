@@ -26,13 +26,37 @@ paths may contain spaces).
 ## 1. The seam + the cheap gate (golden rule #1)
 
 Read `plugin.json` → version `V` and the `runtime.bump` globs. **The globs are the seam — never
-hardcode paths.** Then read `<brain>/.brainforge/runtime-manifest.json` and route:
+hardcode paths.** Then read `<brain>/.brainforge/runtime-manifest.json` and route.
+
+**First, prove this checkout is not behind.** Every route below compares the brain against *this checkout*,
+and a checkout nothing auto-pulls (a plugin marketplace clone, an old laptop copy) can be behind
+while still shipping the brain's own version. Then `runtime-version == V` and the table says "up
+to date" to a brain that is several versions behind: the most reassuring output this command has,
+and the least earned. So whenever the brain has a manifest, the §3 script checks the checkout
+before routing, and refuses rather than guess:
+
+| Checkout | Check | Refuses with |
+|---|---|---|
+| git, clean (`BF` is the repo root) | `git fetch origin`, then `git rev-list --count HEAD..origin/HEAD` (else `origin/main`) | `STALE-CHECKOUT` when that count is above 0: pull, or rebase a feature branch, then re-run |
+| git, **dirty** (tracked changes) | none, **refused** | `DIRTY-CHECKOUT`: the manifest would record a commit whose bytes differ from what was emitted |
+| git, **detached** | **allowed**, same fetch and count against origin's default branch | `STALE-CHECKOUT` only if that branch has commits HEAD lacks |
+| not git (the installed plugin copy), or inside some other repo | reads the published `plugin.json` at `repository` and compares **versions only** | `STALE-CHECKOUT` when the published version is newer: update the plugin, then re-run |
+| no `origin`, fetch fails (offline, or needs credentials: git never prompts here), no `repository` | none possible | `UNVERIFIED-CHECKOUT`. Never a bare "up to date" |
+
+It compares against `origin`. A fork whose `origin` is the fork passes while behind the canonical
+repo; point `origin` at the repo you publish from. The non-git path cannot see a change shipped
+without a version bump; the `UNBUMPED-CHANGE` route below exists for exactly that, and it only
+works from a checkout that has the change.
+
+Untracked files do not count as dirty, so the scratch `bf-upgrade.py` can live in the checkout.
+The check is skipped only when the brain has no manifest (the adoption pass), which is how
+`/forge`'s bootstrap runs offline against a tree it just emitted from the same checkout.
 
 | Manifest state | Route |
 |---|---|
 | `runtime-version` == `V`, every shipped bump file matches its baseline hash | Say **"up to date (v`V`)"** and STOP — zero file work. |
 | `runtime-version` == `V`, some shipped bump file differs from its baseline | Changes shipped without a version bump: the script prints `UNBUMPED-CHANGE` — run the **steady-state pass**. |
-| `runtime-version` newer than `V` | STOP — this Brainforge checkout is stale; pull it first. |
+| `runtime-version` newer than `V` | STOP — this Brainforge checkout is stale; pull it first. (Unpulled commits are caught above, before this table.) |
 | file missing or malformed | **Adoption pass** — never guess a baseline. |
 | older than `V` | **Steady-state pass**. |
 
@@ -74,7 +98,7 @@ CLI signature; keep both stable or the fresh-install bootstrap silently breaks.
 #!/usr/bin/env python3
 """Brainforge /upgrade — deterministic classify + apply. Zero judgment in the write path.
 Usage: python3 bf-upgrade.py <brainforge-checkout> <brain-checkout> <ORG> [--apply]"""
-import json, hashlib, subprocess, sys, pathlib
+import json, hashlib, os, re, subprocess, sys, pathlib, urllib.request
 
 BF, BRAIN, ORG = pathlib.Path(sys.argv[1]), pathlib.Path(sys.argv[2]), sys.argv[3]
 APPLY = "--apply" in sys.argv[4:]
@@ -105,7 +129,61 @@ except Exception:
 
 S = tree(SCAF, emit_bytes)                      # shipped, as-emitted
 
+def checkout_current():
+    """Prove this checkout is not behind before routing on V (§1 guard). A checkout nothing
+    auto-pulls reports "up to date" against its own stale V, the most reassuring output this
+    command has and the least earned. Git checkout (BF is itself the repo root): refuse when
+    dirty, fetch origin, refuse on commits origin's default branch has and HEAD lacks. Non-git
+    copy (the plugin cache): compare V with the published plugin.json at `repository`, versions
+    only. Anything unprovable refuses."""
+    env = dict(os.environ, GIT_TERMINAL_PROMPT="0", GIT_SSH_COMMAND="ssh -oBatchMode=yes")
+    def git(*a):   # never prompts: a credential prompt inside a dry run fails fast instead
+        try: return subprocess.run(["git", "-C", str(BF), *a], capture_output=True, text=True, timeout=120, env=env)
+        except Exception: return subprocess.CompletedProcess(a, 1, "", "")  # no git, or a hung call
+    top = git("rev-parse", "--show-toplevel")
+    # an enclosing repo (a dotfiles $HOME around the plugin cache) is not this checkout
+    if top.returncode == 0 and pathlib.Path(top.stdout.strip()).resolve() == BF.resolve():
+        st = git("status", "--porcelain", "--untracked-files=no")
+        if st.returncode != 0:
+            return "UNVERIFIED-CHECKOUT\tgit status failed in the Brainforge checkout"
+        if st.stdout.strip():
+            return "DIRTY-CHECKOUT\tuncommitted changes in Brainforge; the manifest would name a commit whose bytes differ. Commit or stash first"
+        if git("remote", "get-url", "origin").returncode != 0:
+            return "UNVERIFIED-CHECKOUT\tthe Brainforge checkout has no remote named origin to compare against"
+        if git("fetch", "--quiet", "origin").returncode != 0:
+            return "UNVERIFIED-CHECKOUT\tgit fetch origin failed (offline, or it needs credentials); cannot prove this checkout is current"
+        ref = next((r for r in ("origin/HEAD", "origin/main")
+                    if git("rev-parse", "--verify", "--quiet", r).returncode == 0), None)
+        if ref is None:
+            return "UNVERIFIED-CHECKOUT\tno origin/HEAD or origin/main to compare against"
+        rl = git("rev-list", "--count", f"HEAD..{ref}")
+        if rl.returncode != 0 or not rl.stdout.strip().isdigit():
+            return f"UNVERIFIED-CHECKOUT\tcould not count commits between HEAD and {ref}"
+        n = int(rl.stdout.strip())
+        if n: return f"STALE-CHECKOUT\t{n} commit(s) on {ref} missing from HEAD; pull (or rebase this branch) first"
+        return None
+    repo = plug.get("repository", "").rstrip("/")
+    gh = re.match(r"https://github\.com/([^/]+)/([^/.]+)", repo)
+    url = (f"https://raw.githubusercontent.com/{gh[1]}/{gh[2]}/HEAD/.claude-plugin/plugin.json" if gh
+           else f"{repo}/.claude-plugin/plugin.json" if repo else None)
+    if url is None:
+        return "UNVERIFIED-CHECKOUT\tnot a git checkout and plugin.json names no repository"
+    try:   # curl first: a python.org python3 on macOS often has no CA bundle, and urllib then fails TLS
+        c = subprocess.run(["curl", "-fsSL", "-m", "30", url], capture_output=True, timeout=60)
+        body = c.stdout if c.returncode == 0 else None
+    except Exception: body = None
+    try:
+        if body is None:
+            with urllib.request.urlopen(url, timeout=30) as r: body = r.read()
+        PV = json.loads(body)["version"]; vt(PV)
+    except Exception as e:
+        return f"UNVERIFIED-CHECKOUT\tcould not read the published version at {url} ({e.__class__.__name__}). Retry online"
+    if vt(PV) > vt(V): return f"STALE-CHECKOUT\tpublished {PV}, this copy ships {V}; update the plugin first"
+    return None
+
 if MV is not None:
+    why = checkout_current()
+    if why: print(why); sys.exit(1)
     if vt(MV) == vt(V):
         # A matching version is not proof of matching bytes: a bump-path change shipped without
         # a version bump leaves runtime-version equal. Short-circuit only when every shipped file
@@ -177,11 +255,95 @@ if APPLY:
 
 **Manifest rewrite rules (encoded above, restated):** emitted files (`OVERWRITE`/`ADD`) and
 byte-match adoptions get the new shipped hash; `FLAG-MODIFIED`/`FLAG-SUPERSEDED-MODIFIED` keep
-their **old** baseline entry so the next upgrade still knows their true baseline; consumer files
+their **old** baseline entry so the next upgrade still knows their true baseline, until a human
+reconciles one and re-baselines it (below); consumer files
 and collisions stay out of the manifest; `FLAG-CONSUMER-DELETED` is written as a **`null`
 tombstone** and stays one while the file is absent, so a deliberate deletion survives every
 later upgrade; gone-both-sides entries are dropped. Re-creating a tombstoned file by hand clears
 the tombstone and it is classified normally from then on.
+
+### Upstream delta for a flagged file
+
+A `FLAG-MODIFIED` file needs a human to bring upstream changes into their local version. The
+baseline is what says which upstream changes those are: it is the hash of the shipped version the
+local file was last level with. For each flagged file, run this read-only step. It finds the newest
+commit in this checkout whose emitted `scaffold/<file>` matches the baseline, and diffs that
+version against HEAD:
+
+```bash
+BF="<brainforge-checkout>"; BRAIN="<brain>"; ORG="<ORG>"; F="<flagged file, brain-relative>"
+python3 - "$BF" "$BRAIN" "$ORG" "$F" <<'PY'
+import hashlib, json, pathlib, subprocess, sys
+BF, BRAIN, ORG, F = pathlib.Path(sys.argv[1]), pathlib.Path(sys.argv[2]), sys.argv[3], sys.argv[4]
+def sha(b): return "sha256:" + hashlib.sha256(b).hexdigest()
+def git(*a): return subprocess.run(["git", "-C", str(BF), *a], capture_output=True)
+base = json.loads((BRAIN / ".brainforge" / "runtime-manifest.json").read_text())["files"].get(F)
+path = f"scaffold/{F}"
+if base is None: sys.exit(f"NO-BASELINE\t{F}: not in the manifest")
+head, log = git("show", f"HEAD:{path}"), git("log", "--format=%H", "HEAD", "--", path)
+if head.returncode != 0 or log.returncode != 0:
+    print(f"BASE-UNKNOWN\t{F}: no git history here for {path}; reconcile against the whole shipped file"); sys.exit(0)
+for c in log.stdout.decode().split():
+    blob = git("show", f"{c}:{path}")
+    if blob.returncode == 0 and sha(blob.stdout.replace(b"{{ORG}}", ORG.encode())) == base:
+        if blob.stdout == head.stdout:
+            print(f"NO-UPSTREAM-CHANGE\t{F}\tsince {c[:7]}: the difference is local; nothing upstream to bring in"); sys.exit(0)
+        print(f"UPSTREAM-CHANGED\t{F}\tsince {c[:7]}:", flush=True)
+        subprocess.run(["git", "-C", str(BF), "--no-pager", "diff", c, "HEAD", "--", path]); sys.exit(0)
+print(f"BASE-UNKNOWN\t{F}: no commit in this checkout ships the baseline; reconcile against the whole shipped file")
+PY
+```
+
+Its first line goes on the file's line in the PR body's flagged section; an `UPSTREAM-CHANGED`
+diff is what the reviewer reconciles. A `NO-UPSTREAM-CHANGE` file still flags, because the
+classifier compares bytes and a file with local additions always differs from its baseline, but
+there is nothing to reconcile and the PR says so.
+
+### Re-baseline a reconciled file
+
+`FLAG-MODIFIED` keeps the old baseline because the classifier cannot know whether anyone has dealt
+with the upstream change. While nobody has, that is right: the delta above shows everything
+upstream did since the local file was last level with it. Once a human has reconciled it, the old
+baseline is wrong. At the next version the delta starts from a baseline versions old and
+re-presents upstream changes already brought in. After a few rounds, people stop reading the
+flagged section, which is the one section of the PR that has to be read.
+
+So after reconciling a `FLAG-MODIFIED` file by hand, re-stamp its manifest entry to the current
+shipped hash, **and only while the file still differs from shipped.** The step writes the shipped
+hash, never the file's own, and refuses when the two are equal, so a baseline never equals a
+touched file's on-disk bytes. That equality is what the classifier reads as "byte-unmodified,
+safe to overwrite". A file identical to shipped carries no local changes, so this step does not
+apply to it. Run it on the upgrade branch after `--apply`, with the same checkout, once per
+reconciled file, and stage the manifest with the reconciled file:
+
+```bash
+BF="<brainforge-checkout>"; BRAIN="<brain>"; ORG="<ORG>"; F="<reconciled file, brain-relative>"
+python3 - "$BF" "$BRAIN" "$ORG" "$F" <<'PY'
+import hashlib, json, pathlib, sys
+BF, BRAIN, ORG, F = pathlib.Path(sys.argv[1]), pathlib.Path(sys.argv[2]), sys.argv[3], sys.argv[4]
+def sha(b): return "sha256:" + hashlib.sha256(b).hexdigest()
+V = json.loads((BF / ".claude-plugin" / "plugin.json").read_text())["version"]
+mp = BRAIN / ".brainforge" / "runtime-manifest.json"; m = json.loads(mp.read_text())
+src, dst = BF / "scaffold" / F, BRAIN / F
+if m.get("runtime-version") != V:  sys.exit(f"REFUSED\t{F}: manifest is {m.get('runtime-version')}, checkout ships {V}; --apply this upgrade first")
+if m["files"].get(F) is None:      sys.exit(f"REFUSED\t{F}: no baseline in the manifest; only a FLAG-MODIFIED file is re-baselined")
+if not src.is_file():              sys.exit(f"REFUSED\t{F}: not shipped by this checkout; nothing to re-baseline to")
+if not dst.is_file():              sys.exit(f"REFUSED\t{F}: not in the brain")
+shipped = sha(src.read_bytes().replace(b"{{ORG}}", ORG.encode()))
+if sha(dst.read_bytes()) == shipped:
+    sys.exit(f"REFUSED\t{F}: identical to shipped; a baseline equal to its bytes would let the next upgrade overwrite it unflagged")
+if m["files"][F] == shipped:       print(f"UNCHANGED\t{F}: already baselined at {V}"); sys.exit(0)
+m["files"][F] = shipped
+mp.write_text(json.dumps(m, indent=2) + "\n")
+print(f"REBASELINED\t{F}\t{V}")
+PY
+```
+
+It is a documented human step, never part of the script above: only the person who reconciled
+the file knows it was reconciled. A re-baselined file still flags on every later upgrade, for the
+byte reason above. What changes is its delta: from `V` on, it reports `NO-UPSTREAM-CHANGE` until
+upstream edits the file again, and then only the edits made after `V`. Mark it in the PR body's
+flagged section as checked: `- [x] <file> — reconciled; re-baselined to v<V>`.
 
 **Scaffold-time bootstrap:** on a freshly copied + templated brain, run the same script (no
 manifest yet → adoption pass → every bump file is `ADOPT-CLEAN`) with `--apply`. That writes the
@@ -307,7 +469,8 @@ Emitted from Brainforge `<emitted-from SHA>`.
 - <file> — deleted, staged in this PR
 
 ### ⚠️ Flagged — human reconciliation needed in this PR
-- [ ] <file> — <flag reason>; shipped version: `scaffold/<file>` @ <SHA>
+- [ ] <file> — <flag reason>; shipped version: `scaffold/<file>` @ <SHA>; upstream delta: <UPSTREAM-CHANGED since <sha> + diff | NO-UPSTREAM-CHANGE | BASE-UNKNOWN>  (§3)
+- [x] <file> — reconciled; re-baselined to v<V>   (§3 Re-baseline, only while it differs from shipped)
 
 ### ⚠️ Refused — `runtime.remove` names a brain-owned path
 - [ ] <file> — `SUPERSEDED-REFUSED`; not deleted, fix the `remove` list in `plugin.json`
