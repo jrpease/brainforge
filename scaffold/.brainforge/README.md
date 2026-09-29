@@ -168,8 +168,9 @@ excludes, so the map it lands is current.
 - **No loop.** Pushes made with `GITHUB_TOKEN` never trigger `on: push`, so the regeneration
   commit does not re-run this workflow. It also skips any other push workflow the brain has.
 - **Fails loudly, never quietly.** The run goes red when regeneration cannot produce a map the
-  reader will accept: a context root with nothing committed under it, or a fingerprint that
-  still differs from `HEAD`. It never commits such a map.
+  reader will accept: a generator too old to write a fingerprint (reconcile it to the shipped
+  one), a context root with nothing committed under it, or a fingerprint that still differs from
+  `HEAD`. It never commits such a map.
 - **Cost.** One short job per push to the default branch. Pushes to other branches are skipped.
 - **Opting out.** Delete the workflow file. `/upgrade` records the deletion and never re-adds it.
 - **Pushing it the first time.** GitHub refuses a push that adds a workflow file over HTTPS
