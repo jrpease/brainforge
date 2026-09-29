@@ -21,9 +21,12 @@ Do not hand-edit it; `/drift` owns it.
 ## No file for the sync-health tripwire (by design)
 
 The session-start **sync-health tripwire** (see `.claude/settings.json`) nudges you to run
-`/sync-health` when a source is wired but never synced (`.sync-state.json` has a populated
-fingerprint slot while `lastFullSync` is still `null`) or a derived doc still carries
-`source: TODO`. Unlike `last-drift-review`, it stores **nothing here** — it reads live repo
+`/sync-health` when a source is wired but never synced or a derived doc still carries
+`source: TODO`. "Never synced" has two triggers in `.sync-state.json`: a source's slot still
+says `"synced": false` (written by `/add-source`, flipped by that source's first successful sync,
+so one unsynced source shows even after others have synced), or, for brains older than that
+flag, a populated fingerprint slot while `lastFullSync` is still `null`. Only a slot's own
+`synced` key counts, not one nested inside a fingerprint. Unlike `last-drift-review`, it stores **nothing here** — it reads live repo
 state each session and **self-clears the moment the problem is fixed** (the first successful
 sync, or the filled-in source). The drift gate clears on *acknowledgment* (running `/drift`
 stamps the watermark); the sync-health gate clears only on *resolution*. Different semantics,
@@ -144,3 +147,34 @@ to; this makes a custom adapter that reintroduces either fail loudly. It needs `
 The **deterministic generator** for `brain-manifest.json`. No LLM, no network — `git`/`find`/`sed`/
 `awk`/`wc` only (golden rule 3). Run it with `bash .brainforge/gen-manifest.sh`; every sync command
 runs it as a final step so the manifest never drifts from the brain it describes.
+
+## `regen-if-stale.sh` and the manifest workflow
+
+Two PRs that both regenerate the map always conflict on `brain-manifest.json`. Whichever side a
+merge keeps, the default branch ends up with a fingerprint that matches neither tree, and every
+subscriber sees "map predates the current content" until someone regenerates by hand. You never
+see it yourself, because the warning is for readers of the brain, not the person working in it.
+
+`.github/workflows/brainforge-manifest.yml` fixes that after the fact. On every push to the
+default branch it runs `regen-if-stale.sh`, which does nothing when the map is current (the same
+fingerprint test the reader uses) and regenerates it when it is not. The workflow then commits
+the map as `github-actions[bot]`. The commit touches only `.brainforge/`, which the fingerprint
+excludes, so the map it lands is current.
+
+- **Protected branch.** When the push is refused, the map goes to one standing PR from
+  `brainforge/manifest-regen` instead, force-updated, never more than one. That needs
+  Settings > Actions > General > "Allow GitHub Actions to create and approve pull requests".
+  Without it the run fails red and says so.
+- **No loop.** Pushes made with `GITHUB_TOKEN` never trigger `on: push`, so the regeneration
+  commit does not re-run this workflow. It also skips any other push workflow the brain has.
+- **Fails loudly, never quietly.** The run goes red when regeneration cannot produce a map the
+  reader will accept: a context root with nothing committed under it, or a fingerprint that
+  still differs from `HEAD`. It never commits such a map.
+- **Cost.** One short job per push to the default branch. Pushes to other branches are skipped.
+- **Opting out.** Delete the workflow file. `/upgrade` records the deletion and never re-adds it.
+- **Pushing it the first time.** GitHub refuses a push that adds a workflow file over HTTPS
+  with a token lacking the `workflow` scope. Push the upgrade PR over SSH, or with a token that
+  has it (`gh auth refresh -s workflow`).
+
+`/sync` and `/approve-canon` still regenerate the map in their own PRs. The workflow is the
+backstop for merges, conflict resolutions and hand edits.

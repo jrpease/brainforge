@@ -1,0 +1,82 @@
+# Ships with the brain (Brainforge runtime; /upgrade keeps it current, deleting it opts out).
+#
+# Keeps .brainforge/brain-manifest.json current on the default branch. Two PRs that both
+# regenerate the map conflict on it, and whichever side a merge keeps leaves a fingerprint that
+# matches neither tree, so every subscriber sees "map predates the current content". After each
+# push to the default branch this regenerates the map only when the reader would call it stale
+# (.brainforge/regen-if-stale.sh), and commits it. The commit touches only .brainforge/, which
+# the fingerprint excludes, so the map it lands is current.
+#
+# Protected branch: the push is refused, so the map goes to one standing PR from
+# brainforge/manifest-regen instead (force-updated, never more than one). That needs the repo
+# setting "Allow GitHub Actions to create and approve pull requests".
+#
+# No loop: pushes made with GITHUB_TOKEN never trigger `on: push`, so the regeneration commit
+# does not re-run this (or any other push workflow). A second run would print CURRENT anyway.
+name: brainforge manifest
+
+on: push
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: brainforge-manifest-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  regenerate:
+    if: github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Regenerate the map if stale
+        run: bash .brainforge/regen-if-stale.sh
+
+      - name: Land it
+        env:
+          GH_TOKEN: ${{ github.token }}
+          BRANCH: ${{ github.event.repository.default_branch }}
+        run: |
+          m=.brainforge/brain-manifest.json
+          if [ -z "$(git status --porcelain -- "$m")" ]; then
+            echo "Map is current; nothing to land."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -- "$m"
+          git commit -q -m "chore(manifest): regenerate after ${GITHUB_SHA::7}"
+          if git push -q origin "HEAD:refs/heads/$BRANCH"; then
+            echo "Committed the regenerated map to $BRANCH."
+            exit 0
+          fi
+          git fetch -q origin "$BRANCH"
+          remote=$(git rev-parse --verify -q "origin/$BRANCH") \
+            || { echo "::error::Could not resolve origin/$BRANCH after fetching it."; exit 1; }
+          if [ "$remote" != "$GITHUB_SHA" ]; then
+            echo "::notice::$BRANCH moved while this ran; the run for the newer push owns the map."
+            exit 0
+          fi
+          # Refused on an unchanged branch: protection. One standing PR, force-updated.
+          if git push -q -f origin HEAD:refs/heads/brainforge/manifest-regen; then
+            open=$(gh pr list --head brainforge/manifest-regen --base "$BRANCH" --state open --json number --jq 'length' || echo 0)
+            if [ "$open" != "0" ]; then
+              echo "Updated the open manifest PR from brainforge/manifest-regen."
+              exit 0
+            fi
+            if gh pr create --head brainforge/manifest-regen --base "$BRANCH" \
+                 --title "chore(manifest): regenerate the brain map" \
+                 --body "The map on \`$BRANCH\` is stale (a merge kept one side of a manifest conflict, or content changed without a regeneration). This regenerates it. It touches only \`.brainforge/\`. Opened by the brainforge manifest workflow."; then
+              exit 0
+            fi
+            # the listing above can fail transiently; an open PR the force-push already updated is success
+            if [ "$(gh pr list --head brainforge/manifest-regen --base "$BRANCH" --state open --json number --jq 'length' 2>/dev/null)" = "1" ]; then
+              echo "Updated the open manifest PR from brainforge/manifest-regen."
+              exit 0
+            fi
+          fi
+          echo "::error::Could not land the regenerated map. $BRANCH refused the push (branch protection?), and opening a PR failed. Allow it under Settings > Actions > General > 'Allow GitHub Actions to create and approve pull requests', or delete this workflow to opt out."
+          exit 1

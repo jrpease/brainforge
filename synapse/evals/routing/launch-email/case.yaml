@@ -1,11 +1,19 @@
 schema_version: "1.0"
 name: launch-email
 description: >-
-  brain-routing should ground launch copy in brand voice: "customers" not
-  "users", no exclamation marks, and no tracker reads for a copy task. A peek
-  at tracker/_index.md is allowed: SKILL.md permits an index peek at any band
-  (8ebbf7d), which postdates this check (f66ed23). no-tracker-reads matches
-  tracker/[^_] rather than a lookahead so any regex engine can score it.
+  brain-routing should ground launch copy in brand voice: never "users", no
+  exclamation marks, and no tracker reads for a copy task. The voice canon
+  makes second person the default ("You" is the customer), so a draft need not
+  say "customers" at all; the check is that it never says "user" or "users"
+  (voice.md bans both). Only an unquoted, standalone word counts: replies
+  routinely note, in quotes, that they avoided the word, and name the matched
+  intent ("writing user-facing copy"), and neither is a violation. A possessive
+  "user's" slips through, since it reads like a closing quote. A peek at
+  tracker/_index.md is allowed, because SKILL.md permits an index peek at any
+  band, a rule added after this check was first written. no-tracker-reads and
+  no-tracker-greps match tracker/[^_] rather than a lookahead so any regex
+  engine can score them; the grep check also catches a search of the whole
+  tracker folder.
 context:
   scaffold_script: scaffold.sh
 execution:
@@ -20,16 +28,18 @@ graders:
     input_match: "canon/brand"
     min: 1
   - type: regex
-    name: says-customers
+    name: never-says-users
     target: last_message
-    pattern: "\\bcustomers\\b"
-    flags: i
+    pattern: "(^|[^\"“'‘\\w])users?([^\"”'’\\w-]|$)"
+    flags: im
+    match: not_contains
   - type: llm
     name: avoids-users-word-in-copy
     focus: last_message
     criteria: >-
       In the actual drafted email copy (the subject line and body a customer
-      would receive), the reader is addressed as "customers", never "users".
+      would receive), the reader is addressed as "you", and is called
+      "customers" whenever referred to in the third person, never "users".
       The word "users" does not appear anywhere inside the drafted email
       itself. (The response is allowed to mention, outside the draft, that it
       avoided the word "users" per brand voice — that meta-commentary does
@@ -43,6 +53,13 @@ graders:
     name: no-tracker-reads
     tool: Read
     input_match: "tracker/[^_]"
+    min: 0
+    max: 0
+    arm: both
+  - type: tool_used
+    name: no-tracker-greps
+    tool: Grep
+    input_match: "tracker(/[^_]|/?(\\s|$))"
     min: 0
     max: 0
     arm: both
