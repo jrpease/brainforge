@@ -37,6 +37,12 @@ fi
 
 bash .brainforge/gen-manifest.sh >&2 || { echo "regen-if-stale: gen-manifest.sh failed" >&2; exit 1; }
 new=$(field contextFingerprint)
+if ! grep -q '^  "contextFingerprint": ' "$m" 2>/dev/null; then
+  echo "regen-if-stale: this brain's gen-manifest.sh predates schema 3 and writes no fingerprint," \
+       "so the reader can never check its map. Upgrade the runtime (/upgrade); if the generator" \
+       "is flagged as locally modified, reconcile it to the shipped version first." >&2
+  exit 1
+fi
 if [ -z "$new" ]; then
   echo "regen-if-stale: the context root '$root' is not a tree in HEAD (nothing committed under it," \
        "or the wrong root), so the map has no fingerprint. Not committing a map the reader can't check." >&2
