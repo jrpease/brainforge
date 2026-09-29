@@ -16,6 +16,11 @@ execution:
   allowed_tools: [Read, Glob, Grep, Skill]
 graders:
   - type: tool_used
+    name: reads-the-intent-map
+    tool: Read
+    input_match: "routing/intents\\.json"
+    min: 1
+  - type: tool_used
     name: reads-the-unit-domain
     tool: Read
     input_match: "units/orion"

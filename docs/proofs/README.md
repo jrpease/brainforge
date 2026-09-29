@@ -9,6 +9,8 @@ system taught the spine that got folded back in as hardening.
 - [Monday adapter](monday-adapter.md) — proven live against a production work-management workspace.
 - [GitHub adapter](github-adapter.md) — proven live against a production web-app repo.
 - [Depth-first wizard](depth-first-wizard.md) — proven live on a fresh throwaway brain.
+- [CI manifest regeneration](ci-manifest-regeneration.md) — proven live on a throwaway private
+  GitHub repo: direct pushes, a merge conflict on the manifest, and a protected branch.
 - [`2026-07-02-ga-live/`](2026-07-02-ga-live/) — the full anonymized proof artifact for the GA
   adapter (the last Phase-2 adapter and the first metrics/time-series source), predating this
   summary format.

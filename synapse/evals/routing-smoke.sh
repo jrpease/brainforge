@@ -26,6 +26,11 @@
 #     --strict-mcp-config   use only MCP servers from --mcp-config (none here),
 #                           so no personal MCP servers load
 #     --plugin-dir          load THIS CHECKOUT's synapse, not the installed one
+#     --add-dir routing/    the one plugin folder the reader must open: brain-
+#                           routing step 1 reads routing/intents.json, and
+#                           --restricted confines file tools to the working
+#                           directories. Without it step 1 never runs and a pass
+#                           proves only that the right domain was reached
 #   Note --allowedTools grants permission; it does not shrink the tool set. The
 #   two isolation flags are what actually contain the run.
 #
@@ -81,6 +86,7 @@ for case_yaml in "$CASEDIR"/*/case.yaml; do
       --restricted --strict-mcp-config \
       --allowedTools $tools \
       --plugin-dir "$PLUGIN" \
+      --add-dir "$PLUGIN/routing" \
       --max-turns "$maxturns" ) > "$jsonl" 2>"$TMP/$name.err"
 
   if [ ! -s "$jsonl" ]; then

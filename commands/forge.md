@@ -32,7 +32,9 @@ emitted below) that actually drives the domain-by-domain setup loop.
 3. **Collision check.** None of the scaffold's top-level entries may already exist in the cwd:
    `README.md`, `CLAUDE.md`, `CONTRIBUTING.md`, `sources.json`, `.sync-state.json`, `context/`,
    `pipeline/`, `authoring/`, `setup/`, `templates/`, `.claude/`, `.brainforge/`, `.gitignore`,
-   `.gitattributes`, `.env.example`. If any exist, list them and **STOP** — never overwrite. (A
+   `.gitattributes`, `.env.example`, and the one file the scaffold ships into `.github/`,
+   `.github/workflows/brainforge-manifest.yml` (a repo's own `.github/` is fine). If any exist,
+   list them and **STOP** — never overwrite. (A
    partial or drifted brain is `/upgrade`'s job, not this command's — this command only ever
    bootstraps from nothing.)
 4. **Confirm `{{ORG}}`.** Ask the user for the org name before emitting anything — it lands in the
@@ -91,6 +93,11 @@ landing into a populated brain). Commit:
 ```
 chore(brain): scaffold from brainforge v<V>
 ```
+
+The scaffold ships a workflow file (`.github/workflows/brainforge-manifest.yml`), and GitHub
+refuses an HTTPS push that adds one from a token without the `workflow` scope. When the user
+first pushes the brain, tell them: refresh the token (`gh auth refresh -s workflow`) or push
+over SSH.
 
 ## 5. Hand off
 

@@ -54,8 +54,8 @@ The check is skipped only when the brain has no manifest (the adoption pass), wh
 
 | Manifest state | Route |
 |---|---|
-| `runtime-version` == `V`, every shipped bump file matches its baseline hash | Say **"up to date (v`V`)"** and STOP — zero file work. |
-| `runtime-version` == `V`, some shipped bump file differs from its baseline | Changes shipped without a version bump: the script prints `UNBUMPED-CHANGE` — run the **steady-state pass**. |
+| `runtime-version` == `V`, every shipped bump file matches its baseline hash and every baselined file still ships | Say **"up to date (v`V`)"** and STOP — zero file work. |
+| `runtime-version` == `V`, some shipped bump file differs from its baseline, or a baselined file no longer ships | Changes shipped without a version bump: the script prints `UNBUMPED-CHANGE` — run the **steady-state pass**. |
 | `runtime-version` newer than `V` | STOP — this Brainforge checkout is stale; pull it first. (Unpulled commits are caught above, before this table.) |
 | file missing or malformed | **Adoption pass** — never guess a baseline. |
 | older than `V` | **Steady-state pass**. |
@@ -187,9 +187,10 @@ if MV is not None:
     if vt(MV) == vt(V):
         # A matching version is not proof of matching bytes: a bump-path change shipped without
         # a version bump leaves runtime-version equal. Short-circuit only when every shipped file
-        # equals its manifest baseline. A tombstone is a deliberate deletion, not a baseline.
+        # equals its manifest baseline, and every baselined file still ships (a bump file deleted
+        # upstream is drift too). A tombstone is a deliberate deletion, not a baseline.
         # Compares hashes only -- emitted-from can be empty or name a commit in another repo.
-        drift = [f for f in S if f not in TOMB and M.get(f) != S[f]]
+        drift = [f for f in set(S) | set(M) if f not in TOMB and M.get(f) != S.get(f)]
         if not drift: print(f"UP-TO-DATE\t{V}"); sys.exit(0)
         print(f"UNBUMPED-CHANGE\t{V}\t{len(drift)} file(s)")
     if vt(MV) > vt(V):  print(f"STALE-CHECKOUT\tbrain has {MV}, checkout ships {V} — pull Brainforge first"); sys.exit(1)
@@ -260,7 +261,10 @@ reconciles one and re-baselines it (below); consumer files
 and collisions stay out of the manifest; `FLAG-CONSUMER-DELETED` is written as a **`null`
 tombstone** and stays one while the file is absent, so a deliberate deletion survives every
 later upgrade; gone-both-sides entries are dropped. Re-creating a tombstoned file by hand clears
-the tombstone and it is classified normally from then on.
+the tombstone and it is classified normally from then on. Because the kept baselines still sit in
+the manifest, a re-run at the same version prints `UNBUMPED-CHANGE` while any flag is
+unreconciled. A `FLAG-SUPERSEDED-MODIFIED` file no longer ships, so re-baselining cannot clear it:
+delete it by hand once its local changes are dealt with, and the next run drops the entry.
 
 ### Upstream delta for a flagged file
 
@@ -455,8 +459,10 @@ brain's untracked local files (e.g. Claude Code's per-user `.claude/settings.loc
 ride into the PR. Stage every `DELETE-SUPERSEDED` path too — `git add -- <path>` records a
 deletion. A `runtime.remove` path can sit outside every bump glob, so it is not an emitted path:
 miss it and the deletion stays in the working tree, the PR never carries it, a fresh checkout
-after merge resurrects the file, and the next upgrade flags it again forever. Commit, push, open
-the PR with this body shape:
+after merge resurrects the file, and the next upgrade flags it again forever. When the upgrade
+adds or changes a file under `.github/workflows/`, GitHub refuses an HTTPS push from a token
+without the `workflow` scope: refresh it (`gh auth refresh -s workflow`) or push over SSH. Commit,
+push, open the PR with this body shape:
 
 ```markdown
 ## Runtime upgrade → v<V>
