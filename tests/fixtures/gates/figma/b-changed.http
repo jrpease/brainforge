@@ -1,0 +1,3 @@
+# match: GET ^https://api\.figma\.com/v1/files/KEYMOVED\?depth=1$
+# status: 200
+{"name":"Sample","version":"200","lastModified":"2026-02-01T00:00:00Z","document":{"children":[]}}

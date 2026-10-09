@@ -1,0 +1,3 @@
+# match: POST ^https://api\.monday\.com/v2$ activity_logs \(limit:1\) \{ created_at \}
+# status: 200
+{"data":{"boards":[{"id":"1001","updated_at":"2026-10-01T09:00:00Z","items_count":42,"activity_logs":[{"created_at":"17592000000000000"}]},{"id":"1002","updated_at":"2026-10-01T09:00:00Z","items_count":7,"activity_logs":[{"created_at":"17593000000000000"}]},{"id":"1003","updated_at":"2026-09-20T12:00:00Z","items_count":3,"activity_logs":[]},{"id":"1004","updated_at":"2026-10-02T08:00:00Z","items_count":12,"activity_logs":[{"created_at":"17594000000000000"}]}]},"account_id":1}

@@ -1,0 +1,139 @@
+# Playbook: sync Monday boards  (built-in adapter)
+
+Covers: roadmap/initiatives + task-status across the team's Monday boards — "what the team is
+working toward, and the live status of work." Auth: `MONDAY_API_TOKEN` from `.env` (add it to
+`.env.example`). Monday has **no REST API** — it's GraphQL-only (single endpoint
+`https://api.monday.com/v2`, token in the `Authorization` header). This GraphQL-over-HTTP endpoint
+IS the cheap direct call golden rule #2 means — the heavy, token-hungry MCP is still avoided.
+
+## 0. Inputs
+- `sources.json` → `monday[]` (explicit board allowlist — filter `enabled: true`, or the one
+  `boardId` passed as arg). Locator field: `boardId`.
+- Destination: the entry's `into:` — written `<into>` below, conventionally `monday/` under the
+  derived root. **No `into:` → stop; do not sync this entry and do not fall back to `monday/`**
+  (`pipeline/README.md` § Where a sync writes).
+- `.sync-state.json` → `monday[<boardId>]` (last fingerprint).
+
+## 0a. Size envelope  — golden rule #6
+
+Paths are relative to `<into>`.
+
+| Emitted doc | Envelope |
+|---|---|
+| `<board>.md` | ≤ 3,000 each |
+| `_index.md` | ≤ 1,500 |
+| **domain total** | **≤ 4,500** |
+
+**This is the envelope most likely to be breached, and it has been breached badly.** In one real
+brain a single board doc reached ~30k tokens — around half of the entire brain — as a faithful 1,054-row
+mirror of a board that was 92.5% `Done`. A closed item is not reference material, and an open item is
+not reference material either: it is **live state**, which the tracker owns and which a file is wrong
+about within days of being written.
+
+So when a board will not fit its envelope, **aggregate rather than page**: status distribution per
+board, open counts per group, health signals (unowned, status-unset, needs-attention) as counts with
+their largest cluster named, and the initiative or roadmap layer with its items named — an initiative
+*is* the roadmap, so that is the one place named rows are correct. Derive every number from a single
+full pass, then emit the numbers and not the rows. Never raise the envelope to fit the board.
+
+## 1. Cheap change gate (always)  — golden rule #1
+**The gate is `.brainforge/gate-monday.sh`; this section documents what it does.** `/sync` and
+`/sync-health` run the script and route on the JSON it prints (`.brainforge/README.md` § Gate
+scripts). Never run the call below by hand, even when the script cannot run: that source is
+`not-checked`.
+
+One GraphQL call covering every allowlisted board:
+```
+POST https://api.monday.com/v2      header: Authorization: $MONDAY_API_TOKEN
+query ($ids:[ID!]) { boards (ids:$ids) { id updated_at items_count activity_logs (limit:1) { created_at } } }
+```
+- Fingerprint per board = `{updated_at, items_count, lastActivityAt}`, where `lastActivityAt` is
+  the newest activity event's `created_at`, compared as an opaque string, or `null` when the log
+  is empty or expired. All three match stored → **stop. Nothing changed.** (zero heavy calls)
+- Else → the boards whose fingerprint moved are the delta scope. The gate's `delta` names the
+  fields that moved.
+- A stored slot with no `lastActivityAt` (written before this fingerprint) reports `changed` once,
+  so each brain gets one extra sync after upgrading.
+- A GraphQL `errors` array makes every board in the call `not-checked`, with the first message.
+- **Unconfirmed until live check L1 runs.** `lastActivityAt` is there because a pure in-place
+  *column* edit may not bump `updated_at`. No live run has yet confirmed that
+  `activity_logs(limit:1)` returns the newest event, or that such an edit produces one. Until it
+  does, treat the widened fingerprint as the best available gate, not a proven one.
+
+## 2. Extract only the delta
+- **Which items changed (deterministic):** `activity_logs(from: <lastSync>)` returns the events
+  (item created/updated/column changed) since the last sync. The changed item's id is **not** the
+  log's own `id` — it lives in the `data` field (a JSON string with `pulse_id`/`board_id`/
+  `column_id`); parse `pulse_id` for the item id:
+  ```
+  query ($ids:[ID!],$from:ISO8601DateTime) {
+    boards (ids:$ids) { activity_logs (from:$from) { id event created_at data } } }
+  ```
+  If `activity_logs` is empty or expired (Monday caps log retention on lower plans), fall back to
+  paging items and comparing each item's `updated_at` to the stored fingerprint time.
+  Monday has no cheap "changed-items-only" page fetch, so the delta pattern is: gate cheaply (§1),
+  then full-page only the **boards** whose fingerprint moved — the `pulse_id`s above drive targeted
+  diffing/refresh, not a server-side item filter.
+- **Discover columns first (deterministic + safety):** before building tables, list each board's
+  columns and their `type`. Use it to (a) **enforce the PII rule programmatically** — exclude any
+  `email`/`phone`-typed column; (b) skip uninformative columns (e.g. the auto `Subitems` column,
+  empty on every row). Watch `mirror`/`board_relation`/`doc` columns: `column_values.text` is often
+  empty for these — read the typed field (e.g. `... on MirrorValue { display_value }`) if you need
+  the value.
+- **Fetch the changed items (deterministic):** Monday paginates in **two** calls — the first page
+  from `items_page(limit:100)`, every page after it from `next_items_page(limit:100, cursor:<prev>)`,
+  **not** by re-calling `items_page`:
+  ```
+  # page 1
+  query ($ids:[ID!]) { boards (ids:$ids) {
+    id name groups { id title }
+    items_page (limit: 100) { cursor items {
+      id name updated_at group { id } column_values { id text column { title type } } } } } }
+  # pages 2..N — repeat with the previous page's cursor until cursor is null
+  query ($cursor:String!) { next_items_page (limit: 100, cursor:$cursor) {
+    cursor items { id name group { id } column_values { id text column { title type } } } } }
+  ```
+  Follow the `cursor` chain until it is null (a ~1000-item board is ~11 pages).
+  - **Counts & enumerations come from `items_count` / the API's own count fields — never eyeballed or
+    narrated** (golden rule #3). A fabricated count becomes "truth" downstream.
+- **No narrative pass by default** — roadmap/task boards are structured (columns); render them
+  faithfully. Add at most a one-line factual board summary if genuinely useful.
+- **Transport (golden rule #2):** Monday GraphQL over HTTP with the token — the cheap direct
+  endpoint. Not the MCP.
+- **Emit to:** `<into><board>.md` — table-first, items grouped by the board's Monday groups (one
+  table per group: item · owner · status · timeline/due · the board's key columns). A roadmap board
+  becomes `roadmap.md`. Also refresh this board's row in `<into>_index.md` (cross-board overview:
+  board · item count · last-synced), leaving other rows alone.
+  - **If a board's tables would blow its envelope (§0a), emit the aggregates instead of the rows.**
+    The group tables are the shape for a board a human could read in one sitting; past that, status
+    distributions and per-group open counts say the same thing in a tenth of the tokens and stay
+    true for longer.
+  - **A breach the brain knowingly accepts** goes in `acceptedSize` on the `sources.json` entry with a
+    reason, rather than letting the warning repeat forever. Never raise the envelope to fit the board.
+
+## 3. Finish  — golden rule #5
+- Stamp `source` / `last-synced` / `generated-by` on every file touched. Exception: an existing
+  `<into>_index.md`, where only `last-synced` changes (see below).
+- Update `.sync-state.json` → `monday[<boardId>]` with the gate's `fingerprint`
+  (`{updated_at, items_count, lastActivityAt}`), stored verbatim. When the gate gave none,
+  store the same three fields read from the board.
+- In `.sync-state.json`, set `"synced": true` in `monday[<boardId>]` and `lastFullSync` to today
+  (`YYYY-MM-DD`). Disarms the session-start sync-health tripwire, which stays lit while any
+  source's `synced` is `false` or `lastFullSync` is `null`.
+- **Never write `kinds:`.** `<into>_index.md` follows the index rule in `pipeline/README.md`
+  § Where a sync writes: if it exists, change only `last-synced` in its frontmatter; if it does
+  not, create it with provenance and `title:` but no `kinds:`. `/sync` then proposes kinds for a
+  human to confirm (this source
+  usually proposes `project-tracking`).
+- **Branch + PR — never push to main directly (golden rule #4).**
+
+## Never
+- **Never crawl the whole workspace** — sync only the board IDs allowlisted in `sources.json`. This is
+  what keeps HR / private / CRM boards out of the brain.
+- No person-column PII beyond display-name owners — exclude any `email`/`phone`-typed column (the
+  §2 column-discovery pass is how you catch them); `people`-type columns (display names) are fine.
+- No raw attachments committed — store asset URLs only.
+
+## Reminder: the source owns its own truth
+This produces a *read-only snapshot for cross-team context*. Work happens in Monday; it flows here on
+the next sync — never the reverse.

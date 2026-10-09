@@ -1,0 +1,17 @@
+# Secrets — credentials live here, never committed
+.env
+.env.local
+
+# OS / editor cruft
+.DS_Store
+*.swp
+.idea/
+.vscode/
+
+# Node (for when the plugin gains tooling)
+node_modules/
+dist/
+*.log
+
+# Python bytecode (synapse/evals/lib/score-routing-run.py)
+__pycache__/

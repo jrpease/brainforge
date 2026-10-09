@@ -1,0 +1,16 @@
+{
+  "$comment": "Ships with the brain. On session start, runs .brainforge/session-start.sh, which holds the session hooks (pull the latest context, then the drift, sync-health and canon-health nudges) and documents each in its header. The hooks live in that script so they can be tested and upgraded as one file; do not add them back here. Fails safe: a missing script is silent.",
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "startup|resume",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "[ -r \"$CLAUDE_PROJECT_DIR/.brainforge/session-start.sh\" ] && bash \"$CLAUDE_PROJECT_DIR/.brainforge/session-start.sh\" || true"
+          }
+        ]
+      }
+    ]
+  }
+}

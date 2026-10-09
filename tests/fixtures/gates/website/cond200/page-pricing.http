@@ -1,0 +1,3 @@
+# match: GET ^https://www\.example\.test/pricing$
+# status: 200
+# header: ETag: "pricing-2"

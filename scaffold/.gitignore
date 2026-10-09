@@ -1,0 +1,18 @@
+# Secrets — pipeline credentials NEVER get committed
+.env
+.env.local
+*.token
+
+# Claude Code per-user local settings — machine-specific, never shared/committed
+.claude/settings.local.json
+
+# OS / editor noise
+.DS_Store
+Thumbs.db
+*.swp
+.idea/
+.vscode/
+
+# Scratch / local-only working files
+scratch/
+tmp/

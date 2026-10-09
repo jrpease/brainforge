@@ -1,0 +1,32 @@
+schema_version: "1.0"
+name: eng-conventions
+description: >-
+  An engineering-conventions question must reach the repos domain via the
+  eng-conventions kind. The ship/<ticket>-<slug> branch pattern and the
+  ticket-id commit format live only in repos/conventions.md.
+context:
+  scaffold_script: scaffold.sh
+execution:
+  prompt: "What branch naming and commit message format do our repos use?"
+  max_turns: 12
+  timeout_seconds: 300
+  allowed_tools: [Read, Glob, Grep, Skill]
+graders:
+  - type: tool_used
+    name: reads-eng-conventions
+    tool: Read
+    input_match: "repos/conventions"
+    min: 1
+  - type: regex
+    name: cites-branch-pattern
+    target: last_message
+    pattern: "ship/"
+  - type: regex
+    name: cites-commit-format
+    target: last_message
+    pattern: "(?i)Lantern|\\[[A-Z]+-[0-9]+\\]"
+  - type: regex
+    name: has-announce-line
+    target: last_message
+    pattern: "loaded:.*skipped:"
+    flags: s

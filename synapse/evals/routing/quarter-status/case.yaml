@@ -1,0 +1,31 @@
+schema_version: "1.0"
+name: quarter-status
+description: >-
+  Tracker is the expensive band: brain-routing must read tracker/_index.md
+  before the (large) milestones.md — the expensive pull is correct here.
+context:
+  scaffold_script: scaffold.sh
+execution:
+  prompt: "What's slipping this quarter? Summarize from our tracker."
+  max_turns: 12
+  timeout_seconds: 300
+  allowed_tools: [Read, Glob, Grep, Skill]
+graders:
+  - type: tool_order
+    name: index-before-milestones
+    before:
+      tool: Read
+      input_match: "tracker/_index"
+    after:
+      tool: Read
+      input_match: "tracker/milestones"
+  - type: tool_used
+    name: reads-milestones-content
+    tool: Read
+    input_match: "tracker/milestones"
+    min: 1
+  - type: regex
+    name: has-announce-line
+    target: last_message
+    pattern: "loaded:.*skipped:"
+    flags: s

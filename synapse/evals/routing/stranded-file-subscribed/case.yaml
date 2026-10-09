@@ -1,0 +1,39 @@
+schema_version: "1.0"
+name: stranded-file-subscribed
+description: >-
+  SMOKE-RUNNER-ONLY: needs synapse/evals/routing-smoke.sh, which reads this
+  case's `subscribe` marker. `claude plugin eval` does not understand the marker
+  and would run it as an empty-cwd case, so it would fail there. Same prompt
+  and graders as stranded-file, but the cwd is empty and the brain is reachable
+  only by subscription: the runner turns the acme-brain fixture into a git repo,
+  passes it in SYNAPSE_BRAINS, and synapse's real SessionStart hook clones it
+  into SYNAPSE_HOME and prints the map. That map lists domains with no file
+  list, so the reader has to open the clone itself (tracker/_index.md, or the
+  clone's manifest) to find vendor-contracts.md in the expensive, single-intent
+  tracker domain. The runner fails the case if the
+  map never appeared, so a pass cannot come from a run where the hook was
+  skipped.
+execution:
+  prompt: "When does our hosting contract come up for renewal, and when do we have to decide by?"
+  max_turns: 12
+  timeout_seconds: 300
+  allowed_tools: [Read, Glob, Grep, Skill]
+graders:
+  - type: tool_used
+    name: reads-the-stranded-file
+    tool: Read
+    input_match: "tracker/vendor-contracts"
+    min: 1
+  - type: regex
+    name: cites-renewal-date
+    target: last_message
+    pattern: "2027-03-01|March\\s*1"
+  - type: regex
+    name: cites-decision-deadline
+    target: last_message
+    pattern: "2026-12-01|December\\s*1"
+  - type: regex
+    name: has-announce-line
+    target: last_message
+    pattern: "loaded:.*skipped:"
+    flags: s

@@ -1,0 +1,33 @@
+schema_version: "1.0"
+name: design-decision
+description: >-
+  A design decision with no UI to build must reach the design domain via the
+  design-principles kind, through the art-direction intent rather than the
+  build-prototype one. The undo rule and the safety-orange primary live only in
+  design/principles.md.
+context:
+  scaffold_script: scaffold.sh
+execution:
+  prompt: "We're deciding whether a bulk-delete action on the admin screen needs an undo, and what color its button should be. What do our design principles say?"
+  max_turns: 12
+  timeout_seconds: 300
+  allowed_tools: [Read, Glob, Grep, Skill]
+graders:
+  - type: tool_used
+    name: reads-design-principles
+    tool: Read
+    input_match: "design/principles"
+    min: 1
+  - type: regex
+    name: cites-primary-color
+    target: last_message
+    pattern: "(?i)#FF6A00|safety orange"
+  - type: regex
+    name: cites-reversibility
+    target: last_message
+    pattern: "(?i)undo|reversib"
+  - type: regex
+    name: has-announce-line
+    target: last_message
+    pattern: "loaded:.*skipped:"
+    flags: s

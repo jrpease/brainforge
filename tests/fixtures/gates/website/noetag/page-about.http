@@ -1,0 +1,2 @@
+# match: GET ^https://www\.example\.test/about$
+# status: 304

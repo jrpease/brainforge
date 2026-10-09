@@ -1,0 +1,32 @@
+schema_version: "1.0"
+name: metrics-question
+description: >-
+  A metrics question must reach the analytics domain via the analytics and
+  metric-definitions kinds. The definition (a saved query in a calendar week)
+  and the current value (4,127) live only in analytics/metrics.md.
+context:
+  scaffold_script: scaffold.sh
+execution:
+  prompt: "How do we define weekly active teams, and what is the current number?"
+  max_turns: 12
+  timeout_seconds: 300
+  allowed_tools: [Read, Glob, Grep, Skill]
+graders:
+  - type: tool_used
+    name: reads-metric-definitions
+    tool: Read
+    input_match: "analytics/metrics"
+    min: 1
+  - type: regex
+    name: cites-current-value
+    target: last_message
+    pattern: "4,?127"
+  - type: regex
+    name: cites-definition
+    target: last_message
+    pattern: "(?i)saved query"
+  - type: regex
+    name: has-announce-line
+    target: last_message
+    pattern: "loaded:.*skipped:"
+    flags: s

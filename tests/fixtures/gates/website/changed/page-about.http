@@ -1,0 +1,3 @@
+# match: GET ^https://www\.example\.test/about$
+# status: 304
+# header: ETag: "about-1"

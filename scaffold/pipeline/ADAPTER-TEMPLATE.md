@@ -1,0 +1,160 @@
+# Playbook: sync <SOURCE> — ADAPTER TEMPLATE
+
+> Copy this file to `adapters/<source-type>.md` and fill every `<…>`. This is the **contract**:
+> a new adapter is prose, but prose that fills a fixed skeleton. Don't reverse-engineer style
+> from the built-ins — fill this. `/add-adapter` does exactly this. A worked example lives at
+> `examples/shopify.md`.
+>
+> **Every adapter must honor the six golden rules in `pipeline/README.md`.** The skeleton below is
+> structured so that filling it correctly *is* honoring them.
+
+Covers: <what this source contributes to the brain — e.g. "design tokens + component inventory">.
+Auth: `<CREDENTIAL_ENV_VAR>` from `.env` (add it to `.env.example`). <One line on the API used.>
+
+## 0. Inputs
+- Source entries from `sources.json` → `<source-type>[]` (filter `enabled: true`, or the one passed as arg)
+- Destination: the entry's `into:` — written `<into>` below. **No `into:` → stop; do not sync this
+  entry and do not fall back to a default folder** (`pipeline/README.md` § Where a sync writes).
+- Last fingerprint from `.sync-state.json` → `<source-type>[<key>]`
+
+## 0a. Size envelope  — golden rule #6
+> An envelope is a number, not an intention. Declare one per emitted doc **before** the first live
+> run, then hold the sync to it. This table MAY be omitted — the shipped default (any derived doc
+> ≤ 8k, see `pipeline/README.md` § Defaults) then applies, so golden rule 6 always has something to
+> compare against. Declare one when this source's docs are legitimately bigger or smaller than
+> that, which is most of them.
+
+Paths are relative to `<into>`, the same base `acceptedSize[].doc` uses.
+
+| Emitted doc | Envelope |
+|---|---|
+| `_index.md` | ≤ <n> |
+| `<doc>.md` | ≤ <n> |
+| **domain total** | **≤ <n>** |
+
+`/sync` checks the `_index.md` row from the manifest's `indexTokens`, the figure the generator
+records for each domain's `_index.md`.
+
+**<One paragraph: what "reference, not a mirror" means for THIS source.>** Name the specific thing
+that would balloon the doc if extracted faithfully — every layer, every row, every file, every day —
+and say what to emit instead (counts, aggregates, a link back to the source). If a doc approaches its
+envelope, aggregate harder; never raise the envelope to fit the extraction. A breach the brain
+knowingly accepts goes in `acceptedSize` on the `sources.json` entry with a reason — that is the
+escape hatch, not a bigger number here.
+
+## 1. Cheap change gate (always)  — golden rule #1
+> The cheapest call that answers "did anything change?" — a version field, a `max(updated_at)`,
+> an ETag, a git SHA. This is the whole game: an unchanged source must cost ~one cheap call.
+```
+<the cheap probe — e.g. GET …?fields=updated_at, or git diff <lastSha>..HEAD --name-only>
+```
+- Fingerprint == stored → **stop. Nothing changed.** (zero heavy calls)
+- Else → compute the exact delta (which items/nodes/files changed) and extract only those.
+
+> **A gate script (optional).** A custom adapter may ship `.brainforge/gate-<source-type>.sh` with
+> the built-in gates' contract (`.brainforge/README.md` § Gate scripts): run from the brain root
+> with optional source ids, read-only, one JSON line per gated entry on stdout with `type`, `id`,
+> `status` (`unchanged | changed | never | not-checked | blocked`), `reason`, `fingerprint` (in
+> the shape §3 stores), `stored` and `delta`, exit 0, and exit 1 only for misuse. When it exists,
+> `/sync` runs it and never this section's prose; then say here that this section documents what
+> the script does. Without one, `/sync` runs this section as written.
+
+> **Metrics / time-series sources** (e.g. Google Analytics) don't fit the stop-if-unchanged frame —
+> their data changes every day by definition and recent days get **restated** as they finalize. There
+> the cheap gate is a **date-bounded trailing fingerprint** (a tiny per-day metric over
+> `[lastSyncedThrough − lookback, yesterday]`, e.g. `sessions` by `date`) and the delta is a **date
+> window** (new + restated days), not a whole-source hash. Emit shapes split too: growing time series
+> **append-merge** the window; bounded rollups **refresh-in-full**. See `adapters/ga.md` for the worked
+> example.
+
+## 2. Extract only the delta
+- **Deterministic first (golden rule #3):** <the tooling/endpoint that yields identical output
+  each run — prefer this for anything structured.>
+  - **Counts & enumerations come from an authoritative count field — never eyeballed or narrated.**
+    Read totals from the source's own count (e.g. a `…Count.count` field, a `total`, a paged
+    `count`), not from how many items a narrative pass happened to list. A fabricated count becomes
+    "truth" downstream and is nearly impossible to catch later.
+- **Narrative pass (LLM, gated):** <only for genuinely narrative output; keep short + factual.
+  A wrong word becomes "truth.">
+- **Transport (golden rule #2):** use **REST**, not MCP. If REST genuinely cannot reach the data,
+  document the exception here and scope the MCP use as tightly as possible.
+- **Emit to:** `<into>` — <which files, in what shape (table-first).> Name the conventional
+  folder a new entry gets (e.g. "`<into>`, conventionally `<folder>/`") as an example only; never
+  write a literal `context/derived/<folder>/` path here.
+  - **Never write `kinds:`.** Refresh only this source's rows in `<into>_index.md`. If it exists,
+    change only `last-synced` in its frontmatter; if it does not, create it with provenance and
+    `title:` but no `kinds:`. `/sync` then proposes kinds for a human to confirm. You may name the
+    kind this source usually proposes (<one from setup/README.md §1a>) as that proposal, never as
+    a stamp.
+  - Do not spell a literal derived-root path in this playbook, not even in a prohibition:
+    `sync-contract.sh` cannot tell "write to" from "never write to" and fails both.
+  - **Size envelope:** declared in **§0a** above, per emitted doc. MAY be omitted — the shipped
+    default (any derived doc ≤ 8k) then applies, so golden rule 6 fires for every doc the manifest
+    measures even when this adapter declares nothing. Declare one when this source type's docs are
+    legitimately bigger or smaller than the default. Golden rule 6: if a sync exceeds the resolved
+    envelope or 3×-grows a doc, flag it in the PR body — what grew, by how much, and whether the
+    extraction should aggregate harder. A breach the brain accepts goes in `acceptedSize` on the
+    `sources.json` entry, never here — this file is re-emitted on every `/upgrade`.
+
+## 3. Finish  — golden rule #5
+- Stamp `source` / `last-synced` / `generated-by` frontmatter on every doc this source writes.
+  `<into>_index.md` is the exception, per §2: only `last-synced` changes on an existing one.
+- Update `.sync-state.json` → `<source-type>[<key>]` with the new fingerprint.
+- In `.sync-state.json`, set `"synced": true` in `<source-type>[<key>]` and `lastFullSync` to
+  today (`YYYY-MM-DD`). Disarms the session-start sync-health tripwire, which stays lit while any
+  source's `synced` is `false` or `lastFullSync` is `null`.
+- **Branch + PR — never push to main directly (golden rule #4).**
+
+## Never
+- <PII / secrets / out-of-scope resources this adapter must refuse to extract.>
+- No raw binaries committed — store CDN/export URLs (or Git-LFS per `.gitattributes`).
+
+## Reminder: the source owns its own truth
+This produces a *read-only snapshot for cross-team context*. Edits happen in the source, then
+flow here on the next sync — never the reverse.
+
+---
+
+### `sources.json` entry shape
+```json
+{
+  "id": "<unique-id>",
+  "label": "<human label>",
+  "<locator-field>": "<file key / remote / url>",
+  "extract": ["<what>", "<to>", "<pull>"],
+  "into": "context/derived/<folder>/",
+  "enabled": true,
+  "cadence": "daily | weekly | monthly | manual",
+  "acceptedSize": [
+    { "doc": "<file.md>", "tokens": 32000, "since": "<YYYY-MM-DD>", "why": "<why this is fine>" }
+  ]
+}
+```
+
+Every field here is read by a named step. A field no step reads looks authoritative and does
+nothing, which is worse than no field, so do not add one without the step that consumes it.
+
+| Field | Read by |
+|---|---|
+| `id` | `/sync <source-type> <id>` scoping; the `.sync-state.json` slot key unless the adapter keys by its locator |
+| `label` | `/sync-health`'s source column and the sync PR summary |
+| `<locator-field>` | this adapter's §1 cheap gate and §2 extraction |
+| `extract` | this adapter's §2 — only the named resources are extracted. Omit the field if the source has nothing to choose between |
+| `into` | this adapter's §0 and §2 (the destination), `acceptedSize[].doc` resolution, `sync-contract.sh` (required) |
+| `enabled` | `/sync`, `sync-all.md`, `/sync-health` |
+| `cadence` | `/sync-health` staleness (default `weekly`) |
+| `acceptedSize` | `/sync` golden rule 6 envelope resolution |
+
+Quirks, auth paths, and what to skip belong in this playbook, where a step reads them. A
+free-form note on the entry is read by nothing, and scope written there ("skip X") is not
+enforced.
+
+### Generated command
+`/sync <source-type>` already dispatches here via `sources.json`. No new command needed unless
+the adapter has a bespoke mode — if so, add `.claude/commands/<name>.md` that points back here.
+
+> **Replacing a built-in or flat playbook?** Then producing this file is only half the job — the
+> dispatch must be *repointed* to it. Update the `.claude/commands/sync.md` reference and the
+> `pipeline/README.md` Playbooks list to point at `adapters/<source-type>.md`, and supersede the old
+> flat `sync-<source-type>.md`. A leftover flat playbook or an unrepointed dispatch means `/sync`
+> still runs the stale path. (`/add-adapter` walks this.)

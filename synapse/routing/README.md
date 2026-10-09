@@ -1,0 +1,37 @@
+# Routing — the intent table and kinds vocabulary
+
+`intents.json` maps **intent → domain kinds**. It is the single place routing is tuned
+(DESIGN.md §12): fix it here, ship a plugin update, every subscriber improves. Never vendor
+it into a brain.
+
+Kinds are the domain catalog one level down (DESIGN.md §10). Current vocabulary (v1):
+`brand-voice`, `brand-messaging`, `naming`, `positioning`, `user-archetypes`,
+`product-principles`, `product-roadmap`, `project-tracking`, `design-principles`,
+`design-system`, `art-direction`, `ui-build-standards`, `repo-summaries`,
+`architecture-decisions`, `eng-conventions`, `analytics`, `metric-definitions`,
+`site-inventory`, `product-catalog`, `digital-experience`, `pricing-model`,
+`company-principles`, `org-design`, `unit-context`.
+
+**`intents.json`'s ONE-INTENT-PER-LINE LAYOUT IS A PARSING CONTRACT.** `routing/coverage.sh`
+is dependency-free and derives the routable vocabulary from this file line by line — the union
+of its values — to warn about kinds a brain declares that no intent points at. The session hook
+(`hooks/session-start.sh`) hands off to it for that warning. Reformatting `intents.json`
+(pretty-printing an array across lines, say) breaks that warning **silently**, which is the
+exact failure the warning exists to catch. Same contract `gen-manifest.sh` carries on its own
+output; treat it the same way.
+
+Corollary: the routable vocabulary IS the union of `intents.json`'s values — a kind no intent
+points at is unroutable whether or not it appears in the list above or in a catalog table.
+Adding a kind to that list without pointing an intent at it ships a dead word.
+
+Growing the vocabulary is a Brainforge change (edit here + the catalog table in
+`scaffold/setup/README.md` §1a + an eval case), then a synapse version bump. Adopting a kind
+is a one-line brain change. Every intents.json change MUST come with a passing
+`bash synapse/evals/routing-smoke.sh` run over the cases in `evals/` — tuning for one brain must
+not silently break another. The smoke runner executes the case files with `claude -p` and scores
+their regex/tool_used/tool_order graders, and it is the only runner for the smoke-runner-only
+`stranded-file-subscribed` case. `claude plugin eval` (gated behind org-level early access, not
+self-serve) is the stronger check when you have it — repeated runs, an ablation arm, LLM-judge
+graders scored — so run it too when available, but it is not the requirement and it does not
+understand the `subscribe` marker, so it fails the subscribed case. Either way, say which runner
+you ran when you claim a passing eval.

@@ -1,0 +1,33 @@
+schema_version: "1.0"
+name: company-mission
+description: >-
+  A mission/values question must reach the company domain via the
+  company-principles kind. Before the company domain existed in the catalog,
+  constitutional material had no kind to declare, so it routed to nothing —
+  the same silent-failure class as pricing, one level up.
+context:
+  scaffold_script: scaffold.sh
+execution:
+  prompt: "What's our mission, and what are the operating principles a new hire should know?"
+  max_turns: 12
+  timeout_seconds: 300
+  allowed_tools: [Read, Glob, Grep, Skill]
+graders:
+  - type: tool_used
+    name: reads-company-principles
+    tool: Read
+    input_match: "company/principles"
+    min: 1
+  - type: regex
+    name: cites-mission
+    target: last_message
+    pattern: "(?i)working prototype"
+  - type: regex
+    name: cites-an-operating-principle
+    target: last_message
+    pattern: "(?i)directly responsible individual|two-week|\\$?25,?000"
+  - type: regex
+    name: has-announce-line
+    target: last_message
+    pattern: "loaded:.*skipped:"
+    flags: s

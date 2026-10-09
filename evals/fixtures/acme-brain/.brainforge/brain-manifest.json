@@ -1,0 +1,163 @@
+{
+  "schema": 3,
+  "brain": "acme-brain",
+  "remote": "",
+  "contextRoot": "context",
+  "contextFingerprint": "13d0406754eee595190c8452b90bf13a17a94b14",
+  "generatedFrom": "unborn",
+  "generatedAt": "2026-10-07",
+  "domains": [
+    {
+      "path": "context/canon/audience",
+      "title": "Audience",
+      "kinds": ["user-archetypes", "positioning"],
+      "tokens": 123,
+      "docTokens": 95,
+      "indexTokens": 28,
+      "band": "cheap",
+      "files": [
+        { "path": "archetypes.md", "title": "User archetypes", "tokens": 95 }
+      ]
+    },
+    {
+      "path": "context/canon/brand",
+      "title": "Brand",
+      "kinds": ["brand-voice", "brand-messaging", "naming"],
+      "tokens": 995,
+      "docTokens": 959,
+      "indexTokens": 36,
+      "band": "cheap",
+      "files": [
+        { "path": "naming.md", "title": "Naming Rules", "tokens": 484 },
+        { "path": "voice.md", "title": "Voice and Tone", "tokens": 475 }
+      ]
+    },
+    {
+      "path": "context/canon/company",
+      "title": "Company",
+      "kinds": ["company-principles", "org-design"],
+      "tokens": 387,
+      "docTokens": 345,
+      "indexTokens": 42,
+      "band": "cheap",
+      "files": [
+        { "path": "org.md", "title": "Org Design", "tokens": 167 },
+        { "path": "principles.md", "title": "Mission, Values & Operating Principles", "tokens": 178 }
+      ]
+    },
+    {
+      "path": "context/canon/design",
+      "title": "Design",
+      "kinds": ["design-principles", "ui-build-standards"],
+      "tokens": 556,
+      "docTokens": 530,
+      "indexTokens": 26,
+      "band": "cheap",
+      "files": [
+        { "path": "principles.md", "title": "Design Principles", "tokens": 530 }
+      ]
+    },
+    {
+      "path": "context/canon/pricing",
+      "title": "Pricing",
+      "kinds": ["pricing-model"],
+      "tokens": 323,
+      "docTokens": 295,
+      "indexTokens": 28,
+      "band": "cheap",
+      "files": [
+        { "path": "model.md", "title": "Pricing Model", "tokens": 295 }
+      ]
+    },
+    {
+      "path": "context/derived/analytics",
+      "title": "Analytics",
+      "kinds": ["analytics", "metric-definitions"],
+      "tokens": 126,
+      "docTokens": 96,
+      "indexTokens": 30,
+      "band": "cheap",
+      "files": [
+        { "path": "metrics.md", "title": "Metrics", "tokens": 96 }
+      ]
+    },
+    {
+      "path": "context/derived/design-system",
+      "title": "Design system",
+      "kinds": ["design-system"],
+      "tokens": 3417,
+      "docTokens": 3387,
+      "indexTokens": 30,
+      "band": "normal",
+      "files": [
+        { "path": "tokens.md", "title": "Design Tokens", "tokens": 3387 }
+      ]
+    },
+    {
+      "path": "context/derived/mystery",
+      "title": "Mystery",
+      "kinds": [],
+      "tokens": 276,
+      "docTokens": 270,
+      "indexTokens": 6,
+      "band": "cheap",
+      "files": [
+        { "path": "notes.md", "title": "Notes", "tokens": 270 }
+      ]
+    },
+    {
+      "path": "context/derived/repos",
+      "title": "Repos",
+      "kinds": ["repo-summaries", "eng-conventions"],
+      "tokens": 104,
+      "docTokens": 74,
+      "indexTokens": 30,
+      "band": "cheap",
+      "files": [
+        { "path": "conventions.md", "title": "Engineering conventions", "tokens": 74 }
+      ]
+    },
+    {
+      "path": "context/derived/tracker",
+      "title": "Tracker",
+      "kinds": ["project-tracking"],
+      "tokens": 18237,
+      "docTokens": 18199,
+      "indexTokens": 38,
+      "band": "expensive",
+      "files": [
+        { "path": "milestones.md", "title": "Milestones", "tokens": 18003 },
+        { "path": "vendor-contracts.md", "title": "Vendor Contracts", "tokens": 196 }
+      ]
+    },
+    {
+      "path": "context/derived/units/orion",
+      "title": "Orion (unit)",
+      "kinds": ["unit-context"],
+      "tokens": 367,
+      "docTokens": 327,
+      "indexTokens": 40,
+      "band": "cheap",
+      "files": [
+        { "path": "overview.md", "title": "Orion — unit overview", "tokens": 327 }
+      ]
+    },
+    {
+      "path": "context/derived/web",
+      "title": "Web",
+      "kinds": ["site-inventory", "product-catalog"],
+      "tokens": 98,
+      "docTokens": 68,
+      "indexTokens": 30,
+      "band": "cheap",
+      "files": [
+        { "path": "catalog.md", "title": "Product catalog", "tokens": 68 }
+      ]
+    }
+  ],
+  "unclassified": [
+    "context/derived/mystery"
+  ],
+  "unindexed": [
+  ]
+}

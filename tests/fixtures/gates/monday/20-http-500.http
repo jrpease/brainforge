@@ -1,0 +1,3 @@
+# match: POST ^https://api\.monday\.com/v2$ "ids": \["5000"\]
+# status: 500
+{"error_message":"Internal server error"}

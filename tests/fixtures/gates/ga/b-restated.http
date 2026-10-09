@@ -1,0 +1,2 @@
+# match: POST ^https://analyticsdata\.googleapis\.com/v1beta/properties/1002:runReport$ "startDate":"2026-09-30"
+{"rows":[{"dimensionValues":[{"value":"20260930"}],"metricValues":[{"value":"90"}]},{"dimensionValues":[{"value":"20261001"}],"metricValues":[{"value":"100"}]},{"dimensionValues":[{"value":"20261002"}],"metricValues":[{"value":"115"}]},{"dimensionValues":[{"value":"20261003"}],"metricValues":[{"value":"120"}]}],"rowCount":4,"metadata":{"timeZone":"America/New_York","currencyCode":"USD"}}

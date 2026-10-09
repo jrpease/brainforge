@@ -1,0 +1,32 @@
+schema_version: "1.0"
+name: audience-question
+description: >-
+  An audience question must reach the audience domain via the user-archetypes
+  and positioning kinds. The archetype names and the one-line promise live only
+  in audience/archetypes.md.
+context:
+  scaffold_script: scaffold.sh
+execution:
+  prompt: "Who are our user archetypes, and which one is our positioning built around?"
+  max_turns: 12
+  timeout_seconds: 300
+  allowed_tools: [Read, Glob, Grep, Skill]
+graders:
+  - type: tool_used
+    name: reads-audience-archetypes
+    tool: Read
+    input_match: "audience/archetypes"
+    min: 1
+  - type: regex
+    name: cites-primary-archetype
+    target: last_message
+    pattern: "Maya"
+  - type: regex
+    name: cites-positioning-promise
+    target: last_message
+    pattern: "(?i)calm infrastructure"
+  - type: regex
+    name: has-announce-line
+    target: last_message
+    pattern: "loaded:.*skipped:"
+    flags: s

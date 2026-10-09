@@ -1,0 +1,32 @@
+schema_version: "1.0"
+name: naming-question
+description: >-
+  A naming question must reach the brand domain via the naming kind. The
+  existing tool names (Wrench, Compass) and the no-abbreviations rule live only
+  in brand/naming.md, so a pass means the doc was read, not guessed.
+context:
+  scaffold_script: scaffold.sh
+execution:
+  prompt: "We're naming a new feature that schedules recurring reports. What rules do our feature names follow, and what are the existing examples?"
+  max_turns: 12
+  timeout_seconds: 300
+  allowed_tools: [Read, Glob, Grep, Skill]
+graders:
+  - type: tool_used
+    name: reads-naming-rules
+    tool: Read
+    input_match: "brand/naming"
+    min: 1
+  - type: regex
+    name: cites-existing-names
+    target: last_message
+    pattern: "Wrench|Compass"
+  - type: regex
+    name: cites-no-abbreviations
+    target: last_message
+    pattern: "(?i)abbreviat"
+  - type: regex
+    name: has-announce-line
+    target: last_message
+    pattern: "loaded:.*skipped:"
+    flags: s

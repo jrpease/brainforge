@@ -1,0 +1,32 @@
+schema_version: "1.0"
+name: catalog-question
+description: >-
+  A catalog question must reach the web domain via the product-catalog kind.
+  The best-selling SKU (TK-7740) and the discontinued HX- prefix live only in
+  web/catalog.md.
+context:
+  scaffold_script: scaffold.sh
+execution:
+  prompt: "What's the best-selling product in our catalog, and which SKUs must never be linked from the site?"
+  max_turns: 12
+  timeout_seconds: 300
+  allowed_tools: [Read, Glob, Grep, Skill]
+graders:
+  - type: tool_used
+    name: reads-product-catalog
+    tool: Read
+    input_match: "web/catalog"
+    min: 1
+  - type: regex
+    name: cites-best-seller
+    target: last_message
+    pattern: "TK-7740|Ridgeline"
+  - type: regex
+    name: cites-discontinued-prefix
+    target: last_message
+    pattern: "HX-"
+  - type: regex
+    name: has-announce-line
+    target: last_message
+    pattern: "loaded:.*skipped:"
+    flags: s

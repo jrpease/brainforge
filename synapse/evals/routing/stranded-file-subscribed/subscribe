@@ -1,0 +1,5 @@
+Marker read only by synapse/evals/routing-smoke.sh. Its presence means: run this
+case with an EMPTY cwd and the acme-brain fixture reachable only by subscription
+(a local git repo passed in SYNAPSE_BRAINS, cloned by synapse's own SessionStart
+hook into SYNAPSE_HOME). `claude plugin eval` does not understand it and would
+run this case as a plain empty-cwd case, which fails.

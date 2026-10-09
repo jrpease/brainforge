@@ -1,0 +1,3 @@
+# match: POST ^https://api\.monday\.com/v2$ "ids": \["9999"
+# status: 200
+{"errors":[{"message":"Board not found or no access","locations":[{"line":1,"column":20}]}],"account_id":1}

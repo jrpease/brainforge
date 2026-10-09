@@ -1,0 +1,3 @@
+# match: GET ^https://www\.example\.test/sitemap\.xml$
+# status: 403
+Forbidden

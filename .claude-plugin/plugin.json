@@ -1,0 +1,45 @@
+{
+  "$comment": "Brainforge is packaged as a Claude plugin from day one (DESIGN.md §6B). The BUILDER layer (commands/) is Claude-first; the brain it scaffolds (scaffold/) is tool-agnostic markdown+JSON readable by any LLM.",
+  "name": "brainforge",
+  "version": "0.15.1",
+  "description": "Build and operate a product-org brain — a tool-agnostic git repo of authored truth + synced facts that any LLM can read.",
+  "author": { "name": "jrpease" },
+  "keywords": ["brain", "context", "source-of-truth", "canon", "sync", "design-system"],
+  "scaffold": "scaffold/",
+  "license": "MIT",
+  "repository": "https://github.com/jrpease/brainforge",
+  "runtime": {
+    "$comment": "The seam. Files re-emittable on /upgrade (commands/upgrade.md) — the bumpable behavior layer, like react-scripts. Everything else in scaffold/ is emitted once and owned by the brain. Emitted brains carry .brainforge/runtime-manifest.json (this version + sha256 per bump file, hashed as emitted) — the baseline /upgrade compares against. Corollary: touching a bump path here means bumping version above, or the change is invisible to upgrades.",
+    "bump": [
+      "pipeline/**",
+      "authoring/README.md",
+      "setup/README.md",
+      ".claude/commands/**",
+      ".claude/settings.json",
+      ".brainforge/README.md",
+      ".brainforge/gen-manifest.sh",
+      ".brainforge/canon-health.sh",
+      ".brainforge/sync-contract.sh",
+      ".brainforge/regen-if-stale.sh",
+      ".brainforge/gate-figma.sh",
+      ".brainforge/gate-github.sh",
+      ".brainforge/gate-website.sh",
+      ".brainforge/gate-monday.sh",
+      ".brainforge/gate-ga.sh",
+      ".brainforge/envelope-check.sh",
+      ".brainforge/session-start.sh",
+      ".github/workflows/brainforge-manifest.yml"
+    ],
+    "remove": [
+      ".claude/commands/walk.md"
+    ],
+    "once": [
+      "README.md", "CLAUDE.md", "CONTRIBUTING.md",
+      "sources.json", ".sync-state.json",
+      ".gitignore", ".gitattributes", ".env.example",
+      "templates/**",
+      "authoring/templates/**",
+      "context/canon/README.md", "context/derived/README.md"
+    ]
+  }
+}

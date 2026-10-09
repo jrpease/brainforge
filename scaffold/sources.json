@@ -1,0 +1,61 @@
+{
+  "$comment": "Registry of every upstream source the pipeline watches. Add entries with /add-source (existing type) or /add-adapter (new type). Credentials live in .env (NEVER here). Each source's last-seen fingerprint lives in .sync-state.json. Arrays start empty — the builder walk fills them.",
+  "version": 1,
+  "$examples": {
+    "$comment": "Reference shapes only — NOT live sources. Real entries go in the arrays below.",
+    "figma": {
+      "id": "figma-design-system",
+      "label": "Design System (tokens, components, styles)",
+      "fileKey": "<figma-file-key>",
+      "extract": ["variables", "styles", "components"],
+      "into": "context/derived/design-system/",
+      "enabled": true,
+      "cadence": "weekly"
+    },
+    "repos": {
+      "id": "web",
+      "label": "Marketing site / web app",
+      "remote": "github.com/<org>/<repo>",
+      "localClone": "<absolute-path-or-omit>",
+      "branch": "main",
+      "summarize": ["routes", "components", "stack", "key-readmes"],
+      "into": "context/derived/repos/",
+      "enabled": true,
+      "cadence": "weekly"
+    },
+    "websites": {
+      "id": "marketing-site",
+      "label": "Marketing site",
+      "url": "https://<domain>",
+      "sitemap": "https://<domain>/sitemap.xml",
+      "into": "context/derived/web/",
+      "enabled": true,
+      "cadence": "weekly"
+    },
+    "monday": {
+      "id": "roadmap",
+      "label": "Product roadmap board",
+      "boardId": "<monday-board-id>",
+      "into": "context/derived/monday/",
+      "enabled": true,
+      "cadence": "daily"
+    },
+    "ga": {
+      "id": "web-analytics",
+      "label": "GA4 property — site analytics",
+      "propertyId": "<ga4-numeric-property-id>",
+      "extract": ["traffic-overview", "acquisition", "top-pages", "ecommerce"],
+      "lookbackDays": 3,
+      "backfillDays": 90,
+      "rollupDays": 28,
+      "into": "context/derived/ga/",
+      "enabled": true,
+      "cadence": "daily"
+    }
+  },
+  "figma": [],
+  "repos": [],
+  "websites": [],
+  "monday": [],
+  "ga": []
+}

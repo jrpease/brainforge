@@ -1,0 +1,3 @@
+# match: GET ^https://api\.figma\.com/v1/files/KEYDENIED\?depth=1$
+# status: 403
+{"status":403,"err":"Forbidden"}
