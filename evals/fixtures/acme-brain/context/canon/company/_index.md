@@ -6,3 +6,4 @@ title: Company
 |---|---|
 | principles.md | mission, values & how we operate |
 | org.md | teams, ownership & escalation |
+| remote-work.md | remote work, office days & equipment budget |

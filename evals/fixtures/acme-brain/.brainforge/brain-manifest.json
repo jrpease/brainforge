@@ -3,7 +3,7 @@
   "brain": "acme-brain",
   "remote": "",
   "contextRoot": "context",
-  "contextFingerprint": "13d0406754eee595190c8452b90bf13a17a94b14",
+  "contextFingerprint": "0c8fd4e79b57414cf3de0ab6b0caaab497c06e4b",
   "generatedFrom": "unborn",
   "generatedAt": "2026-10-07",
   "domains": [
@@ -36,13 +36,14 @@
       "path": "context/canon/company",
       "title": "Company",
       "kinds": ["company-principles", "org-design"],
-      "tokens": 387,
-      "docTokens": 345,
-      "indexTokens": 42,
+      "tokens": 471,
+      "docTokens": 415,
+      "indexTokens": 56,
       "band": "cheap",
       "files": [
         { "path": "org.md", "title": "Org Design", "tokens": 167 },
-        { "path": "principles.md", "title": "Mission, Values & Operating Principles", "tokens": 178 }
+        { "path": "principles.md", "title": "Mission, Values & Operating Principles", "tokens": 178 },
+        { "path": "remote-work.md", "title": "Remote Work Policy", "tokens": 70 }
       ]
     },
     {

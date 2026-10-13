@@ -24,6 +24,11 @@ did, and never appear grounded when you are not.
 
 ## Route
 
+Read every brain file, `intents.json` included, with the Read tool, one file per call. Never a
+shell command (`cat`, `ls`, `find`): `/synapse:subscribe` pre-grants Read on the brain clones and
+on synapse's own files, so Read needs no permission, while a shell command asks every time and a
+headless run refuses it.
+
 1. Read `${CLAUDE_PLUGIN_ROOT}/routing/intents.json`. Match the task to one or more intents;
    collect their kinds.
 2. From the brain's manifest, select domains whose `kinds` intersect the collected kinds —
@@ -74,6 +79,10 @@ never omit it when you loaded (or deliberately skipped) brain content.
   than asserting currency. Derived is deliberately *not* a copy of its source, so treat it as a
   summary that may omit detail the source holds, never as the source itself.
 - If canon and derived contradict, surface the conflict (that is drift); never silently pick one.
+- Canon is authored truth only once approved. A canon doc whose `status:` frontmatter is anything
+  but `approved` (usually `draft`) is a proposal: when you cite it, say so ("the draft remote-work
+  policy, not yet approved"), never state it as settled. If it conflicts with approved canon, the
+  approved doc wins, and name the draft that disagrees.
 - If the map warned that it **predates the current content**, or that staleness **cannot be
   checked** (a pre-schema-3 map), trust domain `_index.md` files over the map's token counts and
   band assignments. Both warnings are about the map's numbers, never about the content itself.
