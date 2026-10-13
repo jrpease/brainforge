@@ -11,5 +11,7 @@ system taught the spine that got folded back in as hardening.
 - [Depth-first wizard](depth-first-wizard.md) — proven live on a fresh throwaway brain.
 - [CI manifest regeneration](ci-manifest-regeneration.md) — proven live on a throwaway private
   GitHub repo: direct pushes, a merge conflict on the manifest, and a protected branch.
+- [MCP façade](mcp-facade.md) — proven live in Codex (no synapse code at all) and in Claude Code
+  with the synapse plugin disabled, against the eval fixture brain.
 - [GA adapter](2026-07-02-ga-live/README.md) — proven live against a real, trafficked GA4 property
   (the last Phase-2 adapter and the first metrics/time-series source); predates this summary format.
