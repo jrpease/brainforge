@@ -146,6 +146,37 @@ git -C <clone> diff <lastSha>..origin/<branch> --name-only
   is `unit-context`).
 - Branch + PR.
 
+## Source-side trigger (optional)
+Without it, this source's freshness depends on someone running `/sync` or `/sync-health` here.
+With it, the source repo runs this brain's own gate on every push and keeps one issue in this
+brain, titled `Sync needed: <id>` and labelled `brainforge-sync`, current. It never syncs; it
+makes a needed sync impossible to miss.
+
+| Issue | Means |
+|---|---|
+| opened or updated | in-scope files changed since the last sync; the body lists them, with a compare link |
+| opened or updated, "cannot be checked" | the gate reported `blocked` (e.g. the remote moved); a person has to fix it |
+| closed, "caught up at `<sha>`" | the source matches what the brain last synced |
+| closed by a sync PR | `/sync` step 4 linked it with `Closes #<n>` |
+
+A run that cannot check at all (`not-checked`, or an expired token) goes red in the source repo's
+CI. That is deliberate: a quiet pass would look like "nothing changed".
+
+Install, once per source repo:
+1. Create a fine-grained personal access token whose only repository is this brain, with
+   **Contents: Read** and **Issues: Read and write**, and nothing else. It expires and belongs to
+   whoever creates it; when it lapses, the source's run goes red until it is re-minted. An
+   org-owned brain needs the org to allow fine-grained tokens.
+2. In the source repo, add it as the Actions secret `BRAINFORGE_BRAIN_TOKEN`.
+3. Copy [`source-sync-trigger.yml`](https://github.com/jrpease/brainforge/blob/main/scaffold/templates/source-sync-trigger.yml)
+   (also at `templates/source-sync-trigger.yml` in brains forged since it shipped) into the source
+   repo as `.github/workflows/brainforge-sync-trigger.yml`, and fill in its three values: the
+   branch (must match this entry's `branch`), this entry's `id`, and this brain's `owner/name`.
+
+The workflow runs `.brainforge/source-signal.sh <id> --clone <checkout>` from a checkout of
+this brain, which runs `gate-github.sh --clone`. Scope is this brain's and the source's
+`.brainforge-source.yml`, exactly as for `/sync`.
+
 ## Reminder: the repo owns its own truth
 This produces a *summary for cross-team consumption*. Repo-specific implementation detail stays
 in the repo. Do not pull canon down into the repo — the repo should *reference* canon

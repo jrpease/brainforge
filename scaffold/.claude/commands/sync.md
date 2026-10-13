@@ -99,4 +99,9 @@ that source in `sources.json` in the same PR. That silences the line until the d
 accepted number or triples again. Never silence it by removing the envelope.
 
 4. **Open a PR — never push derived changes to main directly.** Summarize what changed, naming
-   each source by its `label` (else its `id`).
+   each source by its `label` (else its `id`). For each `repos` source this sync brought current,
+   look for its source-side trigger issue
+   (`gh api "repos/{owner}/{repo}/issues?labels=brainforge-sync&state=open&per_page=100"`, an
+   issue, not a PR, titled exactly `Sync needed: <id>`) and add `Closes #<n>` to the PR body, so merging closes it. If `gh`
+   is unavailable or fails, say in one line that the issue was not linked; the source's next push
+   closes it anyway.

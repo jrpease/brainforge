@@ -18,6 +18,10 @@
 #
 # USAGE (from the brain root)
 #   bash .brainforge/gate-github.sh [<source-id>…]   no ids = every enabled repos[] entry
+#   bash .brainforge/gate-github.sh --clone <path> <source-id>
+#       gates one entry against the clone at <path> instead of its localClone (a CI checkout of
+#       the source, as source-signal.sh runs it). Everything else, the remote check included,
+#       runs as usual. The flag may come before or after the id.
 #
 # OUTPUT  one JSON object per gated entry, one per line (JSON Lines):
 #   {"type":"github","id":…,"status":"unchanged|changed|never|not-checked|blocked","reason":…,
@@ -25,10 +29,11 @@
 #
 # EXIT
 #   0  results printed (whatever their status)
-#   1  misuse: an unknown id, no or unreadable sources.json, or no python3 (stderr says which)
+#   1  misuse: an unknown id, --clone without exactly one id or without a path, no or unreadable
+#      sources.json, or no python3 (stderr says which)
 set -u
 
-case "${1:-}" in -h|--help) sed -n '2,29p' "$0"; exit 0 ;; esac
+case "${1:-}" in -h|--help) sed -n '2,33p' "$0"; exit 0 ;; esac
 
 if ! command -v python3 > /dev/null 2>&1; then
   echo "gate-github: python3 not found" >&2
@@ -62,7 +67,17 @@ except Exception:
     state = {}
 
 repos = [e for e in (sources.get("repos") or []) if isinstance(e, dict)]
-ids = sys.argv[1:]
+args = sys.argv[1:]
+clone_override = None
+if "--clone" in args:
+    i = args.index("--clone")
+    if i + 1 >= len(args):
+        die("--clone needs a path")
+    clone_override = args[i + 1]
+    args = args[:i] + args[i + 2:]
+    if len(args) != 1:
+        die("--clone gates exactly one id")
+ids = args
 if ids:
     by_id = {e.get("id"): e for e in repos}
     unknown = [i for i in ids if i not in by_id]
@@ -175,7 +190,7 @@ for e in entries:
     stored = {"lastSha": last} if last else None
     branch = e.get("branch") or "main"
 
-    clone = e.get("localClone")
+    clone = clone_override or e.get("localClone")
     if clone:  # a leading ~ is the running user's home, so one entry serves every machine
         clone = os.path.expanduser(clone)
     if not clone or git(clone, "rev-parse", "--git-dir").returncode != 0:

@@ -199,7 +199,12 @@ never sources, because sourcing executes the file. It is read-only: it never wri
   `--fingerprint`, run before extracting).
 - `stored` is the slot the gate compared against, or `null`.
 - `gate-github.sh` adds `excluded`: how many changed paths `.brainforge-source.yml` filtered out.
-  The count only; excluded paths are never named.
+  The count only; excluded paths are never named. `gate-github.sh --clone <path> <id>` gates one
+  entry against the clone at `<path>` instead of its `localClone`.
+- `source-signal.sh <id> --clone <path>` is not a gate: run by a source repo's workflow, it runs
+  `gate-github.sh --clone` and keeps that source's `Sync needed: <id>` issue in this brain current
+  (`pipeline/adapters/github.md`, "Source-side trigger"). It exits 1 on `not-checked`, so the
+  run goes red.
 - Exit 1 means misuse (an unknown id, no `sources.json`, no `python3`), with a message on stderr.
 - A caller that gets no JSON line for an entry treats it as `not-checked (gate failed)`, never
   as unchanged. There is no fallback to running the adapter's §1 by hand.

@@ -25,5 +25,8 @@ Steps:
    sync sets it to `true`, even when other sources have already synced.
 5. Remind the user which credential (e.g. `FIGMA_TOKEN` / `GITHUB_TOKEN`) must be in `.env`.
 6. Offer to run `/sync <that source>` now to do the initial extraction.
+7. For a `repos` entry, mention in one line that the source repo can install the optional
+   source-side trigger (`pipeline/adapters/github.md`, "Source-side trigger"), so a change there
+   opens an issue here instead of waiting for someone to notice.
 
 Do not commit credentials. Do not put tokens in `sources.json`.
