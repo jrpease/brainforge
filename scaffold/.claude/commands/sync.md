@@ -93,7 +93,8 @@ else 8,000. It also flags 3× growth since `$PREV`. Paste every `⚠ rule-6:` li
 the PR body verbatim. No output means nothing breached. Exit 1 means nothing was checked: relay
 its message and say in the PR body that golden rule 6 was not checked.
 
-If the owner decides a breach is correct, add an `acceptedSize` entry (doc, tokens, since, why) to
+If the owner decides a breach is correct, add an `acceptedSize` entry (doc, tokens, since, why;
+`"doc": "domain total"` for a domain total) to
 that source in `sources.json` in the same PR. That silences the line until the doc exceeds the
 accepted number or triples again. Never silence it by removing the envelope.
 

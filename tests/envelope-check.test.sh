@@ -64,6 +64,17 @@ manifest prev.json 3 "$(dom $G 500 2000 web.md:1500)"
 run prev.json cur.json sources.json web
 expect "(c) accepted but tripled" "⚠ rule-6: context/derived/repos/web.md is 5000 tokens (envelope 6000 / was 1500) — consider aggregating."
 
+# (c2) an accepted "domain total" replaces the table total for that entry; over it still warns
+sources "\"monday\": [$(src roadmap $M ', "acceptedSize": [{ "doc": "domain total", "tokens": 6000, "since": "2026-10-13", "why": "test" }]')]"
+manifest prev.json 3 "$(dom $M 500 5500 roadmap.md:2000)"
+manifest cur.json 3 "$(dom $M 500 5500 roadmap.md:2000)"
+run prev.json cur.json sources.json roadmap
+expect "(c2) accepted domain total is silent" ""
+manifest cur.json 3 "$(dom $M 500 6500 roadmap.md:2000)"
+run prev.json cur.json sources.json roadmap
+expect "(c2) over the accepted total" "⚠ rule-6: context/derived/monday totals 6500 tokens (envelope 6000) — consider aggregating."
+sources "\"monday\": [$(src roadmap $M)], \"repos\": [$(src web $G ', "acceptedSize": [{ "doc": "web.md", "tokens": 6000, "since": "2026-10-07", "why": "test" }]')], \"ga\": [$(src analytics $A)]"
+
 # (d) _index.md checked via indexTokens; a schema-1 prev gives no baseline -> was n/a
 manifest prev.json 1 "$(dom $M 100 600 roadmap.md:500)"
 manifest cur.json 3 "$(dom $M 2000 2500 roadmap.md:500)"

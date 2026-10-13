@@ -87,6 +87,10 @@ the adapter writes to, § Where a sync writes):
         "why": "item-level detail is what cross-team reads use this board for" }
     ]
 
+A domain total is accepted the same way, with `"doc": "domain total"`. It replaces the adapter's
+domain total for that entry; when several entries share a domain, each entry checks the total
+against its own adapter's figure, so each needs its own acceptance.
+
 It lives on the source entry, in `sources.json`, because it is **brain-specific**. An adapter
 playbook is under the `pipeline/**` bump glob and would be overwritten on the next `/upgrade`.
 
