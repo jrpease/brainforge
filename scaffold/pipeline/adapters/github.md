@@ -5,7 +5,9 @@ private-repo read access (read-only contents scope is enough).
 
 ## 0. Inputs
 - `sources.json` → `repos[]`. Per entry: `localClone` (the `<clone>` below), `branch` (the
-  `<branch>` below), `remote`, the registry `summarize` scope (§0b), and `into`.
+  `<branch>` below), `remote`, the registry `summarize` scope (§0b), and `into`. A leading `~` in
+  `localClone` is the home of whoever runs the sync, so `~/dev/web` works on every machine that
+  keeps its clone there.
 - Destination: the entry's `into:` — written `<into>` below, conventionally `repos/` under the
   derived root. **No `into:` → stop; do not sync this entry and do not fall back to `repos/`**
   (`pipeline/README.md` § Where a sync writes).

@@ -279,7 +279,7 @@ Live checks, backlogged until they can run against real sources (each gets a pro
 - [ ] **L4 session hooks:** a real session in an upgraded brain prints the same nudges as before,
       and the legacy detector fires on a brain holding both old and new hooks.
 
-## Publicly usable (v0.15.2 · synapse 0.8.1)
+## Publicly usable (v0.15.3 · synapse 0.8.1)
 
 - [x] **Public-install smoke test (issue #1).** The whole loop from a public install to a subscribed
       reader, run stranger-style in a throwaway profile. Two failures, both fixed and re-run live:
@@ -287,6 +287,9 @@ Live checks, backlogged until they can run against real sources (each gets a pro
       own routing table, and the website gate compares a SHA-256 of each page instead of trusting
       ETags a CDN rotates between origins
       ([spec](docs/specs/2026-10-13-smoke-test-fixes.md) · [proof](docs/proofs/public-install-smoke-test.md)).
+- [x] **One `localClone` for every machine.** The GitHub gate expands a leading `~`, so an entry
+      written `~/dev/web` resolves on each teammate's machine instead of only the one whose
+      absolute path it names (0.15.3).
 
 ## Deferred (C-tier and additive)
 
