@@ -1,0 +1,3 @@
+# match: GET ^https://www\.example\.test/pricing/$
+# header: ETag: "pricing-final"
+pricing body

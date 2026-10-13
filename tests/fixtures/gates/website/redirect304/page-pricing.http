@@ -1,0 +1,5 @@
+# match: GET ^https://www\.example\.test/pricing$
+# status: 301
+# header: ETag: "redirect-hop"
+# header: Location: https://www.example.test/pricing/
+<a href="/pricing/">moved</a>

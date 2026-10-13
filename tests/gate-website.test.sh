@@ -125,10 +125,23 @@ run lastmodbump marketing
 run errpage marketing
 [ "$(j 'd["status"]')" = changed ] || fail "errpage: a 500 must be a delta ($OUT)"
 [ "$(j 'd["fingerprint"]["urls"]["https://www.example.test/pricing"]')" = "{'lastmod': '2026-09-02', 'etag': None, 'sha256': None}" ] || fail "errpage: non-2xx carries null validators"
-# (10g) a redirect is not a 304: the moved page is a delta, never skipped on the stale hash
+# (10g) a 3xx that does not resolve (no Location) is not a 304: a delta, never skipped on the stale hash
 run moved marketing
 [ "$(j 'd["status"]')" = changed ] || fail "moved: a 301 must be a delta ($OUT)"
 [ "$(j 'd["fingerprint"]["urls"]["https://www.example.test/pricing"]["sha256"]')" = None ] || fail "moved: a 3xx body is not hashed"
+# (10h) a redirect that resolves (301 -> 200, identical bytes) is followed: the final page is
+# hashed, its etag kept (not the redirect hop's), so a trailing-slash redirect is not a delta forever
+run redirect marketing
+[ "$(j 'd["status"]')" = unchanged ] || fail "redirect: a 301 to identical bytes must be unchanged ($OUT)"
+[ "$(j 'd["fingerprint"]["urls"]["https://www.example.test/pricing"] == {"lastmod": "2026-09-02", "etag": "\"pricing-final\"", "sha256": H(b"pricing body\n")}')" = True ] || fail "redirect: fingerprint must carry the final page's etag and hash ($(j 'd["fingerprint"]["urls"]["https://www.example.test/pricing"]'))"
+grep -q 'example.test/pricing/	.*If-None-Match: "pricing-a"' "$TMP/fx/calls.log" || fail "redirect: the conditional headers must reach the final hop"
+# (10i) a followed conditional GET that earns a 304 at the target is unchanged, etag from that hop
+run redirect304 marketing
+[ "$(j 'd["status"]')" = unchanged ] || fail "redirect304: a 301 to a 304 must be unchanged ($OUT)"
+[ "$(j 'd["fingerprint"]["urls"]["https://www.example.test/pricing"]["etag"]')" = '"pricing-final"' ] || fail "redirect304: etag from the final hop"
+# (10j) --fingerprint follows it too
+run redirect --fingerprint marketing
+[ "$(j 'd["fingerprint"]["urls"]["https://www.example.test/pricing"]["sha256"] == H(b"pricing body\n")')" = True ] || fail "fingerprint: a redirected page is hashed at its target"
 cp "$TMP/state.keep" "$TMP/brain/.sync-state.json"
 
 # (11) one page that cannot be downloaded never fails the site: it is a delta with null validators
