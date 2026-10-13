@@ -16,7 +16,8 @@
 #         serving identical bytes from two origins gives one page two ETags. So a 200 whose body
 #         hashes to the stored value is unchanged, and so is a changed <lastmod> over identical
 #         bytes. Every page the gate decides on, it downloads: a delta URL's etag and hash come
-#         from that download, null only when the download failed or was not 2xx.
+#         from that download, null only when the download failed or was not 2xx. Redirects are
+#         followed (up to 10): a page is measured at the URL it resolves to.
 # EXIT    1 only for misuse (unknown id, or no sources.json), message on stderr.
 # Read-only: never writes .sync-state.json. No credentials. A caller that gets no JSON treats
 # the source as `not-checked (gate failed)`, never as unchanged.
@@ -63,8 +64,10 @@ def curl(args):
     bf = tempfile.NamedTemporaryFile(delete=False); bf.close()
     hf = tempfile.NamedTemporaryFile(delete=False); hf.close()
     try:
-        p = subprocess.run(["curl", "-sS", "--max-time", "30", "-o", bf.name, "-D", hf.name,
-                            "-w", "%{http_code}"] + args,
+        # -L: a trailing-slash or http->https redirect is followed to the page it names; the
+        # status and body are the final hop's, and so is the etag (see download)
+        p = subprocess.run(["curl", "-sS", "-L", "--max-redirs", "10", "--max-time", "30",
+                            "-o", bf.name, "-D", hf.name, "-w", "%{http_code}"] + args,
                            stdout=subprocess.PIPE, stderr=subprocess.DEVNULL)
         if p.returncode != 0:
             raise Offline()
@@ -82,7 +85,8 @@ def download(loc, hdrs=()):
         st, body, hdr = curl(list(hdrs) + [loc])
     except Offline:
         return None
-    m = re.search(r"^etag:\s*(.+?)\s*$", hdr, re.I | re.M)
+    final = re.split(r"^HTTP/", hdr, flags=re.M)[-1]  # -D holds every redirect hop's headers
+    m = re.search(r"^etag:\s*(.+?)\s*$", final, re.I | re.M)
     etag = m.group(1) if m else None
     return st, etag, (hashlib.sha256(body).hexdigest() if st.startswith("2") else None)
 

@@ -20,6 +20,9 @@ A fixture looks like this:
 - `# status: <code>` is optional (default 200). `# header: <Name: value>` lines are optional and are
   written to the `-D` file.
 - Everything after those lines is the response body.
+- A 3xx fixture with a `# header: Location: <url>` line is followed when the caller passes `-L`,
+  as curl does: each hop is logged, every hop's headers go to `-D` in order, and `-w`/`-o` get the
+  last hop's. Without a `Location` line, or without `-L`, the 3xx is the final response.
 - The first fixture (glob order) that matches wins, so put specific ones in names that sort first.
 - No match: the stub exits 7, which is curl's "couldn't connect". A missing fixture reads as offline,
   never as success.

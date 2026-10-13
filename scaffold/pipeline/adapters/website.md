@@ -50,6 +50,9 @@ GET <sitemap>            → list of <loc> + <lastmod>
   a delta URL's etag and hash come from the gate's own download (so delta pages are downloaded
   twice, once here and once in §2), and are null only when that download failed or was not 2xx. One page that
   cannot be downloaded is a delta; it never makes the whole site `not-checked`.
+- Every fetch follows redirects (up to 10), the sitemap's included: a page is measured and hashed
+  at the URL its `<loc>` resolves to, so a trailing-slash redirect is not a delta every sync. §2's
+  fetch must follow the same redirect.
 - A slot written before hashes existed has no `sha256`: its next 200 is a delta, as before, and
   that sync records the hash.
 
