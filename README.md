@@ -57,7 +57,7 @@ where the value lands fastest, usually eng or design, and add the rest as you fe
 **It is not (yet):**
 - A hosted product, a multi-tenant service, or anything with billing.
 - A cross-platform builder — the *brain* is universal; the *builder* is Claude-first for now.
-- An MCP server. (Parked as the eventual universal reader.)
+- A hosted MCP endpoint. (The local MCP server ships; a web-reachable one is on the roadmap.)
 
 ---
 
@@ -107,11 +107,14 @@ brain, they subscribe to it:
   commits the subscription settings (see `synapse/templates/product-repo-settings.md`). Every
   session auto-pulls the brain, shows a roughly 300-token map, and routes prompts to only the
   slice they need, announcing what it loaded and skipped.
-- **Cursor / Codex / any file-aware tool** → paste the pointer block
+- **Claude Desktop / Cursor / Codex / any local MCP client** → add the synapse MCP server
+  (`synapse/templates/mcp-client-config.md`): one config block, two read-only tools, the same map
+  and routing rules as the plugin. macOS and Linux.
+- **A file-aware tool without MCP** → paste the pointer block
   (`scaffold/templates/brain-pointer-snippet.md`) into the repo's rules file. Same manifest (a
   machine-readable summary of the brain's shape), same reading rules.
-- **Web-only tools (ChatGPT, Claude.ai)** → on the roadmap: a read-only MCP endpoint over the
-  same manifest.
+- **Web-only tools (ChatGPT, Claude.ai)** → on the roadmap: a hosted MCP endpoint, the same server
+  behind HTTPS and sign-in.
 
 ---
 
@@ -216,7 +219,8 @@ Proof summaries for the adapters, the `/forge` walk and CI manifest regeneration
 [`docs/proofs/`](docs/proofs/README.md); the other live runs are recorded in
 [ROADMAP.md](ROADMAP.md).
 
-Open next: the **MCP façade** (tier 3, for web-only tools), and the manifest backfill for brains
+Still open: a **hosted MCP endpoint** (tier 3, for web-only tools, waiting on a team that needs
+it), and the manifest backfill for brains
 scaffolded before manifests existed.
 
 > "Cerebro" was the working codename during design. The shipping name is **Brainforge**.

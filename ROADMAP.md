@@ -192,9 +192,15 @@ whole-branch review.)
       harness) — budget ~$15–25 per full run, don't run it casually, and budget
       it into the *day*: a long background run plus machine sleep once orphaned a subagent for ~8h
       (fix pattern: independent process watch on the pid + foreground reruns).
-- [ ] **MCP façade** (tier 3 — ChatGPT web, Claude.ai) — **next**, own spec. A thin read-only reader
-      over the same manifest; routing is data, so there is nothing to redesign. Deliberately after
-      the routing table has absorbed a few weeks of announce-line feedback.
+- [x] **MCP façade, local — synapse 0.8.0.** `synapse/mcp/server.py`, a stdlib-only stdio MCP
+      server for any local client (Claude Desktop, Cursor, Codex, VS Code). It is not a second
+      reader: `brain_map` runs the synapse hook and `brain_read` is fenced to the context root plus
+      the manifest, while the brain-routing skill is served as the server's instructions. Proven
+      live in Codex and in Claude Code with the plugin disabled
+      ([spec](docs/specs/2026-10-13-mcp-facade.md) · [proof](docs/proofs/mcp-facade.md)).
+- [ ] **Hosted MCP endpoint** (tier 3 — ChatGPT web, Claude.ai). The same server behind HTTPS and
+      sign-in. Undesigned: who may read which brain, and where it runs. Waits for a subscribing
+      team to ask.
 
 Backfill owed before this phase is real in production: brains scaffolded before v0.4.0 have no
 manifest yet — per brain, `/upgrade` (brings `gen-manifest.sh` + `/forge`) then `/sync`
@@ -275,7 +281,7 @@ Live checks, backlogged until they can run against real sources (each gets a pro
 
 ## Deferred (C-tier and additive)
 
-- MCP universal reader · access tiers · autonomous scheduled sync · declarative/executable adapters.
+- Hosted MCP endpoint · access tiers · autonomous scheduled sync · declarative/executable adapters.
 
 - **Source-side sync trigger.** A source repo runs a GitHub Action that opens a sync issue on the
   brain when in-scope paths change, so the pull stops depending on one laptop noticing. Cheaper

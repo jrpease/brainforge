@@ -84,6 +84,7 @@ for remote in "${remotes[@]}"; do
 
   m="$dir/.brainforge/brain-manifest.json"
   if [ ! -f "$m" ]; then
+    # synapse/mcp/server.py parses this line (NO_MANIFEST) for the brain's directory.
     echo "🧠 synapse: $name has no manifest — read $dir/context/ directly (degraded routing)."
     continue
   fi
@@ -93,6 +94,7 @@ for remote in "${remotes[@]}"; do
   ctx_fp=$(sed -n 's/^  "contextFingerprint": "\(.*\)",$/\1/p' "$m" | head -1)
   last=$(git -C "$dir" log -1 --format=%cs 2>/dev/null || echo "?")
 
+  # synapse/mcp/server.py parses this line (HEADER) for the brain's directory.
   echo "🧠 $name — brain at $dir (last change $last, map generated $gen_at)"
 
   # Staleness, by CONTENT. `contextFingerprint` is the git tree object id of the brain's

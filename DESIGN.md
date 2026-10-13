@@ -36,8 +36,9 @@ LLM). **The builder + manager layer is Claude-first.**
   **Claude is the author's tool; every LLM is a reader.**
 - Rejected: per-platform builders (Cursor rules + GPT config + …) — four scaffolds that drift
   out of sync, the exact disease this cures.
-- **MCP** parked as the eventual *universal reader* (the no-git path for ChatGPT /
-  non-technical teammates). Strictly additive; does not gate v1.
+- **MCP** as the *universal reader*, strictly additive. The local stdio server shipped in
+  synapse 0.8.0 (`synapse/mcp/server.py`); the hosted endpoint for ChatGPT / Claude.ai (the
+  no-git path for non-technical teammates) is still parked.
 
 ## 3. Topology
 
@@ -156,7 +157,7 @@ brain). Not passive tools you have to remember to run.
 - **Extraction plan:** how to separate the reusable Brainforge spine from the source brain's
   org-specific canon/sources. This was the immediate next step and literally defined the
   product seam. That work is done; this repo is the reusable spine it produced.
-- **MCP universal reader, access tiers, autonomous scheduling, declarative adapters** — all
+- **Hosted MCP endpoint, access tiers, autonomous scheduling, declarative adapters** — all
   parked, all additive.
 
 ---
