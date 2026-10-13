@@ -221,6 +221,12 @@ GIT_SSH_COMMAND="ssh -i k" PATH="$TMP/spy:$PATH" gate web >/dev/null
 [ -s "$TMP/spy/log" ]                                  || fail "(k) spy git never ran (pre-set GIT_SSH_COMMAND)"
 ! grep -qv '^0|ssh -i k -oBatchMode=yes$' "$TMP/spy/log" || fail "(k) an owner's GIT_SSH_COMMAND must be kept, BatchMode appended (got: $(sort -u "$TMP/spy/log"))"
 
+# --- a leading ~ in localClone is the running user's home ---
+fresh; mv "$TMP/w/clone" "$HOME/web-clone"
+sources "$(entry web github.com/acme/web '~/web-clone')"; state "{ \"web\": { \"lastSha\": \"$(head_sha)\" } }"
+[ "$(field "$(gate web)" 'j["status"]')" = unchanged ] || fail "~/ localClone must resolve under HOME (got: $(gate web))"
+mv "$HOME/web-clone" "$TMP/w/clone"
+
 # --- not-checked: no clone, and fetch failure (offline) ---
 sources "$(entry web github.com/acme/web "$TMP/w/missing")"
 [ "$(field "$(gate web)" 'j["status"]+":"+j["reason"]')" = "not-checked:no clone" ] || fail "missing clone -> not-checked (no clone)"
