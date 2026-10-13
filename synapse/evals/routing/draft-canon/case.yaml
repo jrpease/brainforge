@@ -1,0 +1,33 @@
+schema_version: "1.0"
+name: draft-canon
+description: >-
+  A canon doc marked `status: draft` is a proposal, not authored truth. The
+  only doc on remote work (company/remote-work.md) is a draft, so the answer
+  must come from it and must say it is a draft. Before the skill read `status:`,
+  a draft was cited with the same authority as approved canon.
+context:
+  scaffold_script: scaffold.sh
+execution:
+  prompt: "How many days a month do we have to be in the office, and where?"
+  max_turns: 12
+  timeout_seconds: 300
+  allowed_tools: [Read, Glob, Grep, Skill]
+graders:
+  - type: tool_used
+    name: reads-the-draft
+    tool: Read
+    input_match: "company/remote-work"
+    min: 1
+  - type: regex
+    name: cites-anchor-days
+    target: last_message
+    pattern: "(?i)two anchor days|2 anchor days|two days a month|2 days a month|lisbon"
+  - type: regex
+    name: flags-it-as-draft
+    target: last_message
+    pattern: "(?i)\\bdraft\\b|not (yet )?approved|unapproved"
+  - type: regex
+    name: has-announce-line
+    target: last_message
+    pattern: "loaded:.*skipped:"
+    flags: s
