@@ -1,0 +1,4 @@
+# match: GET ^https://www\.example\.test/pricing$
+# status: 301
+# header: Location: https://www.example.test/pricing/
+pricing body

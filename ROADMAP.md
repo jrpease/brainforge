@@ -279,6 +279,15 @@ Live checks, backlogged until they can run against real sources (each gets a pro
 - [ ] **L4 session hooks:** a real session in an upgraded brain prints the same nudges as before,
       and the legacy detector fires on a brain holding both old and new hooks.
 
+## Publicly usable (v0.15.2 · synapse 0.8.1)
+
+- [x] **Public-install smoke test (issue #1).** The whole loop from a public install to a subscribed
+      reader, run stranger-style in a throwaway profile. Two failures, both fixed and re-run live:
+      `/synapse:subscribe` now grants the real `SYNAPSE_HOME` and a read-only rule for synapse's
+      own routing table, and the website gate compares a SHA-256 of each page instead of trusting
+      ETags a CDN rotates between origins
+      ([spec](docs/specs/2026-10-13-smoke-test-fixes.md) · [proof](docs/proofs/public-install-smoke-test.md)).
+
 ## Deferred (C-tier and additive)
 
 - Hosted MCP endpoint · access tiers · autonomous scheduled sync · declarative/executable adapters.

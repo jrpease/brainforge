@@ -191,11 +191,12 @@ never sources, because sourcing executes the file. It is read-only: it never wri
 | `never` | no stored slot, or (figma) the entry's `into` holds no output yet | extract regardless |
 | `blocked` | the gate refused to look, e.g. the clone's origin is another repo, an unreadable `.brainforge-source.yml`, or a stored `lastSha` gone from history | stop and ask the owner; `reason` says why |
 | `not-checked` | it could not look; `reason` is `no clone`, `no credentials`, `offline`, an HTTP status, or the API's error | skip the source and report the reason |
+| `fingerprint` | only from `gate-website.sh --fingerprint <id>`: every page downloaded and hashed | store the fingerprint (website §2 runs it on a `never` source) |
 
 - `fingerprint` is in the shape the adapter's §3 stores, so §3 copies it rather than rebuilding
-  it. The one exception is website: §3 then sets the etag of each page it fetched. It may be
-  `null` on `never`, `blocked` and `not-checked`; for a `never` entry, the adapter's §3 says how
-  to build it from the extraction.
+  it, website included. It may be `null` on `never`, `blocked` and `not-checked`; for a `never`
+  entry, the adapter's §3 says how to build it from the extraction (website: from
+  `--fingerprint`, run before extracting).
 - `stored` is the slot the gate compared against, or `null`.
 - `gate-github.sh` adds `excluded`: how many changed paths `.brainforge-source.yml` filtered out.
   The count only; excluded paths are never named.

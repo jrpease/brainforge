@@ -18,11 +18,15 @@ that is the entire onboarding.
     "SYNAPSE_BRAINS": "git@github.com:YOUR-ORG/YOUR-BRAIN.git"
   },
   "permissions": {
-    "additionalDirectories": ["~/.synapse"]
+    "additionalDirectories": ["~/.synapse"],
+    "allow": ["Read(~/.claude/plugins/cache/brainforge/synapse/**)"]
   }
 }
 ```
 
+- The two permissions are what every session reads: the brain clones (`~/.synapse`) and synapse's
+  own routing table, read-only. Without them each brain question asks for permission, and a
+  headless run (`claude -p`) is refused outright and answers ungrounded.
 - `SYNAPSE_BRAINS` is comma-separated — subscribe one repo to several brains if you need to.
 - Teammates need read access to the brain repo (normal GitHub org membership).
 - Personal (non-repo) subscription: install synapse once

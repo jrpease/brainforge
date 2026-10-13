@@ -9,7 +9,7 @@ needs rendered/JS understanding, scoped to that one URL.
 - Destination: the entry's `into:` — written `<into>` below, conventionally `web/` under the
   derived root. **No `into:` → stop; do not sync this entry and do not fall back to `web/`**
   (`pipeline/README.md` § Where a sync writes).
-- `.sync-state.json` → `websites[<id>]` (per-URL lastmod + etag)
+- `.sync-state.json` → `websites[<id>]` (per-URL lastmod + etag + sha256)
 
 ## 0a. Size envelope  — golden rule #6
 
@@ -38,26 +38,35 @@ scripts). Never run the call below by hand, even when the script cannot run: tha
 GET <sitemap>            → list of <loc> + <lastmod>
 ```
 - For each URL: if `<lastmod>` == stored AND a conditional `GET` (`If-Modified-Since`/
-  `If-None-Match`) returns **304** → skip it (free). `If-Modified-Since` is the stored `<lastmod>`
+  `If-None-Match`) returns **304** → skip it (free). A **200** whose body hashes (SHA-256) to the
+  stored `sha256` is skipped too: a CDN can serve identical bytes from two origins with different
+  ETags, and the content is what "changed" means. `If-Modified-Since` is the stored `<lastmod>`
   as an HTTP-date (`Tue, 01 Sep 2026 00:00:00 GMT`), since a server ignores any other format; a
   `<lastmod>` that does not parse sends no `If-Modified-Since`.
-- New URLs and changed `<lastmod>` → the delta to fetch. A known URL with no `<lastmod>` gets the
-  same conditional `GET`.
-- The gate's `fingerprint` is `{urls: {<url>: {lastmod, etag}}}`. A skipped URL carries its stored
-  etag, or the one the 304 returned. A delta URL carries its new `<lastmod>` and `etag: null`,
-  because the gate never fetched the page.
+- New URLs and changed `<lastmod>` → the gate downloads the page. A changed `<lastmod>` over
+  bytes that hash to the stored value is skipped (a rebuild that bumped every date); anything
+  else is the delta to fetch. A known URL with no `<lastmod>` gets the same conditional `GET`.
+- The gate's `fingerprint` is `{urls: {<url>: {lastmod, etag, sha256}}}`, complete for every URL:
+  a delta URL's etag and hash come from the gate's own download (so delta pages are downloaded
+  twice, once here and once in §2), and are null only when that download failed or was not 2xx. One page that
+  cannot be downloaded is a delta; it never makes the whole site `not-checked`.
+- A slot written before hashes existed has no `sha256`: its next 200 is a delta, as before, and
+  that sync records the hash.
 
 ## 2. Extract only the delta
-- Fetch changed URLs, extract title, page type, headings/structure, and key copy.
+- **When the gate said `never`, fingerprint first:** run
+  `bash .brainforge/gate-website.sh --fingerprint <id>` before extracting anything. Its
+  `fingerprint` is this sync's (status `fingerprint`); `not-checked` means skip the source this
+  sync. Hashing before extracting errs safe: a page that changes in between is re-fetched next
+  sync, never stored as current over an older extraction.
+- Fetch changed URLs (every URL on a `never` source), extract title, page type, headings/structure, and key copy.
 - Update `<into>site-map.md` (the inventory table) and, for significant pages, a per-page file
   in `<into>`. Refresh this site's row in `<into>_index.md`, leaving other rows alone.
 ## 3. Finish
 - Stamp `source` / `last-synced` / `generated-by` provenance frontmatter. Exception: an existing
   `<into>_index.md`, where only `last-synced` changes (see below).
 - Update `.sync-state.json` → `websites[<id>]` with the gate's `fingerprint` (its `urls` map),
-  then set the `etag` of each URL §2 fetched from that fetch's response. That merge is the one
-  exception to storing the gate's fingerprint verbatim: the gate left those etags `null`. When
-  the gate gave no fingerprint (`never`), build the same map from the sitemap and §2's fetches.
+  verbatim: on a `never` source, the one §2's `--fingerprint` printed.
 - In `.sync-state.json`, set `"synced": true` in `websites[<id>]` and `lastFullSync` to today
   (`YYYY-MM-DD`). Disarms the session-start sync-health tripwire, which stays lit while any
   source's `synced` is `false` or `lastFullSync` is `null`.

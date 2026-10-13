@@ -32,7 +32,9 @@ run() {
   : "$d"
 }
 # j '<python expr over d (first line object)>' -> prints result
-j() { printf '%s\n' "$OUT" | head -n 1 | $PY -c 'import sys,json; d=json.loads(sys.stdin.readline()); print(eval(sys.argv[1]))' "$1"; }
+# H(b"...") is the sha256 of literal bytes: expected hashes are computed here, never captured from
+# a gate run, so a gate hashing the wrong thing cannot agree with them by construction.
+j() { printf '%s\n' "$OUT" | head -n 1 | $PY -c 'import sys,json,hashlib; H=lambda b: hashlib.sha256(b).hexdigest(); d=json.loads(sys.stdin.readline()); print(eval(sys.argv[1]))' "$1"; }
 calls() { if [ -f "$TMP/fx/calls.log" ]; then wc -l < "$TMP/fx/calls.log" | tr -d ' '; else echo 0; fi; }
 
 # (1) unchanged: one sitemap fetch, every other call a conditional GET answered 304
@@ -50,19 +52,23 @@ grep -q 'example.test/about	.*If-None-Match: "about-1"' "$TMP/fx/calls.log" || f
 grep -q 'example.test/about	.*If-Modified-Since: Tue, 01 Sep 2026 00:00:00 GMT' "$TMP/fx/calls.log" || fail "conditional GET must send If-Modified-Since as the HTTP-date of the stored lastmod"
 [ "$(cat "$TMP/brain/.sync-state.json")" = "$(cat "$TMP/state.before")" ] || fail "gate must not write .sync-state.json"
 
-# (2) changed lastmod + a new URL: both in delta, etag null, no fetch of the page itself
+# (2) changed lastmod + a new URL: both in delta, each downloaded once, so the fingerprint is complete
 run changed marketing
 [ "$(j 'd["status"]')" = changed ] || fail "changed: status ($OUT)"
 [ "$(j 'sorted(d["delta"])')" = "['https://www.example.test/blog/new', 'https://www.example.test/pricing']" ] || fail "changed: delta ($(j 'd["delta"]'))"
-[ "$(j 'd["fingerprint"]["urls"]["https://www.example.test/pricing"]')" = "{'lastmod': '2026-10-05', 'etag': None}" ] || fail "changed: delta URL fingerprint must carry new lastmod and etag null"
+[ "$(j 'd["fingerprint"]["urls"]["https://www.example.test/pricing"] == {"lastmod": "2026-10-05", "etag": "\"pricing-2\"", "sha256": H(b"pricing v2\n")}')" = True ] || fail "changed: delta URL fingerprint must carry the new lastmod, etag and hash ($(j 'd["fingerprint"]["urls"]["https://www.example.test/pricing"]'))"
+[ "$(j 'd["fingerprint"]["urls"]["https://www.example.test/blog/new"]["sha256"] == H(b"a new post\n")')" = True ] || fail "changed: a new URL is downloaded and hashed"
 [ "$(j 'd["fingerprint"]["urls"]["https://www.example.test/about"]["etag"]')" = '"about-1"' ] || fail "changed: skipped URL keeps etag"
-[ "$(calls)" = 2 ] || fail "changed: expected sitemap + 1 conditional GET only, got $(calls)"
+[ "$(calls)" = 4 ] || fail "changed: expected sitemap + 1 conditional + 2 downloads, got $(calls)"
+grep 'example.test/pricing	' "$TMP/fx/calls.log" | grep -q 'If-None-Match' && fail "changed: a changed lastmod is an unconditional download"
 
 # (3) matching lastmod but the conditional GET returns 200 -> delta
 run cond200 marketing
 [ "$(j 'd["status"]')" = changed ] || fail "cond200: status ($OUT)"
 [ "$(j 'd["delta"]')" = "['https://www.example.test/pricing']" ] || fail "cond200: delta ($(j 'd["delta"]'))"
-[ "$(j 'd["fingerprint"]["urls"]["https://www.example.test/pricing"]["etag"]')" = None ] || fail "cond200: delta URL etag must be null"
+# (3b) legacy state, no stored sha256: a 200 is a delta, as before this fix, and records the hash
+[ "$(j 'd["fingerprint"]["urls"]["https://www.example.test/pricing"] == {"lastmod": "2026-09-02", "etag": "\"pricing-2\"", "sha256": H(b"")}')" = True ] || fail "cond200: delta URL takes the 200's etag and hash ($(j 'd["fingerprint"]["urls"]["https://www.example.test/pricing"]'))"
+[ "$(calls)" = 3 ] || fail "cond200: the conditional GET's own body is hashed, not fetched again (got $(calls))"
 
 # (4) URL with no <lastmod> gets the conditional GET; 304 skips it
 run nolastmod marketing
@@ -89,6 +95,61 @@ printf '%s\n' "$ims" | grep -Evq '^[A-Z][a-z]{2}, [0-9]{2} [A-Z][a-z]{2} [0-9]{4
 grep -q 'example.test/about	.*If-Modified-Since: Tue, 01 Sep 2026 10:00:00 GMT' "$TMP/fx/calls.log" || fail "noetag: Z lastmod must convert to its HTTP-date"
 grep -q 'example.test/pricing	.*If-Modified-Since: Wed, 02 Sep 2026 08:00:00 GMT' "$TMP/fx/calls.log" || fail "noetag: offset lastmod must convert to GMT"
 grep 'example.test/team	' "$TMP/fx/calls.log" | grep -q 'If-Modified-Since' && fail "noetag: unparseable lastmod must send no If-Modified-Since"
+
+# (10) content hashing. State: both pages carry the hash of what was served last time.
+cp "$TMP/brain/.sync-state.json" "$TMP/state.keep"
+$PY - "$TMP/brain/.sync-state.json" <<'P'
+import hashlib, json, sys
+H = lambda b: hashlib.sha256(b).hexdigest()
+json.dump({"version": 1, "websites": {"marketing": {"synced": True, "urls": {
+  "https://www.example.test/about": {"lastmod": "2026-09-01", "etag": "\"about-1\"", "sha256": H(b"about body\n")},
+  "https://www.example.test/pricing": {"lastmod": "2026-09-02", "etag": "\"pricing-a\"", "sha256": H(b"pricing body\n")}}}}},
+  open(sys.argv[1], "w"))
+P
+# (10a) a CDN flap: another origin's ETag, identical bytes -> unchanged, new etag kept, same hash
+run flap marketing
+[ "$(j 'd["status"]')" = unchanged ] || fail "flap: identical bytes under another ETag must be unchanged ($OUT)"
+[ "$(j 'd["fingerprint"]["urls"]["https://www.example.test/pricing"] == {"lastmod": "2026-09-02", "etag": "\"pricing-b\"", "sha256": H(b"pricing body\n")}')" = True ] || fail "flap: fingerprint ($(j 'd["fingerprint"]["urls"]["https://www.example.test/pricing"]'))"
+# (10c) a 304 keeps the stored hash, or the next flap would read changed again
+[ "$(j 'd["fingerprint"]["urls"]["https://www.example.test/about"]["sha256"] == H(b"about body\n")')" = True ] || fail "304: must keep the stored sha256"
+# (10b) another ETag and different bytes -> delta with the new hash
+run flapchanged marketing
+[ "$(j 'd["status"]')" = changed ] && [ "$(j 'd["delta"]')" = "['https://www.example.test/pricing']" ] || fail "flapchanged: different bytes must be a delta ($OUT)"
+[ "$(j 'd["fingerprint"]["urls"]["https://www.example.test/pricing"]["sha256"] == H(b"pricing body, new price\n")')" = True ] || fail "flapchanged: delta carries the new hash"
+# (10e) a bumped <lastmod> over identical bytes -> unchanged, the new lastmod stored
+run lastmodbump marketing
+[ "$(j 'd["status"]')" = unchanged ] || fail "lastmodbump: identical bytes under a new lastmod must be unchanged ($OUT)"
+[ "$(j 'd["fingerprint"]["urls"]["https://www.example.test/pricing"]["lastmod"]')" = 2026-10-05 ] || fail "lastmodbump: must store the new lastmod"
+# (10f) an error page whose body happens to match the stored hash is never "unchanged": only a 2xx
+# body is hashed, so a stable 500 cannot read as current sync after sync
+run errpage marketing
+[ "$(j 'd["status"]')" = changed ] || fail "errpage: a 500 must be a delta ($OUT)"
+[ "$(j 'd["fingerprint"]["urls"]["https://www.example.test/pricing"]')" = "{'lastmod': '2026-09-02', 'etag': None, 'sha256': None}" ] || fail "errpage: non-2xx carries null validators"
+# (10g) a redirect is not a 304: the moved page is a delta, never skipped on the stale hash
+run moved marketing
+[ "$(j 'd["status"]')" = changed ] || fail "moved: a 301 must be a delta ($OUT)"
+[ "$(j 'd["fingerprint"]["urls"]["https://www.example.test/pricing"]["sha256"]')" = None ] || fail "moved: a 3xx body is not hashed"
+cp "$TMP/state.keep" "$TMP/brain/.sync-state.json"
+
+# (11) one page that cannot be downloaded never fails the site: it is a delta with null validators
+run missingpage marketing
+[ "$(j 'd["status"]')" = changed ] || fail "missingpage: the entry must still be changed, not not-checked ($OUT)"
+[ "$(j 'd["fingerprint"]["urls"]["https://www.example.test/blog/new"]')" = "{'lastmod': '2026-10-06', 'etag': None, 'sha256': None}" ] || fail "missingpage: failed download carries null validators"
+[ "$(j '"https://www.example.test/blog/new" in d["delta"]')" = True ] || fail "missingpage: failed download is in the delta"
+
+# (12) --fingerprint: every sitemap URL downloaded once, unconditionally; works with no stored slot
+run full --fingerprint marketing
+[ "$(j 'd["status"]')" = fingerprint ] && [ "$(j 'd["delta"]')" = "[]" ] || fail "fingerprint: status/delta ($OUT)"
+[ "$(j 'd["fingerprint"]["urls"] == {"https://www.example.test/about": {"lastmod": "2026-09-01", "etag": "\"about-1\"", "sha256": H(b"about body\n")}, "https://www.example.test/pricing": {"lastmod": "2026-09-02", "etag": "\"pricing-a\"", "sha256": H(b"pricing body\n")}}')" = True ] || fail "fingerprint: full map ($(j 'd["fingerprint"]'))"
+[ "$(calls)" = 3 ] || fail "fingerprint: sitemap + one download per URL (got $(calls))"
+grep -q 'If-None-Match\|If-Modified-Since' "$TMP/fx/calls.log" && fail "fingerprint: downloads must be unconditional"
+run full --fingerprint noslot
+[ "$(j 'd["status"]')" = fingerprint ] || fail "fingerprint: a never-synced source must fingerprint, not print never ($OUT)"
+[ "$(j 'd["stored"]')" = None ] || fail "fingerprint: a slot-less entry reports stored null, per the contract"
+for args in "--fingerprint" "--fingerprint marketing noslot" "--fingerprint nope"; do
+  rc=0; out=$(cd "$TMP/brain" && CURL_STUB_DIR="$TMP/fx" PATH="$TMP/bin:/usr/bin:/bin" bash "$GATE" $args 2>/dev/null) || rc=$?
+  [ "$rc" = 1 ] && [ -z "$out" ] || fail "misuse '$args' must exit 1 with no stdout (rc=$rc)"
+done
 
 # (5) stub exit 7 -> not-checked (offline)
 run offline marketing
