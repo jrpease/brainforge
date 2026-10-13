@@ -12,7 +12,7 @@ Figma file because one frame moved.
 |---|---|---|
 | Repo | `git diff <lastSha>..HEAD --name-only` | re-summarize affected areas |
 | Figma | file `version`/`lastModified` via REST → then `depth=1` node diff | export/extract changed nodes |
-| Website | sitemap `<lastmod>` + HTTP `ETag`/`If-Modified-Since` (304 = free) | refetch changed URLs |
+| Website | sitemap `<lastmod>` + HTTP `ETag`/`If-Modified-Since` (304 = free), then the page body's SHA-256 | refetch changed URLs |
 | Shopify | max product `updated_at` + resource counts via Admin REST | re-extract changed products/collections |
 | GA (metrics) | `sessions` by `date` over a trailing window (dates + per-day count) | re-pull only new/restated days (append-merge) |
 

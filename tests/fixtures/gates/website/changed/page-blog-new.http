@@ -1,0 +1,3 @@
+# match: GET ^https://www\.example\.test/blog/new$
+# header: ETag: "new-1"
+a new post

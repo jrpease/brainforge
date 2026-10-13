@@ -1,0 +1,3 @@
+# match: GET ^https://www\.example\.test/about$
+# header: ETag: "about-1"
+about body

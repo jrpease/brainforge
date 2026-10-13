@@ -2,21 +2,28 @@
 # gate-website.sh — the website adapter's §1 cheap change gate, as a script.
 #
 # USAGE   bash .brainforge/gate-website.sh [<source-id>...]    (run from the brain root)
+#         bash .brainforge/gate-website.sh --fingerprint <source-id>
 #         With ids it gates those websites[] entries; with none, every enabled one.
+#         --fingerprint downloads every sitemap URL of one entry and prints its full
+#         fingerprint (status `fingerprint`, empty delta): §2 runs it first on a `never` source.
 # OUTPUT  one JSON object per entry, one per line (JSON Lines), exit 0:
 #           {"type","id","status","reason","fingerprint","stored","delta"}
-#         status: unchanged | changed | never | not-checked  (website never emits `blocked`)
-#         fingerprint {"urls": {<url>: {"lastmod","etag"}}} is the shape §3 stores under
-#         .sync-state.json websites[<id>].urls. Skipped URLs carry the stored etag (or the one
-#         the 304 returned); `delta` URLs carry the new <lastmod> and etag null, because the
-#         gate never fetches the page. §3 sets the etag of each URL §2 fetched from that response.
+#         status: unchanged | changed | never | not-checked  (website never emits `blocked`),
+#         plus `fingerprint`, only from --fingerprint.
+#         fingerprint {"urls": {<url>: {"lastmod","etag","sha256"}}} is the shape §3 stores
+#         verbatim under .sync-state.json websites[<id>].urls. `sha256` is the page body's hash:
+#         the content, which is what "changed" means. An ETag only stands in for it, and a CDN
+#         serving identical bytes from two origins gives one page two ETags. So a 200 whose body
+#         hashes to the stored value is unchanged, and so is a changed <lastmod> over identical
+#         bytes. Every page the gate decides on, it downloads: a delta URL's etag and hash come
+#         from that download, null only when the download failed or was not 2xx.
 # EXIT    1 only for misuse (unknown id, or no sources.json), message on stderr.
 # Read-only: never writes .sync-state.json. No credentials. A caller that gets no JSON treats
 # the source as `not-checked (gate failed)`, never as unchanged.
 set -u
 command -v python3 >/dev/null 2>&1 || { echo "gate-website: python3 not found" >&2; exit 1; }
 exec python3 - "$@" <<'PY'
-import datetime, email.utils, json, os, re, subprocess, sys, tempfile
+import datetime, email.utils, hashlib, json, os, re, subprocess, sys, tempfile
 
 def die(msg):
     sys.stderr.write("gate-website: %s\n" % msg)
@@ -35,6 +42,11 @@ except Exception:
 
 entries = sources.get("websites") or []
 ids = sys.argv[1:]
+full = bool(ids) and ids[0] == "--fingerprint"
+if full:
+    ids = ids[1:]
+    if len(ids) != 1:
+        die("--fingerprint takes exactly one source id")
 if ids:
     byid = {e.get("id"): e for e in entries}
     for i in ids:
@@ -47,7 +59,7 @@ else:
 class Offline(Exception): pass
 
 def curl(args):
-    """Returns (status, body, header_text). Raises Offline when curl cannot connect."""
+    """Returns (status, body bytes, header_text). Raises Offline when curl cannot connect."""
     bf = tempfile.NamedTemporaryFile(delete=False); bf.close()
     hf = tempfile.NamedTemporaryFile(delete=False); hf.close()
     try:
@@ -57,11 +69,22 @@ def curl(args):
         if p.returncode != 0:
             raise Offline()
         status = p.stdout.decode().strip()
-        return status, open(bf.name, errors="replace").read(), open(hf.name, errors="replace").read()
+        return status, open(bf.name, "rb").read(), open(hf.name, errors="replace").read()
     except OSError:
         raise Offline()
     finally:
         os.unlink(bf.name); os.unlink(hf.name)
+
+def download(loc, hdrs=()):
+    """(status, etag, sha256) for one page; None when curl fails for it. One slow or broken
+    page never fails the whole site: the caller lists it in the delta with null validators."""
+    try:
+        st, body, hdr = curl(list(hdrs) + [loc])
+    except Offline:
+        return None
+    m = re.search(r"^etag:\s*(.+?)\s*$", hdr, re.I | re.M)
+    etag = m.group(1) if m else None
+    return st, etag, (hashlib.sha256(body).hexdigest() if st.startswith("2") else None)
 
 def parse_sitemap(xml):
     out = []
@@ -94,14 +117,21 @@ def emit(e, status, reason=None, fp=None, stored=None, delta=None):
 def gate(e):
     slot = (state.get("websites") or {}).get(e.get("id")) or {}
     stored = slot.get("urls") if isinstance(slot, dict) else None
-    if not stored:
+    if not stored and not full:
         return emit(e, "never")
     sitemap = e.get("sitemap") or (e.get("url", "").rstrip("/") + "/sitemap.xml")
     try:
         status, body, _ = curl([sitemap])
         if not status.startswith("2"):
             return emit(e, "not-checked", "HTTP %s" % status, stored=stored)
-        urls = parse_sitemap(body)
+        urls = parse_sitemap(body.decode("utf-8", errors="replace"))
+        if full:
+            fp = {}
+            for loc, lastmod in urls:
+                got = download(loc)
+                ok = got is not None and got[0].startswith("2")
+                fp[loc] = {"lastmod": lastmod, "etag": got[1] if ok else None, "sha256": got[2] if ok else None}
+            return emit(e, "fingerprint", fp={"urls": fp}, stored=stored)
         fp, delta = {}, []
         for loc, lastmod in urls:
             prev = stored.get(loc)
@@ -113,14 +143,21 @@ def gate(e):
                 ims = http_date(prev["lastmod"]) if prev.get("lastmod") else None
                 if ims:
                     hdrs += ["-H", "If-Modified-Since: %s" % ims]
-                st, _, hdr = curl(hdrs + [loc])
-                if st == "304":
-                    m = re.search(r"^etag:\s*(.+?)\s*$", hdr, re.I | re.M)
+                got = download(loc, hdrs)
+                if got is not None and got[0] == "304":
                     fp[loc] = {"lastmod": prev.get("lastmod") if lastmod is None else lastmod,
-                               "etag": m.group(1) if m else prev.get("etag")}
+                               "etag": got[1] or prev.get("etag"), "sha256": prev.get("sha256")}
                     continue
+            else:
+                got = download(loc)  # a new URL, or a changed <lastmod>: the body decides
+            ok = got is not None and got[0].startswith("2")
+            if ok and prev is not None and prev.get("sha256") and prev["sha256"] == got[2]:
+                # identical bytes: another origin's ETag, or a <lastmod> bumped by a rebuild
+                fp[loc] = {"lastmod": prev.get("lastmod") if lastmod is None else lastmod,
+                           "etag": got[1] or prev.get("etag"), "sha256": got[2]}
+                continue
             delta.append(loc)
-            fp[loc] = {"lastmod": lastmod, "etag": None}
+            fp[loc] = {"lastmod": lastmod, "etag": got[1] if ok else None, "sha256": got[2] if ok else None}
         emit(e, "changed" if delta else "unchanged", fp={"urls": fp}, stored=stored, delta=delta)
     except Offline:
         emit(e, "not-checked", "offline", stored=stored)

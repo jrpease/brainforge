@@ -1,0 +1,4 @@
+# match: GET ^https://www\.example\.test/pricing$
+# status: 500
+# header: ETag: "pricing-b"
+pricing body

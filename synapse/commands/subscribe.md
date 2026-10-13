@@ -23,38 +23,65 @@ Never guess a URL.
 Extract the **first** ```python fence in this file to `$TMPDIR/bf-subscribe.py` and run:
 
 ```
-python3 $TMPDIR/bf-subscribe.py "<the-url-argument>"
+python3 $TMPDIR/bf-subscribe.py "<the-url-argument>" --plugin-root "${CLAUDE_PLUGIN_ROOT}"
 ```
 
 (The fence position is load-bearing — same extraction convention as `commands/upgrade.md`.)
 The script is deterministic and self-contained: it merges into `~/.claude/settings.json`
 (creating it if absent), preserves every existing setting, appends to `SYNAPSE_BRAINS`
-(comma-separated, deduplicated), ensures `~/.synapse` is in `permissions.additionalDirectories`,
-and refuses to touch a settings file it cannot parse. It never edits project/repo settings.
+(comma-separated, deduplicated), and refuses to touch a settings file it cannot parse. It never
+edits project/repo settings. It grants the two places every session reads from, or the reader
+asks permission on every brain question and is refused outright in headless runs:
+
+- the brain clones: `$SYNAPSE_HOME` when set, else `~/.synapse`, in
+  `permissions.additionalDirectories`;
+- this plugin's own files (the routing table the brain-routing skill reads), as a read-only
+  `Read(...)` rule in `permissions.allow`. An installed plugin lives at
+  `…/plugins/cache/<marketplace>/synapse/<version>/`, so the rule covers the version-free parent
+  and survives `claude plugin update`.
+
+Re-running it on a brain you already follow is safe, and it is how an older subscription (or one
+made before `SYNAPSE_HOME` moved) picks up a missing grant.
 
 ```python
 #!/usr/bin/env python3
-"""bf-subscribe.py <brain-url> [--settings <path>]
+"""bf-subscribe.py <brain-url> [--settings <path>] [--plugin-root <dir>]
 
 Merge a brain subscription into the user's personal Claude settings.
 Deterministic; stdlib only. --settings overrides the target file (tests).
 """
-import json, os, subprocess, sys
+import json, os, re, subprocess, sys
 
 
 def norm(u):
     return u.rstrip("/")
 
 
+def opt(args, name):
+    if name not in args:
+        return None
+    i = args.index(name)
+    value = args[i + 1]
+    del args[i:i + 2]
+    return value
+
+
+def read_rule(plugin_root):
+    """The read-only rule for this plugin's files. An installed copy sits in a version
+    directory, which `claude plugin update` replaces, so cover the parent instead."""
+    root = os.path.realpath(plugin_root)
+    if re.fullmatch(r"\d+\.\d+\.\d+.*", os.path.basename(root)):
+        root = os.path.dirname(root)
+    return "Read(/" + root + "/**)"  # `//abs/path` is the absolute form of a path rule
+
+
 def main(argv):
     args = list(argv)
     path = os.path.join(os.path.expanduser(os.environ.get("CLAUDE_CONFIG_DIR") or "~/.claude"), "settings.json")
-    if "--settings" in args:
-        i = args.index("--settings")
-        path = args[i + 1]
-        del args[i:i + 2]
+    path = opt(args, "--settings") or path
+    plugin_root = opt(args, "--plugin-root")
     if len(args) != 1 or args[0].startswith("-"):
-        print("usage: bf-subscribe.py <brain-git-url-or-path> [--settings <path>]")
+        print("usage: bf-subscribe.py <brain-git-url-or-path> [--settings <path>] [--plugin-root <dir>]")
         return 2
     url = args[0]
 
@@ -85,9 +112,17 @@ def main(argv):
         current.append(url)
         env["SYNAPSE_BRAINS"] = ",".join(current)
 
-    dirs = settings.setdefault("permissions", {}).setdefault("additionalDirectories", [])
-    if "~/.synapse" not in dirs:
-        dirs.append("~/.synapse")
+    perms = settings.setdefault("permissions", {})
+    home = os.environ.get("SYNAPSE_HOME")
+    home = os.path.abspath(os.path.expanduser(home)) if home else "~/.synapse"
+    dirs = perms.setdefault("additionalDirectories", [])
+    if home not in dirs:
+        dirs.append(home)
+    rule = read_rule(plugin_root) if plugin_root else None
+    if rule:
+        allow = perms.setdefault("allow", [])
+        if rule not in allow:
+            allow.append(rule)
 
     os.makedirs(os.path.dirname(path), exist_ok=True)
     tmp = path + ".tmp"
@@ -98,6 +133,8 @@ def main(argv):
 
     print(f"subscribed ✓  {path}")
     print("brains: " + env["SYNAPSE_BRAINS"])
+    print("dirs:   " + home)
+    print("read:   " + rule if rule else "no --plugin-root: plugin read rule not written")
     if access == "failed":
         print(f"⚠ access: could not reach {url} — you may need GitHub read access to the "
               "brain repo. The subscription is saved; sessions will say UNGROUNDED until "
