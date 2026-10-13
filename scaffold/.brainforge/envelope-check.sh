@@ -214,10 +214,12 @@ for key, e in chosen:
             emit("⚠ rule-6: %s/%s is %d tokens (envelope %d / was %s) — consider aggregating."
                  % (into, name, n, env, "n/a" if p is None else str(p)))
 
-    if table and table["total"] is not None and isinstance(dom.get("tokens"), int):
-        if dom["tokens"] > table["total"]:
+    # an accepted "domain total" replaces the table's total for this entry, as a doc's does its row
+    total = accepted.get("domain total", table["total"] if table else None)
+    if total is not None and isinstance(dom.get("tokens"), int):
+        if dom["tokens"] > total:
             emit("⚠ rule-6: %s totals %d tokens (envelope %d) — consider aggregating."
-                 % (into, dom["tokens"], table["total"]))
+                 % (into, dom["tokens"], total))
 
 for line in out:
     print(line)
