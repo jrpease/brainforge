@@ -279,7 +279,7 @@ Live checks, backlogged until they can run against real sources (each gets a pro
 - [ ] **L4 session hooks:** a real session in an upgraded brain prints the same nudges as before,
       and the legacy detector fires on a brain holding both old and new hooks.
 
-## Publicly usable (v0.15.4 · synapse 0.8.1)
+## Publicly usable (v0.15.5 · synapse 0.8.2)
 
 - [x] **Public-install smoke test (issue #1).** The whole loop from a public install to a subscribed
       reader, run stranger-style in a throwaway profile. Two failures, both fixed and re-run live:
@@ -293,6 +293,12 @@ Live checks, backlogged until they can run against real sources (each gets a pro
 - [x] **A domain total can be accepted.** `acceptedSize` takes `"doc": "domain total"`, so an owner
       can record a domain that is knowingly over its adapter's total, as they already could for a
       doc (0.15.4).
+- [x] **The website gate follows redirects.** A sitemap URL that redirects (a trailing slash,
+      http → https) is measured at the page it lands on, instead of reading as changed on every
+      sync (0.15.5).
+- [x] **No permission prompt per brain question, and drafts cited as drafts.** The routing skill
+      reads brain files with Read, which `/synapse:subscribe` pre-grants, and cites canon whose
+      `status:` is not `approved` as a proposal that approved canon outranks (synapse 0.8.2).
 
 ## Deferred (C-tier and additive)
 

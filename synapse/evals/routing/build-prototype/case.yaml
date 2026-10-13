@@ -18,8 +18,19 @@ graders:
     min: 1
   - type: regex
     name: uses-real-brand-color
-    target: last_message
+    # trace, not last_message: the cwd is the brain, which the skill forbids writing into, so
+    # the HTML usually lives in a blocked Write and the final message asks where to save it.
+    # trace holds tool inputs (never file contents read), so a hex here is the model's own output.
+    target: trace
     pattern: "#FF6A00|--acme-orange"
+    flags: i
+  - type: regex
+    name: builds-a-prototype
+    # the brand colour alone could come from a Grep; this asserts HTML was actually produced,
+    # in a Write or in the reply
+    target: trace
+    pattern: "<html|<!doctype"
+    flags: i
   - type: tool_used
     name: no-tracker-milestones
     tool: Read
