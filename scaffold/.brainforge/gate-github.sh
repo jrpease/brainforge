@@ -176,6 +176,8 @@ for e in entries:
     branch = e.get("branch") or "main"
 
     clone = e.get("localClone")
+    if clone:  # a leading ~ is the running user's home, so one entry serves every machine
+        clone = os.path.expanduser(clone)
     if not clone or git(clone, "rev-parse", "--git-dir").returncode != 0:
         out(eid, "not-checked", "no clone", stored=stored); continue
 
