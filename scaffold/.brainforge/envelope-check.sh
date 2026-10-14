@@ -163,6 +163,18 @@ def table_for(key):
         tables[adapter] = parse_table(adapter)
     return adapter, tables[adapter]
 
+# A "domain total" acceptance is a decision about the domain, not about one entry: an acceptance on
+# any entry (enabled or not, chosen or not) whose into is that domain covers every entry feeding it.
+# Several acceptances for one domain: the latest `since` wins, ties go to the larger number.
+domain_accept = {}  # into -> (since, tokens)
+for _k, _e in entries:
+    _into = norm(_e.get("into"))
+    for a in _e.get("acceptedSize") or []:
+        if isinstance(a, dict) and isinstance(a.get("tokens"), int) and norm(a.get("doc")) == "domain total":
+            cand = (str(a.get("since") or ""), a["tokens"])
+            if _into and (_into not in domain_accept or cand > domain_accept[_into]):
+                domain_accept[_into] = cand
+
 out = []
 def emit(line):
     if line not in out:
@@ -214,8 +226,8 @@ for key, e in chosen:
             emit("⚠ rule-6: %s/%s is %d tokens (envelope %d / was %s) — consider aggregating."
                  % (into, name, n, env, "n/a" if p is None else str(p)))
 
-    # an accepted "domain total" replaces the table's total for this entry, as a doc's does its row
-    total = accepted.get("domain total", table["total"] if table else None)
+    # an accepted "domain total" (on any entry feeding this domain) replaces the table's total
+    total = domain_accept[into][1] if into in domain_accept else (table["total"] if table else None)
     if total is not None and isinstance(dom.get("tokens"), int):
         if dom["tokens"] > total:
             emit("⚠ rule-6: %s totals %d tokens (envelope %d) — consider aggregating."

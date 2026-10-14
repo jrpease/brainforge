@@ -11,8 +11,9 @@ gate:
 - The `SessionStart` hook (see `session-start.sh` below) cheaply asks *"has `context/canon/` or
   `context/derived/` changed since this SHA?"* — if yes (or if this file is missing on a brain that
   already has derived content), it nudges you to run `/drift`.
-- `/drift` **writes** this file at the end of every run (drift found or not), so the nudge clears
-  until the next canon edit or sync.
+- `/drift` **writes** this file at the end of every run that reviewed everything changed since it
+  (drift found or not), so the nudge clears until the next canon edit or sync. A `/drift <domain>`
+  run that left other changed paths unreviewed does not write it, so the nudge stays lit.
 
 It is a **plain one-line file, not a field in `.sync-state.json`, on purpose** — so the shell hook can
 read it with `cat` and needs no `jq`/python. It is committed so the watermark travels with history.
@@ -28,8 +29,8 @@ so one unsynced source shows even after others have synced), or, for brains olde
 flag, a populated fingerprint slot while `lastFullSync` is still `null`. Only a slot's own
 `synced` key counts, not one nested inside a fingerprint. Unlike `last-drift-review`, it stores **nothing here** — it reads live repo
 state each session and **self-clears the moment the problem is fixed** (the first successful
-sync, or the filled-in source). The drift gate clears on *acknowledgment* (running `/drift`
-stamps the watermark); the sync-health gate clears only on *resolution*. Different semantics,
+sync, or the filled-in source). The drift gate clears on *acknowledgment* (a `/drift` run
+that covered every change stamps the watermark); the sync-health gate clears only on *resolution*. Different semantics,
 so: a watermark for drift, no state for sync health.
 
 ## `runtime-manifest.json`

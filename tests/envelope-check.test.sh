@@ -39,6 +39,17 @@ got
 }
 
 : > prev-empty.json
+# (c3) one entry's domain-total acceptance covers every entry feeding that domain
+sources "\"monday\": [$(src roadmap $M ', "acceptedSize": [{ "doc": "domain total", "tokens": 6000, "since": "2026-10-13", "why": "test" }]'), $(src roadmap2 $M)]"
+manifest cur.json 3 "$(dom $M 500 5500 roadmap.md:2000)"
+run prev-empty.json cur.json sources.json roadmap2
+expect "(c3) acceptance on a sibling entry covers the domain" ""
+run prev-empty.json cur.json sources.json
+expect "(c3) bare run, every entry covered" ""
+# (c4) the latest acceptance wins by `since`, not by position (the newer one is listed first)
+sources "\"monday\": [$(src roadmap $M ', "acceptedSize": [{ "doc": "domain total", "tokens": 5000, "since": "2026-10-13", "why": "new" }]'), $(src roadmap2 $M ', "acceptedSize": [{ "doc": "domain total", "tokens": 7000, "since": "2026-09-01", "why": "old" }]')]"
+run prev-empty.json cur.json sources.json
+expect "(c4) latest acceptance wins" "⚠ rule-6: context/derived/monday totals 5500 tokens (envelope 5000) — consider aggregating."
 sources "\"monday\": [$(src roadmap $M)], \"repos\": [$(src web $G ', "acceptedSize": [{ "doc": "web.md", "tokens": 6000, "since": "2026-10-07", "why": "test" }]')], \"ga\": [$(src analytics $A)]"
 
 # (a) a doc over its adapter row (<board>.md wildcard, 3,000) -> the per-doc line, exact bytes
@@ -64,7 +75,7 @@ manifest prev.json 3 "$(dom $G 500 2000 web.md:1500)"
 run prev.json cur.json sources.json web
 expect "(c) accepted but tripled" "⚠ rule-6: context/derived/repos/web.md is 5000 tokens (envelope 6000 / was 1500) — consider aggregating."
 
-# (c2) an accepted "domain total" replaces the table total for that entry; over it still warns
+# (c2) an accepted "domain total" replaces the table total for the domain; over it still warns
 sources "\"monday\": [$(src roadmap $M ', "acceptedSize": [{ "doc": "domain total", "tokens": 6000, "since": "2026-10-13", "why": "test" }]')]"
 manifest prev.json 3 "$(dom $M 500 5500 roadmap.md:2000)"
 manifest cur.json 3 "$(dom $M 500 5500 roadmap.md:2000)"

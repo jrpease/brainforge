@@ -14,7 +14,8 @@ time. Good moments: after a big sync, before a campaign, monthly.
 ## 1. Delta-scope (golden rule #1 — work scales with the delta)
 Read the watermark `.brainforge/last-drift-review`. Analyze only the domains whose canon or derived
 changed since that commit (`git diff --name-only <sha> HEAD -- context/canon context/derived`). No
-watermark (or a domain passed to `/drift`) → check that scope in full.
+watermark (or a domain passed to `/drift`) → check that scope in full. With a domain and a
+watermark, still run the diff and keep its path list: §5 needs it to decide whether to stamp.
 
 ## 2. Compare — the pattern is always *canon claim* vs *derived fact*
 Wire the rows that match the brain's actual domains:
@@ -46,9 +47,13 @@ none relaxed:
 - Lands `status: draft` + the loud DRAFT banner via PR. **`/approve-canon` is the only path to
   `approved` and refuses on any `[GAP]`.** The tool proposes; the human owns.
 
-## 5. Stamp the watermark (always)
+## 5. Stamp the watermark (drift found or not), only if the run covered every changed scope
 Write `git rev-parse HEAD` into `.brainforge/last-drift-review` and commit that one file, so the
-session-start nudge clears until the next canon edit or sync. (Manager-state cursor — commits directly;
+session-start nudge clears until the next canon edit or sync. Stamp only when the run reviewed every
+path changed since the watermark: a run with no domain argument, or a domain-scoped run where each
+changed path is under `context/canon/<domain>/` or a derived folder the run compared. A domain-scoped run that leaves other changed paths unreviewed, or a
+domain-scoped run with no watermark yet, does **not** stamp; it names the unreviewed scopes in its output and the
+nudge stays lit until a full run. (Manager-state cursor — commits directly;
 drafts go through their own PR.) Merging an approved canon fix later changes canon after this stamp, so
 the nudge re-trips once — the next `/drift` re-stamps and it clears. Expected, not a bug.
 
