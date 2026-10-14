@@ -300,16 +300,19 @@ Live checks, backlogged until they can run against real sources (each gets a pro
       reads brain files with Read, which `/synapse:subscribe` pre-grants, and cites canon whose
       `status:` is not `approved` as a proposal that approved canon outranks (synapse 0.8.2).
 
+## Source-side sync trigger (v0.16.0)
+
+- [x] **A GitHub source signals its own staleness.** A workflow copied into the source repo runs
+      the brain's own gate on every push and keeps one `Sync needed: <id>` issue in the brain
+      current: opened when in-scope files change, closed when the brain catches up or a sync PR
+      lands. It never syncs. A source's freshness no longer depends on one laptop with a clone
+      noticing. Auth is a fine-grained token scoped to the brain, with Contents: Read and
+      Issues: Read and write. Raised by a subscribing team in the 2026-09-08 audit
+      ([spec](docs/specs/2026-10-13-source-sync-trigger.md) · [proof](docs/proofs/source-sync-trigger.md)).
+
 ## Deferred (C-tier and additive)
 
 - Hosted MCP endpoint · access tiers · autonomous scheduled sync · declarative/executable adapters.
-
-- **Source-side sync trigger.** A source repo runs a GitHub Action that opens a sync issue on the
-  brain when in-scope paths change, so the pull stops depending on one laptop noticing. Cheaper
-  than the autonomous scheduled sync above, and it unpicks a coupling worth losing: today a
-  source's freshness depends on a clone path on one machine (`git -C <clone>`). Raised by a
-  subscribing team in the 2026-09-08 audit and worth taking. Undesigned: cross-repo issue-open
-  auth, and it needs a live proof before it ships (CONTRIBUTING's adapter bar).
 
 - **Federation — unit brains alongside the company brain.** `SYNAPSE_BRAINS` already takes a list,
   `brain-routing` already handles a brain being the working directory, and as of v0.9.0 the context

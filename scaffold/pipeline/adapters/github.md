@@ -167,11 +167,16 @@ Install, once per source repo:
    **Contents: Read** and **Issues: Read and write**, and nothing else. It expires and belongs to
    whoever creates it; when it lapses, the source's run goes red until it is re-minted. An
    org-owned brain needs the org to allow fine-grained tokens.
-2. In the source repo, add it as the Actions secret `BRAINFORGE_BRAIN_TOKEN`.
+2. In the source repo, add it as the Actions secret `BRAINFORGE_BRAIN_TOKEN`. From a real
+   terminal, `gh secret set` prompts for it; anywhere without one it reads stdin, and an empty
+   stdin saves an empty secret without complaint. Pipe it instead (`pbpaste | gh secret set …`).
+   An empty secret fails the run at the brain checkout with "Input required and not supplied: token".
 3. Copy [`source-sync-trigger.yml`](https://github.com/jrpease/brainforge/blob/main/scaffold/templates/source-sync-trigger.yml)
    (also at `templates/source-sync-trigger.yml` in brains forged since it shipped) into the source
    repo as `.github/workflows/brainforge-sync-trigger.yml`, and fill in its three values: the
    branch (must match this entry's `branch`), this entry's `id`, and this brain's `owner/name`.
+   The workflow file is itself in scope unless the source's `.brainforge-source.yml` lists
+   `.github/**` under `never-summarize`, so without that its own push opens the first issue.
 
 The workflow runs `.brainforge/source-signal.sh <id> --clone <checkout>` from a checkout of
 this brain, which runs `gate-github.sh --clone`. Scope is this brain's and the source's

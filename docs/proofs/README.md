@@ -16,5 +16,8 @@ system taught the spine that got folded back in as hardening.
   permissions, website-gate CDN flapping). Also the website adapter's first live proof.
 - [MCP façade](mcp-facade.md) — proven live in Codex (no synapse code at all) and in Claude Code
   with the synapse plugin disabled, against the eval fixture brain.
+- [Source-side sync trigger](source-sync-trigger.md) — proven live on two throwaway private
+  repos with a least-privilege fine-grained token: every issue state, a sync PR closing its
+  issue, and a red run when the token loses Issues access.
 - [GA adapter](2026-07-02-ga-live/README.md) — proven live against a real, trafficked GA4 property
   (the last Phase-2 adapter and the first metrics/time-series source); predates this summary format.

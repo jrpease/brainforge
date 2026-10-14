@@ -1,6 +1,6 @@
 # Source-side sync trigger
 
-Status: planned
+Status: built
 Reviewed: 2026-10-13 — ready to build (second pass; its two setup fixes and two clarifications applied)
 Date: 2026-10-13
 
@@ -59,11 +59,34 @@ Jordan delegated these on 2026-10-13 ("take your recommendations"). Each row is 
   signal depends on one person's token", and it is what lands in another team's repo. Claude's
   call under the delegation; Jordan may want to confirm it before a real team installs it.
   Not blocking the build.
-- **The token for the live proof.** A fine-grained token can only be created in GitHub's web UI,
-  by Jordan. Recommendation: Jordan creates one scoped to the throwaway brain repo, with exactly
-  the permissions in the Auth row, so the proof proves least privilege, not just the mechanics.
-  The broad `gh` token would prove the mechanics but not the permission claim the docs make.
-  Needs Jordan at Step 6, as does merging run 5's PR.
+- **The token for the live proof.** Resolved 2026-10-14: Jordan created a fine-grained token
+  with exactly the Auth row's permissions, scoped to the throwaway brain, and the proof ran on it.
+
+## What shipped
+
+- `scaffold/.brainforge/gate-github.sh`: `--clone <path>` for exactly one id, in any position.
+- `scaffold/.brainforge/source-signal.sh` (new): the lifecycle, the REST lookup, the issue body.
+- `scaffold/templates/source-sync-trigger.yml` (new): the workflow, three literal values to fill in.
+- `tests/source-signal.test.sh`, `tests/lib/gh-stub.sh` (new); `--clone` cases in
+  `tests/gate-github.test.sh`.
+- `scaffold/pipeline/adapters/github.md`: "Source-side trigger (optional)", with the install steps.
+- `scaffold/.claude/commands/sync.md` (step 4's `Closes #<n>`), `add-source.md` (a pointer),
+  `scaffold/.brainforge/README.md` (the script list).
+- `.claude-plugin/plugin.json`: 0.16.0; `source-signal.sh` in `runtime.bump`.
+- `docs/proofs/source-sync-trigger.md`, its line in `docs/proofs/README.md`, and the ROADMAP item
+  moved from Deferred to done.
+
+## Where it diverged
+
+- **The proof source also excluded `.github/**`.** Step 6 named only `notes/**`. Without the
+  second exclusion the push installing the workflow is itself in scope and opens an issue, which
+  would have muddied run 1. The adapter's install step now says this.
+- **The live run added one install note.** `gh secret set` without a terminal saved an empty
+  secret silently, and the run failed with "Input required and not supplied: token". The
+  adapter's step 2 now says to pipe the token and names that error. No script or template changed.
+- **Two statuses were not run live.** `never` and `not-checked` stop before any `gh` call, so the
+  offline test covers them fully; the proof says so.
+- **Run 5's PR was merged by Claude**, with Jordan's go-ahead in the session, not by Jordan.
 
 ## Plan
 
