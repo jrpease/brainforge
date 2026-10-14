@@ -237,6 +237,25 @@ sources "$(entry web)"; mv "$TMP/w/origin.git" "$TMP/w/origin.moved"
 [ "$(field "$(gate web)" 'j["status"]+":"+j["reason"]')" = "not-checked:offline" ] || fail "failed fetch -> not-checked (offline)"
 mv "$TMP/w/origin.moved" "$TMP/w/origin.git"
 
+# --- --clone <path>: replaces localClone for one id (a CI checkout is not at localClone) ---
+fresh; c0=$(head_sha); commit "src/a.ts" "a"
+git clone -q "file://$TMP/w/origin.git" "$TMP/w/ci"
+git -C "$TMP/w/ci" remote set-url origin "$REMOTE"
+git -C "$TMP/w/ci" config "url.file://$TMP/w/origin.git.insteadOf" "$REMOTE"
+sources "$(entry web github.com/acme/web "$TMP/w/nowhere")"; state "{ \"web\": { \"lastSha\": \"$c0\" } }"
+[ "$(field "$(gate web)" 'j["status"]')" = not-checked ] || fail "--clone setup: localClone must point nowhere"
+out=$(gate --clone "$TMP/w/ci" web)
+[ "$(field "$out" 'j["status"]+":"+",".join(j["delta"])')" = "changed:src/a.ts" ] || fail "--clone must gate the given clone ($out)"
+out=$(gate web --clone "$TMP/w/ci")
+[ "$(field "$out" 'j["status"]')" = changed ] || fail "--clone after the id must work too ($out)"
+git -C "$TMP/w/ci" remote set-url origin "https://github.com/acme/other.git"
+[ "$(field "$(gate --clone "$TMP/w/ci" web)" 'j["status"]')" = blocked ] || fail "--clone at another repo's clone must be blocked"
+sources "$(entry web), $(entry docs)"
+for args in "--clone $TMP/w/ci" "--clone $TMP/w/ci web docs" "--clone $TMP/w/ci nope" "web --clone"; do
+  rc=0; out=$(gate $args 2>/dev/null) || rc=$?
+  [ "$rc" = 1 ] && [ -z "$out" ] || fail "--clone misuse '$args' must exit 1 with no stdout (rc=$rc)"
+done
+
 # --- misuse: unknown id or no sources.json -> exit 1, stderr, nothing on stdout ---
 rc=0; out=$(gate web nope 2>"$TMP/err") || rc=$?
 [ "$rc" = 1 ] && [ -z "$out" ]                         || fail "unknown id must exit 1 with no stdout (rc=$rc)"

@@ -1,0 +1,57 @@
+# Brainforge source-side sync trigger. Copy this file into the SOURCE repo (the one the brain
+# syncs), as .github/workflows/brainforge-sync-trigger.yml. See the brain's
+# pipeline/adapters/github.md, "Source-side trigger".
+#
+# On each push to the tracked branch it runs the brain's own GitHub gate against this repo and
+# keeps one "Sync needed: <id>" issue in the brain current: opened when in-scope files changed
+# since the last sync, closed when the brain catches up. It never syncs; /sync in the brain does.
+#
+# FILL IN three values. They are literal text, not variables (GitHub reads `on:` and the
+# concurrency group before any env exists), so replace every occurrence:
+#   BRANCH        the branch the brain tracks; must match the brain's repos[] entry "branch"
+#                 (1 place: on.push.branches)
+#   SOURCE_ID     this repo's id in the brain's sources.json repos[]
+#                 (2 places: concurrency.group, and the last step)
+#   OWNER/BRAIN   the brain repo
+#                 (2 places: the brain checkout, and GH_REPO)
+#
+# SECRET  BRAINFORGE_BRAIN_TOKEN: a fine-grained personal access token whose only repository is
+#         the brain, with Contents: Read and Issues: Read and write. Nothing else. It expires and
+#         belongs to a person; when it lapses this workflow goes red until it is re-minted. An
+#         org-owned brain needs the org to allow fine-grained tokens.
+name: brainforge sync trigger
+
+on:
+  push:
+    branches: [BRANCH]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: brainforge-sync-SOURCE_ID
+  cancel-in-progress: true   # only the newest push is worth reporting
+
+jobs:
+  signal:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out this repo (full history, so the brain's last synced commit is present)
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Check out the brain
+        uses: actions/checkout@v4
+        with:
+          repository: OWNER/BRAIN
+          token: ${{ secrets.BRAINFORGE_BRAIN_TOKEN }}
+          path: brain
+
+      - name: Update the brain's sync issue
+        working-directory: brain
+        env:
+          GH_TOKEN: ${{ secrets.BRAINFORGE_BRAIN_TOKEN }}
+          GH_REPO: OWNER/BRAIN
+        run: bash .brainforge/source-signal.sh SOURCE_ID --clone "$GITHUB_WORKSPACE"
