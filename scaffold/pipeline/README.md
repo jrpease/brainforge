@@ -87,9 +87,10 @@ the adapter writes to, § Where a sync writes):
         "why": "item-level detail is what cross-team reads use this board for" }
     ]
 
-A domain total is accepted the same way, with `"doc": "domain total"`. It replaces the adapter's
-domain total for that entry; when several entries share a domain, each entry checks the total
-against its own adapter's figure, so each needs its own acceptance.
+A domain total is accepted the same way, with `"doc": "domain total"`. It is a decision about the
+domain, so record it once, on any one entry whose `into` is that domain: it covers every entry
+feeding the domain. If more than one entry carries one, the latest `since` wins (write it as an
+ISO date; a missing `since` counts as oldest, and a tie goes to the larger number).
 
 It lives on the source entry, in `sources.json`, because it is **brain-specific**. An adapter
 playbook is under the `pipeline/**` bump glob and would be overwritten on the next `/upgrade`.

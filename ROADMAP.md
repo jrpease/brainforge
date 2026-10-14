@@ -300,7 +300,7 @@ Live checks, backlogged until they can run against real sources (each gets a pro
       reads brain files with Read, which `/synapse:subscribe` pre-grants, and cites canon whose
       `status:` is not `approved` as a proposal that approved canon outranks (synapse 0.8.2).
 
-## Source-side sync trigger (v0.16.0)
+## Source-side sync trigger (v0.16.0 · 0.16.1)
 
 - [x] **A GitHub source signals its own staleness.** A workflow copied into the source repo runs
       the brain's own gate on every push and keeps one `Sync needed: <id>` issue in the brain
@@ -309,6 +309,11 @@ Live checks, backlogged until they can run against real sources (each gets a pro
       noticing. Auth is a fine-grained token scoped to the brain, with Contents: Read and
       Issues: Read and write. Raised by a subscribing team in the 2026-09-08 audit
       ([spec](docs/specs/2026-10-13-source-sync-trigger.md) · [proof](docs/proofs/source-sync-trigger.md)).
+- [x] **`/drift <domain>` no longer vouches for what it didn't read.** A domain-scoped run that
+      leaves other changed paths unreviewed skips the watermark and names them, so the session-start
+      nudge stays lit until a full run (0.16.1; reported by ManyChat's brain).
+- [x] **One domain-total acceptance covers the domain.** `acceptedSize` `"domain total"` recorded on
+      any entry feeding a domain covers every entry feeding it; the latest `since` wins (0.16.1).
 
 ## Deferred (C-tier and additive)
 
