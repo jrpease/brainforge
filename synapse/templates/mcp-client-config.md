@@ -70,6 +70,9 @@ Before answering anything that touches brand voice, copy, naming, design, produc
 metrics or other org facts, call the `brain_map` tool and follow its instructions.
 ```
 
+For Codex, put it once in `~/.codex/AGENTS.md` instead and it applies to every project (proven
+live, run 7 of the proof).
+
 ## Check it works
 
 Ask a brand or product question. The answer should cite brain files and end with a line like

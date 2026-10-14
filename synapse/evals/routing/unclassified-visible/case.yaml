@@ -24,7 +24,8 @@ graders:
   - type: regex
     name: mentions-design-system
     target: last_message
-    pattern: "design system"
+    # the design-system domain is the token reference; naming either is naming it
+    pattern: "design[- ]system|design[- ]tokens?"
     flags: i
   - type: regex
     name: mentions-tracker
@@ -37,7 +38,11 @@ graders:
     pattern: "mystery"
     flags: i
   - type: regex
-    name: names-it-unclassified
+    name: says-it-is-unroutable
+    # the behaviour is flagging that routing cannot reach the mystery domain, in any words (the
+    # manifest's label "unclassified" is one, "no kinds" another), said after the domain's name
+    # in the same sentence (a dot inside a path is not a sentence end), so routing words about
+    # another domain do not pass
     target: last_message
-    pattern: "unclassified"
+    pattern: "mystery([^.]|\\.(?=\\S)){0,200}?(unclassified|no (declared )?kinds|not (been )?classified|isn'?t classified|unroutable|not routable|(can'?t|cannot|won'?t)[^.]{0,30}(reach|rout)|no intent)"
     flags: i

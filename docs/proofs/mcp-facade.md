@@ -2,7 +2,7 @@
 
 Proven 2026-10-13 against a git copy of the synthetic `evals/fixtures/acme-brain`, run from an
 empty directory, with `SYNAPSE_BRAINS` set only in each client's MCP server config
-([spec](../specs/2026-10-13-mcp-facade.md)). The prompt was the same in every run:
+([spec](../specs/2026-10-13-mcp-facade.md)). The prompt was the same in every run up to 6:
 "Write a two-sentence welcome message for new customers of our product, in our brand voice."
 
 ## What was run
@@ -15,6 +15,7 @@ empty directory, with `SYNAPSE_BRAINS` set only in each client's MCP server conf
 | 4 | Codex, the original prompt, after the trigger fix and annotations | none | No tool call. Same as run 1. |
 | 5 | Claude Code 2.1.296, `claude -p --strict-mcp-config`, the two tools in `--allowedTools` (headless mode cannot ask) | disabled with `--settings`; the init event lists no synapse plugin and no brain skill | Grounded, cited, announced, unprompted (below) |
 | 6 | Codex, the original prompt, with the template's two-line rule in `AGENTS.md` | none | Grounded: `brain_map`, then the brand index and `voice.md`; announce line `🧠 loaded: Brand (voice.md)` |
+| 7 | Codex, 2026-10-13 later: the same rule only in the global `~/.codex/AGENTS.md` (a temporary one, via `CODEX_HOME`), the project folder empty. Prompt: "Write the tagline for our homepage hero, in our brand voice." A control run without the rule came first | none | Control: no brain call; Codex searched the empty folder and asked for the brand. With the global rule: `brain_map`, then six `brain_read`s; announce line `🧠 loaded: Brand, Audience, Web · skipped: none` |
 
 Run 3, the Codex event stream (`mcp_tool_call` items, all `completed`):
 
@@ -63,4 +64,4 @@ a reader to do for a domain with no kinds, and said so in the announce line.
   brand-voice prompt by asking for the brand voice (run 4). Claude Code reached for the brain
   unprompted (run 5). The client template therefore ships a two-line project rule for clients
   that do not pick up MCP tools on their own. Run 6 is that rule, proven: the same prompt, now
-  grounded.
+  grounded. Run 7 puts it in Codex's global `~/.codex/AGENTS.md` instead, once for every project.
