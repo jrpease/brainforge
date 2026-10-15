@@ -1,7 +1,6 @@
 {
   "name": "brainforge-studio",
-  "version": "0.0.0",
-  "private": true,
+  "version": "0.1.0",
   "description": "A local admin cockpit for a Brainforge brain: health, browse, and (later) triage and runs.",
   "license": "MIT",
   "repository": {
