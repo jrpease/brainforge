@@ -231,7 +231,7 @@ function Notice({ title, severity, action, children }: { title: string; severity
 
 function LoadingLedger() {
   return (
-    <div aria-busy="true" aria-label="Loading health">
+    <div role="status" aria-busy="true" aria-label="Loading health">
       <header className="lg-head"><h1>Health</h1></header>
       <section className="lg-verdict"><Skeleton w={8} h={8} /><div style={{ flex: 1 }}><Skeleton w={220} h={18} /><div style={{ height: 8 }} /><Skeleton w={420} h={12} /></div></section>
       {[0, 1].map((s) => (

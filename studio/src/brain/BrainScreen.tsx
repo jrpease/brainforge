@@ -34,7 +34,7 @@ export function BrainScreen() {
   }, [open]);
 
   if (err) return <ErrorNotice kind={err} />;
-  if (!data) return <div aria-busy="true"><div className="screen-head"><h1>Brain</h1></div>{[0, 1, 2, 3].map((i) => <div className="row" key={i}><Skeleton w={220} h={12} /></div>)}</div>;
+  if (!data) return <div role="status" aria-busy="true" aria-label="Loading"><div className="screen-head"><h1>Brain</h1></div>{[0, 1, 2, 3].map((i) => <div className="row" key={i}><Skeleton w={220} h={12} /></div>)}</div>;
   if (!data.available) {
     return (
       <section aria-label="Brain">
@@ -81,7 +81,7 @@ export function BrainScreen() {
         </nav>
         <article className="br-doc" aria-live="polite">
           {!open && <p className="muted br-pick">Pick a file to read it here. Studio only reads; edits still go through Claude Code and a PR.</p>}
-          {open && !doc && <div aria-busy="true"><Skeleton w={300} h={20} /><div style={{ height: 12 }} /><Skeleton w="90%" h={12} /><div style={{ height: 6 }} /><Skeleton w="80%" h={12} /></div>}
+          {open && !doc && <div role="status" aria-busy="true" aria-label="Loading"><Skeleton w={300} h={20} /><div style={{ height: 12 }} /><Skeleton w="90%" h={12} /><div style={{ height: 6 }} /><Skeleton w="80%" h={12} /></div>}
           {doc && "error" in doc && <p className="br-err">{doc.error}</p>}
           {doc && "text" in doc && <Doc path={doc.path} text={doc.text} />}
         </article>

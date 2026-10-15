@@ -186,7 +186,7 @@ function Unavailable({ what, hint }: { what: string; hint: string }) {
 
 function LoadingSeam() {
   return (
-    <div aria-busy="true" aria-label="Loading health">
+    <div role="status" aria-busy="true" aria-label="Loading health">
       <div className="sm-verdict"><Skeleton w={260} h={24} /><div style={{ height: 8 }} /><Skeleton w={460} h={12} /></div>
       <div className="sm-strip">{[0, 1, 2].map((i) => <div className="sm-counter" key={i}><Skeleton w={90} h={10} /><div style={{ height: 8 }} /><Skeleton w={40} h={24} /></div>)}</div>
       <div className="sm-cols">

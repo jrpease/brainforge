@@ -90,6 +90,7 @@
 /* narrow: a command drops to its own line under its item, so its argument is never cut off */
 @media (max-width: 1180px) {
   .sm-cols { column-gap: var(--space-5); }
-  .sm-card, .sm-src { flex-wrap: wrap; }
+  .sm-card, .sm-src { flex-wrap: wrap; row-gap: var(--space-2); }
+  .sm-card > .sm-card-main, .sm-src > .sm-src-main { flex: 1 1 calc(100% - 20px); }
   .sm-card > .cmd, .sm-src > .cmd { max-width: calc(100% - 20px); margin-left: 20px; }
 }

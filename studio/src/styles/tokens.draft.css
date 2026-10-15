@@ -30,12 +30,13 @@
   --color-paper-2: #fbfaf7;
   --color-paper-3: #ebe8e1;
   --color-paper-line: #d9d5cc;
-  --color-ink-slate: #55616b;
+  --color-ink-slate: #48535c;
+  --color-ink-muted: #5f6a74;
   --color-canon-deep: #8a5a28;
   --color-derived-ink: #04768d;
   --color-seam-deep: #1f7a52;
   --color-stale-deep: #c62f2f;
-  --color-amber-deep: #8f6a00;
+  --color-amber-deep: #7f5f00;
   --color-violet-deep: #6f43c0;
 
   /* ---- semantic: dark (default) ---- */
@@ -100,7 +101,7 @@
   --color-bg-raised: var(--color-paper-3);
   --color-text-primary: var(--color-void-3);
   --color-text-secondary: var(--color-ink-slate);
-  --color-text-muted: var(--color-slate-dim);
+  --color-text-muted: var(--color-ink-muted);
   --color-border-default: var(--color-paper-line);
   --color-accent-canon: var(--color-canon-deep);
   --color-accent-canon-muted: var(--color-canon-ink);

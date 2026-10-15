@@ -15,7 +15,7 @@ export function SourcesScreen() {
   }, []);
 
   if (err) return <ErrorNotice kind={err} />;
-  if (!data) return <div aria-busy="true"><div className="screen-head"><h1>Sources</h1></div>{[0, 1, 2].map((i) => <div className="row" key={i}><Skeleton w={240} h={12} /></div>)}</div>;
+  if (!data) return <div role="status" aria-busy="true" aria-label="Loading"><div className="screen-head"><h1>Sources</h1></div>{[0, 1, 2].map((i) => <div className="row" key={i}><Skeleton w={240} h={12} /></div>)}</div>;
   if (!data.available) {
     return (
       <section aria-label="Sources">

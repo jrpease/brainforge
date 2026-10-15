@@ -1,0 +1,610 @@
+{
+ "baseUrl": "http://127.0.0.1:4400",
+ "surfaces": [
+  {
+   "name": "1440",
+   "width": 1440,
+   "height": 900
+  },
+  {
+   "name": "1024",
+   "width": 1024,
+   "height": 768
+  }
+ ],
+ "fingerprintPaths": [
+  "src"
+ ],
+ "states": [
+  {
+   "state": "health:all-clear",
+   "screen": "health",
+   "url": "/?t=f2d2064c39d69e5780e6c0ca245a84c9f5b71962203dd464f441e40b0c156b09#health",
+   "status": "forceable",
+   "force": {
+    "kind": "route",
+    "routes": [
+     {
+      "pattern": "**/api/prereqs",
+      "status": 200,
+      "body": "[{\"name\": \"Node\", \"ok\": true, \"detail\": \"found\", \"blocking\": true, \"hint\": \"\"}, {\"name\": \"git\", \"ok\": true, \"detail\": \"found\", \"blocking\": true, \"hint\": \"\"}, {\"name\": \"python3\", \"ok\": true, \"detail\": \"found\", \"blocking\": true, \"hint\": \"\"}, {\"name\": \"GitHub CLI\", \"ok\": true, \"detail\": \"found\", \"blocking\": false, \"hint\": \"\"}, {\"name\": \"Claude Code\", \"ok\": true, \"detail\": \"found\", \"blocking\": false, \"hint\": \"\"}]"
+     },
+     {
+      "pattern": "**/api/brain",
+      "status": 200,
+      "body": "{\"name\": \"acme-brain\", \"path\": \"/Users/sam/brains/acme-brain\"}"
+     },
+     {
+      "pattern": "**/api/health",
+      "status": 200,
+      "body": "{\"canon\": {\"available\": true, \"stderr\": \"\", \"timedOut\": false, \"stdout\": \"Canon health \\u2014 context/canon\\n  14 approved and current \\u00b7 0 past review \\u00b7 0 never reviewed \\u00b7 3 draft(s)\\n\\n\\u00b7 drafts \\u2014 not yet trusted as canon; a stalled one means the approve gate never closed\\n    context/canon/brand/naming.md                last touched 2026-10-09  open\\n    context/canon/pricing/model.md               last touched 2026-10-12  open\\n    context/canon/audience/archetypes.md         last touched 2026-10-14  open\\n\\n\\u2713 every approved canon doc is within its review cadence.\\n\", \"exitCode\": 0, \"finding\": false, \"error\": false}, \"tripwires\": {\"available\": true, \"stderr\": \"\", \"timedOut\": false, \"stdout\": \"\", \"exitCode\": 0, \"lines\": [], \"error\": false}}"
+     }
+    ]
+   },
+   "fullPage": true
+  },
+  {
+   "state": "health:first-run",
+   "screen": "health",
+   "url": "/?t=f2d2064c39d69e5780e6c0ca245a84c9f5b71962203dd464f441e40b0c156b09#health",
+   "status": "forceable",
+   "force": {
+    "kind": "input",
+    "routes": [
+     {
+      "pattern": "**/api/prereqs",
+      "status": 200,
+      "body": "[{\"name\": \"Node\", \"ok\": true, \"detail\": \"found\", \"blocking\": true, \"hint\": \"\"}, {\"name\": \"git\", \"ok\": true, \"detail\": \"found\", \"blocking\": true, \"hint\": \"\"}, {\"name\": \"python3\", \"ok\": true, \"detail\": \"found\", \"blocking\": true, \"hint\": \"\"}, {\"name\": \"GitHub CLI\", \"ok\": true, \"detail\": \"found\", \"blocking\": false, \"hint\": \"\"}, {\"name\": \"Claude Code\", \"ok\": true, \"detail\": \"found\", \"blocking\": false, \"hint\": \"\"}]"
+     },
+     {
+      "pattern": "**/api/brain",
+      "status": 200,
+      "body": "{\"name\": \"acme-brain\", \"path\": \"/Users/sam/brains/acme-brain\"}"
+     },
+     {
+      "pattern": "**/api/health",
+      "status": 200,
+      "body": "{\"canon\": {\"available\": true, \"stderr\": \"\", \"timedOut\": false, \"stdout\": \"Canon health \\u2014 context/canon\\n  0 approved and current \\u00b7 0 past review \\u00b7 0 never reviewed \\u00b7 6 draft(s)\\n\\n\\u00b7 drafts \\u2014 not yet trusted as canon; a stalled one means the approve gate never closed\\n    context/canon/brand/voice.md                 last touched 2026-10-15  open\\n    context/canon/brand/naming.md                last touched 2026-10-15  open\\n    context/canon/product/tenets.md              last touched 2026-10-15  open\\n    context/canon/design/principles.md           last touched 2026-10-15  open\\n    context/canon/eng/conventions.md             last touched 2026-10-15  open\\n    context/canon/company/org.md                 last touched 2026-10-15  open\\n\\nRe-confirm a doc by reviewing it and running /approve-canon, which stamps today's date.\\nA doc that genuinely does not rot can declare 'review-cadence: never' in its frontmatter.\\n\", \"exitCode\": 0, \"finding\": false, \"error\": false}, \"tripwires\": {\"available\": true, \"stderr\": \"\", \"timedOut\": false, \"stdout\": \"\", \"exitCode\": 0, \"lines\": [], \"error\": false}}"
+     },
+     {
+      "pattern": "**/api/gates/run",
+      "status": 200,
+      "body": "{\"available\": false, \"hint\": \"This brain has no sources.json yet; add a source with /add-source.\"}"
+     }
+    ],
+    "steps": [
+     {
+      "kind": "click",
+      "selector": "button.sm-btn-primary"
+     }
+    ]
+   },
+   "fullPage": true,
+   "captureAfterMs": 1300
+  },
+  {
+   "state": "health:single-item",
+   "screen": "health",
+   "url": "/?t=f2d2064c39d69e5780e6c0ca245a84c9f5b71962203dd464f441e40b0c156b09#health",
+   "status": "forceable",
+   "force": {
+    "kind": "route",
+    "routes": [
+     {
+      "pattern": "**/api/prereqs",
+      "status": 200,
+      "body": "[{\"name\": \"Node\", \"ok\": true, \"detail\": \"found\", \"blocking\": true, \"hint\": \"\"}, {\"name\": \"git\", \"ok\": true, \"detail\": \"found\", \"blocking\": true, \"hint\": \"\"}, {\"name\": \"python3\", \"ok\": true, \"detail\": \"found\", \"blocking\": true, \"hint\": \"\"}, {\"name\": \"GitHub CLI\", \"ok\": true, \"detail\": \"found\", \"blocking\": false, \"hint\": \"\"}, {\"name\": \"Claude Code\", \"ok\": true, \"detail\": \"found\", \"blocking\": false, \"hint\": \"\"}]"
+     },
+     {
+      "pattern": "**/api/brain",
+      "status": 200,
+      "body": "{\"name\": \"acme-brain\", \"path\": \"/Users/sam/brains/acme-brain\"}"
+     },
+     {
+      "pattern": "**/api/health",
+      "status": 200,
+      "body": "{\"canon\": {\"available\": true, \"stderr\": \"\", \"timedOut\": false, \"stdout\": \"Canon health \\u2014 context/canon\\n  13 approved and current \\u00b7 1 past review \\u00b7 0 never reviewed \\u00b7 0 draft(s)\\n\\n\\u26a0 past review \\u2014 the date someone last confirmed this is still true\\n    context/canon/brand/voice.md                 2025-11-02  biannual (default)     owner: Priya\\n\\nRe-confirm a doc by reviewing it and running /approve-canon, which stamps today's date.\\nA doc that genuinely does not rot can declare 'review-cadence: never' in its frontmatter.\\n\", \"exitCode\": 1, \"finding\": true, \"error\": false}, \"tripwires\": {\"available\": true, \"stderr\": \"\", \"timedOut\": false, \"stdout\": \"\", \"exitCode\": 0, \"lines\": [], \"error\": false}}"
+     }
+    ]
+   },
+   "fullPage": true
+  },
+  {
+   "state": "health:dense",
+   "screen": "health",
+   "url": "/?t=f2d2064c39d69e5780e6c0ca245a84c9f5b71962203dd464f441e40b0c156b09#health",
+   "status": "forceable",
+   "force": {
+    "kind": "input",
+    "routes": [
+     {
+      "pattern": "**/api/prereqs",
+      "status": 200,
+      "body": "[{\"name\": \"Node\", \"ok\": true, \"detail\": \"found\", \"blocking\": true, \"hint\": \"\"}, {\"name\": \"git\", \"ok\": true, \"detail\": \"found\", \"blocking\": true, \"hint\": \"\"}, {\"name\": \"python3\", \"ok\": true, \"detail\": \"found\", \"blocking\": true, \"hint\": \"\"}, {\"name\": \"GitHub CLI\", \"ok\": true, \"detail\": \"found\", \"blocking\": false, \"hint\": \"\"}, {\"name\": \"Claude Code\", \"ok\": true, \"detail\": \"found\", \"blocking\": false, \"hint\": \"\"}]"
+     },
+     {
+      "pattern": "**/api/brain",
+      "status": 200,
+      "body": "{\"name\": \"acme-brain\", \"path\": \"/Users/sam/brains/acme-brain\"}"
+     },
+     {
+      "pattern": "**/api/health",
+      "status": 200,
+      "body": "{\"canon\": {\"available\": true, \"stderr\": \"\", \"timedOut\": false, \"stdout\": \"Canon health \\u2014 context/canon\\n  9 approved and current \\u00b7 4 past review \\u00b7 2 never reviewed \\u00b7 6 draft(s)\\n\\n\\u2717 approved but never reviewed \\u2014 carrying full authority on a template default\\n    context/canon/brand/naming.md                owner: TODO\\n    context/canon/eng/conventions.md             owner: TODO\\n\\n\\u26a0 past review \\u2014 the date someone last confirmed this is still true\\n    context/canon/brand/voice.md                 2025-11-02  biannual (default)     owner: Priya\\n    context/canon/product/roadmap.md             2026-05-30  quarterly              owner: Sam\\n    context/canon/design/principles.md           2025-08-14  biannual (default)     owner: Jordan\\n    context/canon/company/org.md                 2024-12-01  annual                 owner: Lee\\n\\n\\u00b7 drafts \\u2014 not yet trusted as canon; a stalled one means the approve gate never closed\\n    context/canon/brand/arch.md                  last touched 2026-03-29  stalled\\n    context/canon/pricing/tiers.md               last touched 2026-06-02  stalled\\n    context/canon/audience/archetypes.md         last touched 2026-10-14  open\\n    context/canon/analytics/metrics.md           last touched 2026-10-11  open\\n    context/canon/product/tenets.md              last touched 2026-10-02  open\\n    context/canon/company/remote-work.md         last touched 2026-09-30  open\\n\\nRe-confirm a doc by reviewing it and running /approve-canon, which stamps today's date.\\nA doc that genuinely does not rot can declare 'review-cadence: never' in its frontmatter.\\n\", \"exitCode\": 1, \"finding\": true, \"error\": false}, \"tripwires\": {\"available\": true, \"stderr\": \"\", \"timedOut\": false, \"stdout\": \"\\u26a0\\ufe0f  Context changed since last drift review \\u2014 run /drift to check canon vs. reality.\\n\\u26a0\\ufe0f  Sync health: a source is unsynced or still has a TODO \\u2014 run /sync-health.\", \"exitCode\": 0, \"lines\": [\"\\u26a0\\ufe0f  Context changed since last drift review \\u2014 run /drift to check canon vs. reality.\", \"\\u26a0\\ufe0f  Sync health: a source is unsynced or still has a TODO \\u2014 run /sync-health.\"], \"error\": false}}"
+     },
+     {
+      "pattern": "**/api/gates/run",
+      "status": 200,
+      "body": "{\"available\": true, \"results\": [{\"available\": true, \"stderr\": \"\", \"timedOut\": false, \"script\": \"gate-figma.sh\", \"lines\": [{\"type\": \"figma\", \"id\": \"design-system\", \"status\": \"changed\", \"reason\": \"version 4120 \\u2192 4188\"}, {\"type\": \"figma\", \"id\": \"icon-library\", \"status\": \"not-checked\", \"reason\": \"no credentials\"}], \"exitCode\": 0, \"stdout\": \"\", \"error\": false}, {\"available\": true, \"stderr\": \"\", \"timedOut\": false, \"script\": \"gate-github.sh\", \"lines\": [{\"type\": \"github\", \"id\": \"web\", \"status\": \"changed\", \"reason\": \"12 files changed in scope\", \"delta\": [null, null, null, null, null, null, null, null, null, null, null, null]}, {\"type\": \"github\", \"id\": \"api\", \"status\": \"unchanged\", \"reason\": \"origin/main at 3f9c2e1\"}, {\"type\": \"github\", \"id\": \"mobile\", \"status\": \"not-checked\", \"reason\": \"no clone\"}, {\"type\": \"github\", \"id\": \"infra\", \"status\": \"blocked\", \"reason\": \"no into: set on this entry\"}], \"exitCode\": 0, \"stdout\": \"\", \"error\": false}, {\"available\": true, \"stderr\": \"\", \"timedOut\": false, \"script\": \"gate-website.sh\", \"lines\": [{\"type\": \"website\", \"id\": \"marketing-site\", \"status\": \"unchanged\", \"reason\": \"sitemap unchanged (148 pages)\"}, {\"type\": \"website\", \"id\": \"docs\", \"status\": \"changed\", \"reason\": \"3 pages changed\"}], \"exitCode\": 0, \"stdout\": \"\", \"error\": false}, {\"available\": true, \"stderr\": \"\", \"timedOut\": false, \"script\": \"gate-monday.sh\", \"lines\": [{\"type\": \"monday\", \"id\": \"roadmap\", \"status\": \"never\", \"reason\": \"no stored version\"}], \"exitCode\": 0, \"stdout\": \"\", \"error\": false}, {\"available\": true, \"stderr\": \"\", \"timedOut\": false, \"script\": \"gate-ga.sh\", \"lines\": [{\"type\": \"ga\", \"id\": \"web-analytics\", \"status\": \"unchanged\", \"reason\": \"within lookback\"}, {\"type\": \"ga\", \"id\": \"app-analytics\", \"status\": \"not-checked\", \"reason\": \"no credentials\"}, {\"type\": \"ga\", \"id\": \"events\", \"status\": \"unchanged\", \"reason\": \"within lookback\"}], \"exitCode\": 0, \"stdout\": \"\", \"error\": false}]}"
+     }
+    ],
+    "steps": [
+     {
+      "kind": "click",
+      "selector": "button.sm-btn-primary"
+     }
+    ]
+   },
+   "fullPage": true,
+   "captureAfterMs": 1300
+  },
+  {
+   "state": "health:overflow",
+   "screen": "health",
+   "url": "/?t=f2d2064c39d69e5780e6c0ca245a84c9f5b71962203dd464f441e40b0c156b09#health",
+   "status": "forceable",
+   "force": {
+    "kind": "input",
+    "routes": [
+     {
+      "pattern": "**/api/prereqs",
+      "status": 200,
+      "body": "[{\"name\": \"Node\", \"ok\": true, \"detail\": \"found\", \"blocking\": true, \"hint\": \"\"}, {\"name\": \"git\", \"ok\": true, \"detail\": \"found\", \"blocking\": true, \"hint\": \"\"}, {\"name\": \"python3\", \"ok\": true, \"detail\": \"found\", \"blocking\": true, \"hint\": \"\"}, {\"name\": \"GitHub CLI\", \"ok\": true, \"detail\": \"found\", \"blocking\": false, \"hint\": \"\"}, {\"name\": \"Claude Code\", \"ok\": true, \"detail\": \"found\", \"blocking\": false, \"hint\": \"\"}]"
+     },
+     {
+      "pattern": "**/api/brain",
+      "status": 200,
+      "body": "{\"name\": \"acme-brain\", \"path\": \"/Users/sam/brains/acme-brain\"}"
+     },
+     {
+      "pattern": "**/api/health",
+      "status": 200,
+      "body": "{\"canon\": {\"available\": true, \"stderr\": \"\", \"timedOut\": false, \"stdout\": \"Canon health \\u2014 context/canon\\n  10482 approved and current \\u00b7 1 past review \\u00b7 0 never reviewed \\u00b7 1 draft(s)\\n\\n\\u26a0 past review \\u2014 the date someone last confirmed this is still true\\n    context/canon/product/platform-migration-strategy-and-sequencing-for-the-2027-replatform.md  2025-01-04  biannual (default)     owner: Alexandria Montgomery-Okafor\\n\\n\\u00b7 drafts \\u2014 not yet trusted as canon; a stalled one means the approve gate never closed\\n    context/canon/brand/sub-brands/enterprise/naming-conventions-for-regional-partner-programs.md  last touched 2026-02-11  stalled\\n\\nRe-confirm a doc by reviewing it and running /approve-canon, which stamps today's date.\\nA doc that genuinely does not rot can declare 'review-cadence: never' in its frontmatter.\\n\", \"exitCode\": 1, \"finding\": true, \"error\": false}, \"tripwires\": {\"available\": true, \"stderr\": \"\", \"timedOut\": false, \"stdout\": \"\\u26a0\\ufe0f  Sync health: a source is unsynced or still has a TODO \\u2014 run /sync-health.\", \"exitCode\": 0, \"lines\": [\"\\u26a0\\ufe0f  Sync health: a source is unsynced or still has a TODO \\u2014 run /sync-health.\"], \"error\": false}}"
+     },
+     {
+      "pattern": "**/api/gates/run",
+      "status": 200,
+      "body": "{\"available\": true, \"results\": [{\"available\": true, \"stderr\": \"\", \"timedOut\": false, \"script\": \"gate-github.sh\", \"lines\": [{\"type\": \"github\", \"id\": \"enterprise-partner-portal-frontend-monorepo\", \"status\": \"not-checked\", \"reason\": \"git fetch failed: ssh: connect to host github.com port 22: Operation timed out after 30 seconds (BatchMode=yes, no interactive auth)\"}], \"exitCode\": 0, \"stdout\": \"\", \"error\": false}]}"
+     }
+    ],
+    "steps": [
+     {
+      "kind": "click",
+      "selector": "button.sm-btn-primary"
+     }
+    ]
+   },
+   "fullPage": true,
+   "captureAfterMs": 1300
+  },
+  {
+   "state": "health:tripwires",
+   "screen": "health",
+   "url": "/?t=f2d2064c39d69e5780e6c0ca245a84c9f5b71962203dd464f441e40b0c156b09#health",
+   "status": "forceable",
+   "force": {
+    "kind": "route",
+    "routes": [
+     {
+      "pattern": "**/api/prereqs",
+      "status": 200,
+      "body": "[{\"name\": \"Node\", \"ok\": true, \"detail\": \"found\", \"blocking\": true, \"hint\": \"\"}, {\"name\": \"git\", \"ok\": true, \"detail\": \"found\", \"blocking\": true, \"hint\": \"\"}, {\"name\": \"python3\", \"ok\": true, \"detail\": \"found\", \"blocking\": true, \"hint\": \"\"}, {\"name\": \"GitHub CLI\", \"ok\": true, \"detail\": \"found\", \"blocking\": false, \"hint\": \"\"}, {\"name\": \"Claude Code\", \"ok\": true, \"detail\": \"found\", \"blocking\": false, \"hint\": \"\"}]"
+     },
+     {
+      "pattern": "**/api/brain",
+      "status": 200,
+      "body": "{\"name\": \"acme-brain\", \"path\": \"/Users/sam/brains/acme-brain\"}"
+     },
+     {
+      "pattern": "**/api/health",
+      "status": 200,
+      "body": "{\"canon\": {\"available\": true, \"stderr\": \"\", \"timedOut\": false, \"stdout\": \"Canon health \\u2014 context/canon\\n  14 approved and current \\u00b7 0 past review \\u00b7 0 never reviewed \\u00b7 3 draft(s)\\n\\n\\u00b7 drafts \\u2014 not yet trusted as canon; a stalled one means the approve gate never closed\\n    context/canon/brand/naming.md                last touched 2026-10-09  open\\n    context/canon/pricing/model.md               last touched 2026-10-12  open\\n    context/canon/audience/archetypes.md         last touched 2026-10-14  open\\n\\n\\u2713 every approved canon doc is within its review cadence.\\n\", \"exitCode\": 0, \"finding\": false, \"error\": false}, \"tripwires\": {\"available\": true, \"stderr\": \"\", \"timedOut\": false, \"stdout\": \"\\u26a0\\ufe0f  Context changed since last drift review \\u2014 run /drift to check canon vs. reality.\\n\\u26a0\\ufe0f  Sync health: a source is unsynced or still has a TODO \\u2014 run /sync-health.\", \"exitCode\": 0, \"lines\": [\"\\u26a0\\ufe0f  Context changed since last drift review \\u2014 run /drift to check canon vs. reality.\", \"\\u26a0\\ufe0f  Sync health: a source is unsynced or still has a TODO \\u2014 run /sync-health.\"], \"error\": false}}"
+     }
+    ]
+   },
+   "fullPage": true
+  },
+  {
+   "state": "health:degraded-older-brain",
+   "screen": "health",
+   "url": "/?t=f2d2064c39d69e5780e6c0ca245a84c9f5b71962203dd464f441e40b0c156b09#health",
+   "status": "forceable",
+   "force": {
+    "kind": "route",
+    "routes": [
+     {
+      "pattern": "**/api/prereqs",
+      "status": 200,
+      "body": "[{\"name\": \"Node\", \"ok\": true, \"detail\": \"found\", \"blocking\": true, \"hint\": \"\"}, {\"name\": \"git\", \"ok\": true, \"detail\": \"found\", \"blocking\": true, \"hint\": \"\"}, {\"name\": \"python3\", \"ok\": true, \"detail\": \"found\", \"blocking\": true, \"hint\": \"\"}, {\"name\": \"GitHub CLI\", \"ok\": true, \"detail\": \"found\", \"blocking\": false, \"hint\": \"\"}, {\"name\": \"Claude Code\", \"ok\": true, \"detail\": \"found\", \"blocking\": false, \"hint\": \"\"}]"
+     },
+     {
+      "pattern": "**/api/brain",
+      "status": 200,
+      "body": "{\"name\": \"acme-brain\", \"path\": \"/Users/sam/brains/acme-brain\"}"
+     },
+     {
+      "pattern": "**/api/health",
+      "status": 200,
+      "body": "{\"canon\": {\"available\": true, \"stderr\": \"\", \"timedOut\": false, \"stdout\": \"Canon health \\u2014 context/canon\\n  13 approved and current \\u00b7 1 past review \\u00b7 0 never reviewed \\u00b7 0 draft(s)\\n\\n\\u26a0 past review \\u2014 the date someone last confirmed this is still true\\n    context/canon/brand/voice.md                 2025-11-02  biannual (default)     owner: Priya\\n\\nRe-confirm a doc by reviewing it and running /approve-canon, which stamps today's date.\\nA doc that genuinely does not rot can declare 'review-cadence: never' in its frontmatter.\\n\", \"exitCode\": 1, \"finding\": true, \"error\": false}, \"tripwires\": {\"available\": false, \"hint\": \"Not available in this brain; run /upgrade.\"}}"
+     }
+    ]
+   },
+   "fullPage": true
+  },
+  {
+   "state": "health:canon-error",
+   "screen": "health",
+   "url": "/?t=f2d2064c39d69e5780e6c0ca245a84c9f5b71962203dd464f441e40b0c156b09#health",
+   "status": "forceable",
+   "force": {
+    "kind": "route",
+    "routes": [
+     {
+      "pattern": "**/api/prereqs",
+      "status": 200,
+      "body": "[{\"name\": \"Node\", \"ok\": true, \"detail\": \"found\", \"blocking\": true, \"hint\": \"\"}, {\"name\": \"git\", \"ok\": true, \"detail\": \"found\", \"blocking\": true, \"hint\": \"\"}, {\"name\": \"python3\", \"ok\": true, \"detail\": \"found\", \"blocking\": true, \"hint\": \"\"}, {\"name\": \"GitHub CLI\", \"ok\": true, \"detail\": \"found\", \"blocking\": false, \"hint\": \"\"}, {\"name\": \"Claude Code\", \"ok\": true, \"detail\": \"found\", \"blocking\": false, \"hint\": \"\"}]"
+     },
+     {
+      "pattern": "**/api/brain",
+      "status": 200,
+      "body": "{\"name\": \"acme-brain\", \"path\": \"/Users/sam/brains/acme-brain\"}"
+     },
+     {
+      "pattern": "**/api/health",
+      "status": 200,
+      "body": "{\"canon\": {\"available\": true, \"stderr\": \"canon-health.sh: line 61: syntax error near unexpected token `fi'\", \"timedOut\": false, \"stdout\": \"\", \"exitCode\": 2, \"finding\": false, \"error\": true}, \"tripwires\": {\"available\": true, \"stderr\": \"\", \"timedOut\": false, \"stdout\": \"\\u26a0\\ufe0f  Context changed since last drift review \\u2014 run /drift to check canon vs. reality.\", \"exitCode\": 0, \"lines\": [\"\\u26a0\\ufe0f  Context changed since last drift review \\u2014 run /drift to check canon vs. reality.\"], \"error\": false}}"
+     }
+    ]
+   },
+   "fullPage": true
+  },
+  {
+   "state": "health:initial-load",
+   "screen": "health",
+   "url": "/?t=f2d2064c39d69e5780e6c0ca245a84c9f5b71962203dd464f441e40b0c156b09#health",
+   "status": "forceable",
+   "force": {
+    "kind": "route",
+    "routes": [
+     {
+      "pattern": "**/api/prereqs",
+      "status": 200,
+      "body": "[{\"name\": \"Node\", \"ok\": true, \"detail\": \"found\", \"blocking\": true, \"hint\": \"\"}, {\"name\": \"git\", \"ok\": true, \"detail\": \"found\", \"blocking\": true, \"hint\": \"\"}, {\"name\": \"python3\", \"ok\": true, \"detail\": \"found\", \"blocking\": true, \"hint\": \"\"}, {\"name\": \"GitHub CLI\", \"ok\": true, \"detail\": \"found\", \"blocking\": false, \"hint\": \"\"}, {\"name\": \"Claude Code\", \"ok\": true, \"detail\": \"found\", \"blocking\": false, \"hint\": \"\"}]"
+     },
+     {
+      "pattern": "**/api/brain",
+      "status": 200,
+      "body": "{\"name\": \"acme-brain\", \"path\": \"/Users/sam/brains/acme-brain\"}"
+     },
+     {
+      "pattern": "**/api/health",
+      "status": 200,
+      "body": "{\"canon\": {\"available\": true, \"stderr\": \"\", \"timedOut\": false, \"stdout\": \"Canon health \\u2014 context/canon\\n  9 approved and current \\u00b7 4 past review \\u00b7 2 never reviewed \\u00b7 6 draft(s)\\n\\n\\u2717 approved but never reviewed \\u2014 carrying full authority on a template default\\n    context/canon/brand/naming.md                owner: TODO\\n    context/canon/eng/conventions.md             owner: TODO\\n\\n\\u26a0 past review \\u2014 the date someone last confirmed this is still true\\n    context/canon/brand/voice.md                 2025-11-02  biannual (default)     owner: Priya\\n    context/canon/product/roadmap.md             2026-05-30  quarterly              owner: Sam\\n    context/canon/design/principles.md           2025-08-14  biannual (default)     owner: Jordan\\n    context/canon/company/org.md                 2024-12-01  annual                 owner: Lee\\n\\n\\u00b7 drafts \\u2014 not yet trusted as canon; a stalled one means the approve gate never closed\\n    context/canon/brand/arch.md                  last touched 2026-03-29  stalled\\n    context/canon/pricing/tiers.md               last touched 2026-06-02  stalled\\n    context/canon/audience/archetypes.md         last touched 2026-10-14  open\\n    context/canon/analytics/metrics.md           last touched 2026-10-11  open\\n    context/canon/product/tenets.md              last touched 2026-10-02  open\\n    context/canon/company/remote-work.md         last touched 2026-09-30  open\\n\\nRe-confirm a doc by reviewing it and running /approve-canon, which stamps today's date.\\nA doc that genuinely does not rot can declare 'review-cadence: never' in its frontmatter.\\n\", \"exitCode\": 1, \"finding\": true, \"error\": false}, \"tripwires\": {\"available\": true, \"stderr\": \"\", \"timedOut\": false, \"stdout\": \"\\u26a0\\ufe0f  Context changed since last drift review \\u2014 run /drift to check canon vs. reality.\\n\\u26a0\\ufe0f  Sync health: a source is unsynced or still has a TODO \\u2014 run /sync-health.\", \"exitCode\": 0, \"lines\": [\"\\u26a0\\ufe0f  Context changed since last drift review \\u2014 run /drift to check canon vs. reality.\", \"\\u26a0\\ufe0f  Sync health: a source is unsynced or still has a TODO \\u2014 run /sync-health.\"], \"error\": false}}",
+      "delayMs": 20000
+     }
+    ],
+    "delayMs": 1
+   },
+   "fullPage": true
+  },
+  {
+   "state": "health:gates-running",
+   "screen": "health",
+   "url": "/?t=f2d2064c39d69e5780e6c0ca245a84c9f5b71962203dd464f441e40b0c156b09#health",
+   "status": "forceable",
+   "force": {
+    "kind": "input",
+    "routes": [
+     {
+      "pattern": "**/api/prereqs",
+      "status": 200,
+      "body": "[{\"name\": \"Node\", \"ok\": true, \"detail\": \"found\", \"blocking\": true, \"hint\": \"\"}, {\"name\": \"git\", \"ok\": true, \"detail\": \"found\", \"blocking\": true, \"hint\": \"\"}, {\"name\": \"python3\", \"ok\": true, \"detail\": \"found\", \"blocking\": true, \"hint\": \"\"}, {\"name\": \"GitHub CLI\", \"ok\": true, \"detail\": \"found\", \"blocking\": false, \"hint\": \"\"}, {\"name\": \"Claude Code\", \"ok\": true, \"detail\": \"found\", \"blocking\": false, \"hint\": \"\"}]"
+     },
+     {
+      "pattern": "**/api/brain",
+      "status": 200,
+      "body": "{\"name\": \"acme-brain\", \"path\": \"/Users/sam/brains/acme-brain\"}"
+     },
+     {
+      "pattern": "**/api/health",
+      "status": 200,
+      "body": "{\"canon\": {\"available\": true, \"stderr\": \"\", \"timedOut\": false, \"stdout\": \"Canon health \\u2014 context/canon\\n  9 approved and current \\u00b7 4 past review \\u00b7 2 never reviewed \\u00b7 6 draft(s)\\n\\n\\u2717 approved but never reviewed \\u2014 carrying full authority on a template default\\n    context/canon/brand/naming.md                owner: TODO\\n    context/canon/eng/conventions.md             owner: TODO\\n\\n\\u26a0 past review \\u2014 the date someone last confirmed this is still true\\n    context/canon/brand/voice.md                 2025-11-02  biannual (default)     owner: Priya\\n    context/canon/product/roadmap.md             2026-05-30  quarterly              owner: Sam\\n    context/canon/design/principles.md           2025-08-14  biannual (default)     owner: Jordan\\n    context/canon/company/org.md                 2024-12-01  annual                 owner: Lee\\n\\n\\u00b7 drafts \\u2014 not yet trusted as canon; a stalled one means the approve gate never closed\\n    context/canon/brand/arch.md                  last touched 2026-03-29  stalled\\n    context/canon/pricing/tiers.md               last touched 2026-06-02  stalled\\n    context/canon/audience/archetypes.md         last touched 2026-10-14  open\\n    context/canon/analytics/metrics.md           last touched 2026-10-11  open\\n    context/canon/product/tenets.md              last touched 2026-10-02  open\\n    context/canon/company/remote-work.md         last touched 2026-09-30  open\\n\\nRe-confirm a doc by reviewing it and running /approve-canon, which stamps today's date.\\nA doc that genuinely does not rot can declare 'review-cadence: never' in its frontmatter.\\n\", \"exitCode\": 1, \"finding\": true, \"error\": false}, \"tripwires\": {\"available\": true, \"stderr\": \"\", \"timedOut\": false, \"stdout\": \"\\u26a0\\ufe0f  Context changed since last drift review \\u2014 run /drift to check canon vs. reality.\\n\\u26a0\\ufe0f  Sync health: a source is unsynced or still has a TODO \\u2014 run /sync-health.\", \"exitCode\": 0, \"lines\": [\"\\u26a0\\ufe0f  Context changed since last drift review \\u2014 run /drift to check canon vs. reality.\", \"\\u26a0\\ufe0f  Sync health: a source is unsynced or still has a TODO \\u2014 run /sync-health.\"], \"error\": false}}"
+     },
+     {
+      "pattern": "**/api/gates/run",
+      "status": 200,
+      "body": "{\"available\": true, \"results\": [{\"available\": true, \"stderr\": \"\", \"timedOut\": false, \"script\": \"gate-figma.sh\", \"lines\": [{\"type\": \"figma\", \"id\": \"design-system\", \"status\": \"changed\", \"reason\": \"version 4120 \\u2192 4188\"}, {\"type\": \"figma\", \"id\": \"icon-library\", \"status\": \"not-checked\", \"reason\": \"no credentials\"}], \"exitCode\": 0, \"stdout\": \"\", \"error\": false}, {\"available\": true, \"stderr\": \"\", \"timedOut\": false, \"script\": \"gate-github.sh\", \"lines\": [{\"type\": \"github\", \"id\": \"web\", \"status\": \"changed\", \"reason\": \"12 files changed in scope\", \"delta\": [null, null, null, null, null, null, null, null, null, null, null, null]}, {\"type\": \"github\", \"id\": \"api\", \"status\": \"unchanged\", \"reason\": \"origin/main at 3f9c2e1\"}, {\"type\": \"github\", \"id\": \"mobile\", \"status\": \"not-checked\", \"reason\": \"no clone\"}, {\"type\": \"github\", \"id\": \"infra\", \"status\": \"blocked\", \"reason\": \"no into: set on this entry\"}], \"exitCode\": 0, \"stdout\": \"\", \"error\": false}, {\"available\": true, \"stderr\": \"\", \"timedOut\": false, \"script\": \"gate-website.sh\", \"lines\": [{\"type\": \"website\", \"id\": \"marketing-site\", \"status\": \"unchanged\", \"reason\": \"sitemap unchanged (148 pages)\"}, {\"type\": \"website\", \"id\": \"docs\", \"status\": \"changed\", \"reason\": \"3 pages changed\"}], \"exitCode\": 0, \"stdout\": \"\", \"error\": false}, {\"available\": true, \"stderr\": \"\", \"timedOut\": false, \"script\": \"gate-monday.sh\", \"lines\": [{\"type\": \"monday\", \"id\": \"roadmap\", \"status\": \"never\", \"reason\": \"no stored version\"}], \"exitCode\": 0, \"stdout\": \"\", \"error\": false}, {\"available\": true, \"stderr\": \"\", \"timedOut\": false, \"script\": \"gate-ga.sh\", \"lines\": [{\"type\": \"ga\", \"id\": \"web-analytics\", \"status\": \"unchanged\", \"reason\": \"within lookback\"}, {\"type\": \"ga\", \"id\": \"app-analytics\", \"status\": \"not-checked\", \"reason\": \"no credentials\"}, {\"type\": \"ga\", \"id\": \"events\", \"status\": \"unchanged\", \"reason\": \"within lookback\"}], \"exitCode\": 0, \"stdout\": \"\", \"error\": false}]}",
+      "delayMs": 20000
+     }
+    ],
+    "steps": [
+     {
+      "kind": "click",
+      "selector": "button.sm-btn-primary"
+     }
+    ]
+   },
+   "fullPage": true,
+   "captureAfterMs": 600
+  },
+  {
+   "state": "health:gates-mixed",
+   "screen": "health",
+   "url": "/?t=f2d2064c39d69e5780e6c0ca245a84c9f5b71962203dd464f441e40b0c156b09#health",
+   "status": "forceable",
+   "force": {
+    "kind": "input",
+    "routes": [
+     {
+      "pattern": "**/api/prereqs",
+      "status": 200,
+      "body": "[{\"name\": \"Node\", \"ok\": true, \"detail\": \"found\", \"blocking\": true, \"hint\": \"\"}, {\"name\": \"git\", \"ok\": true, \"detail\": \"found\", \"blocking\": true, \"hint\": \"\"}, {\"name\": \"python3\", \"ok\": true, \"detail\": \"found\", \"blocking\": true, \"hint\": \"\"}, {\"name\": \"GitHub CLI\", \"ok\": true, \"detail\": \"found\", \"blocking\": false, \"hint\": \"\"}, {\"name\": \"Claude Code\", \"ok\": true, \"detail\": \"found\", \"blocking\": false, \"hint\": \"\"}]"
+     },
+     {
+      "pattern": "**/api/brain",
+      "status": 200,
+      "body": "{\"name\": \"acme-brain\", \"path\": \"/Users/sam/brains/acme-brain\"}"
+     },
+     {
+      "pattern": "**/api/health",
+      "status": 200,
+      "body": "{\"canon\": {\"available\": true, \"stderr\": \"\", \"timedOut\": false, \"stdout\": \"Canon health \\u2014 context/canon\\n  9 approved and current \\u00b7 4 past review \\u00b7 2 never reviewed \\u00b7 6 draft(s)\\n\\n\\u2717 approved but never reviewed \\u2014 carrying full authority on a template default\\n    context/canon/brand/naming.md                owner: TODO\\n    context/canon/eng/conventions.md             owner: TODO\\n\\n\\u26a0 past review \\u2014 the date someone last confirmed this is still true\\n    context/canon/brand/voice.md                 2025-11-02  biannual (default)     owner: Priya\\n    context/canon/product/roadmap.md             2026-05-30  quarterly              owner: Sam\\n    context/canon/design/principles.md           2025-08-14  biannual (default)     owner: Jordan\\n    context/canon/company/org.md                 2024-12-01  annual                 owner: Lee\\n\\n\\u00b7 drafts \\u2014 not yet trusted as canon; a stalled one means the approve gate never closed\\n    context/canon/brand/arch.md                  last touched 2026-03-29  stalled\\n    context/canon/pricing/tiers.md               last touched 2026-06-02  stalled\\n    context/canon/audience/archetypes.md         last touched 2026-10-14  open\\n    context/canon/analytics/metrics.md           last touched 2026-10-11  open\\n    context/canon/product/tenets.md              last touched 2026-10-02  open\\n    context/canon/company/remote-work.md         last touched 2026-09-30  open\\n\\nRe-confirm a doc by reviewing it and running /approve-canon, which stamps today's date.\\nA doc that genuinely does not rot can declare 'review-cadence: never' in its frontmatter.\\n\", \"exitCode\": 1, \"finding\": true, \"error\": false}, \"tripwires\": {\"available\": true, \"stderr\": \"\", \"timedOut\": false, \"stdout\": \"\\u26a0\\ufe0f  Context changed since last drift review \\u2014 run /drift to check canon vs. reality.\\n\\u26a0\\ufe0f  Sync health: a source is unsynced or still has a TODO \\u2014 run /sync-health.\", \"exitCode\": 0, \"lines\": [\"\\u26a0\\ufe0f  Context changed since last drift review \\u2014 run /drift to check canon vs. reality.\", \"\\u26a0\\ufe0f  Sync health: a source is unsynced or still has a TODO \\u2014 run /sync-health.\"], \"error\": false}}"
+     },
+     {
+      "pattern": "**/api/gates/run",
+      "status": 200,
+      "body": "{\"available\": true, \"results\": [{\"available\": true, \"stderr\": \"\", \"timedOut\": false, \"script\": \"gate-figma.sh\", \"lines\": [{\"type\": \"figma\", \"id\": \"design-system\", \"status\": \"changed\", \"reason\": \"version 4120 \\u2192 4188\"}, {\"type\": \"figma\", \"id\": \"icon-library\", \"status\": \"not-checked\", \"reason\": \"no credentials\"}], \"exitCode\": 0, \"stdout\": \"\", \"error\": false}, {\"available\": true, \"stderr\": \"\", \"timedOut\": false, \"script\": \"gate-github.sh\", \"lines\": [{\"type\": \"github\", \"id\": \"web\", \"status\": \"changed\", \"reason\": \"12 files changed in scope\", \"delta\": [null, null, null, null, null, null, null, null, null, null, null, null]}, {\"type\": \"github\", \"id\": \"api\", \"status\": \"unchanged\", \"reason\": \"origin/main at 3f9c2e1\"}, {\"type\": \"github\", \"id\": \"mobile\", \"status\": \"not-checked\", \"reason\": \"no clone\"}, {\"type\": \"github\", \"id\": \"infra\", \"status\": \"blocked\", \"reason\": \"no into: set on this entry\"}], \"exitCode\": 0, \"stdout\": \"\", \"error\": false}, {\"available\": true, \"stderr\": \"\", \"timedOut\": false, \"script\": \"gate-website.sh\", \"lines\": [{\"type\": \"website\", \"id\": \"marketing-site\", \"status\": \"unchanged\", \"reason\": \"sitemap unchanged (148 pages)\"}, {\"type\": \"website\", \"id\": \"docs\", \"status\": \"changed\", \"reason\": \"3 pages changed\"}], \"exitCode\": 0, \"stdout\": \"\", \"error\": false}, {\"available\": true, \"stderr\": \"\", \"timedOut\": false, \"script\": \"gate-monday.sh\", \"lines\": [{\"type\": \"monday\", \"id\": \"roadmap\", \"status\": \"never\", \"reason\": \"no stored version\"}], \"exitCode\": 0, \"stdout\": \"\", \"error\": false}, {\"available\": true, \"stderr\": \"\", \"timedOut\": false, \"script\": \"gate-ga.sh\", \"lines\": [{\"type\": \"ga\", \"id\": \"web-analytics\", \"status\": \"unchanged\", \"reason\": \"within lookback\"}, {\"type\": \"ga\", \"id\": \"app-analytics\", \"status\": \"not-checked\", \"reason\": \"no credentials\"}, {\"type\": \"ga\", \"id\": \"events\", \"status\": \"unchanged\", \"reason\": \"within lookback\"}], \"exitCode\": 0, \"stdout\": \"\", \"error\": false}]}"
+     }
+    ],
+    "steps": [
+     {
+      "kind": "click",
+      "selector": "button.sm-btn-primary"
+     }
+    ]
+   },
+   "fullPage": true,
+   "captureAfterMs": 1300
+  },
+  {
+   "state": "health:gate-error",
+   "screen": "health",
+   "url": "/?t=f2d2064c39d69e5780e6c0ca245a84c9f5b71962203dd464f441e40b0c156b09#health",
+   "status": "forceable",
+   "force": {
+    "kind": "input",
+    "routes": [
+     {
+      "pattern": "**/api/prereqs",
+      "status": 200,
+      "body": "[{\"name\": \"Node\", \"ok\": true, \"detail\": \"found\", \"blocking\": true, \"hint\": \"\"}, {\"name\": \"git\", \"ok\": true, \"detail\": \"found\", \"blocking\": true, \"hint\": \"\"}, {\"name\": \"python3\", \"ok\": true, \"detail\": \"found\", \"blocking\": true, \"hint\": \"\"}, {\"name\": \"GitHub CLI\", \"ok\": true, \"detail\": \"found\", \"blocking\": false, \"hint\": \"\"}, {\"name\": \"Claude Code\", \"ok\": true, \"detail\": \"found\", \"blocking\": false, \"hint\": \"\"}]"
+     },
+     {
+      "pattern": "**/api/brain",
+      "status": 200,
+      "body": "{\"name\": \"acme-brain\", \"path\": \"/Users/sam/brains/acme-brain\"}"
+     },
+     {
+      "pattern": "**/api/health",
+      "status": 200,
+      "body": "{\"canon\": {\"available\": true, \"stderr\": \"\", \"timedOut\": false, \"stdout\": \"Canon health \\u2014 context/canon\\n  9 approved and current \\u00b7 4 past review \\u00b7 2 never reviewed \\u00b7 6 draft(s)\\n\\n\\u2717 approved but never reviewed \\u2014 carrying full authority on a template default\\n    context/canon/brand/naming.md                owner: TODO\\n    context/canon/eng/conventions.md             owner: TODO\\n\\n\\u26a0 past review \\u2014 the date someone last confirmed this is still true\\n    context/canon/brand/voice.md                 2025-11-02  biannual (default)     owner: Priya\\n    context/canon/product/roadmap.md             2026-05-30  quarterly              owner: Sam\\n    context/canon/design/principles.md           2025-08-14  biannual (default)     owner: Jordan\\n    context/canon/company/org.md                 2024-12-01  annual                 owner: Lee\\n\\n\\u00b7 drafts \\u2014 not yet trusted as canon; a stalled one means the approve gate never closed\\n    context/canon/brand/arch.md                  last touched 2026-03-29  stalled\\n    context/canon/pricing/tiers.md               last touched 2026-06-02  stalled\\n    context/canon/audience/archetypes.md         last touched 2026-10-14  open\\n    context/canon/analytics/metrics.md           last touched 2026-10-11  open\\n    context/canon/product/tenets.md              last touched 2026-10-02  open\\n    context/canon/company/remote-work.md         last touched 2026-09-30  open\\n\\nRe-confirm a doc by reviewing it and running /approve-canon, which stamps today's date.\\nA doc that genuinely does not rot can declare 'review-cadence: never' in its frontmatter.\\n\", \"exitCode\": 1, \"finding\": true, \"error\": false}, \"tripwires\": {\"available\": true, \"stderr\": \"\", \"timedOut\": false, \"stdout\": \"\\u26a0\\ufe0f  Context changed since last drift review \\u2014 run /drift to check canon vs. reality.\\n\\u26a0\\ufe0f  Sync health: a source is unsynced or still has a TODO \\u2014 run /sync-health.\", \"exitCode\": 0, \"lines\": [\"\\u26a0\\ufe0f  Context changed since last drift review \\u2014 run /drift to check canon vs. reality.\", \"\\u26a0\\ufe0f  Sync health: a source is unsynced or still has a TODO \\u2014 run /sync-health.\"], \"error\": false}}"
+     },
+     {
+      "pattern": "**/api/gates/run",
+      "status": 200,
+      "body": "{\"available\": true, \"results\": [{\"available\": true, \"stderr\": \"\", \"timedOut\": false, \"script\": \"gate-figma.sh\", \"lines\": [{\"type\": \"figma\", \"id\": \"design-system\", \"status\": \"changed\", \"reason\": \"version 4120 \\u2192 4188\"}, {\"type\": \"figma\", \"id\": \"icon-library\", \"status\": \"not-checked\", \"reason\": \"no credentials\"}], \"exitCode\": 0, \"stdout\": \"\", \"error\": false}, {\"available\": true, \"stderr\": \"\\u2717 gate-github: python3 not found, so this source was not checked.\", \"timedOut\": false, \"script\": \"gate-github.sh\", \"lines\": [], \"exitCode\": 1, \"stdout\": \"\", \"error\": true}, {\"available\": true, \"stderr\": \"\", \"timedOut\": false, \"script\": \"gate-website.sh\", \"lines\": [{\"type\": \"website\", \"id\": \"marketing-site\", \"status\": \"unchanged\", \"reason\": \"sitemap unchanged (148 pages)\"}, {\"type\": \"website\", \"id\": \"docs\", \"status\": \"changed\", \"reason\": \"3 pages changed\"}], \"exitCode\": 0, \"stdout\": \"\", \"error\": false}, {\"available\": true, \"stderr\": \"\", \"timedOut\": false, \"script\": \"gate-monday.sh\", \"lines\": [{\"type\": \"monday\", \"id\": \"roadmap\", \"status\": \"never\", \"reason\": \"no stored version\"}], \"exitCode\": 0, \"stdout\": \"\", \"error\": false}, {\"available\": true, \"stderr\": \"\", \"timedOut\": false, \"script\": \"gate-ga.sh\", \"lines\": [{\"type\": \"ga\", \"id\": \"web-analytics\", \"status\": \"unchanged\", \"reason\": \"within lookback\"}, {\"type\": \"ga\", \"id\": \"app-analytics\", \"status\": \"not-checked\", \"reason\": \"no credentials\"}, {\"type\": \"ga\", \"id\": \"events\", \"status\": \"unchanged\", \"reason\": \"within lookback\"}], \"exitCode\": 0, \"stdout\": \"\", \"error\": false}]}"
+     }
+    ],
+    "steps": [
+     {
+      "kind": "click",
+      "selector": "button.sm-btn-primary"
+     }
+    ]
+   },
+   "fullPage": true,
+   "captureAfterMs": 1300
+  },
+  {
+   "state": "health:server-down",
+   "screen": "health",
+   "url": "/?t=f2d2064c39d69e5780e6c0ca245a84c9f5b71962203dd464f441e40b0c156b09#health",
+   "status": "forceable",
+   "force": {
+    "kind": "route",
+    "routes": [
+     {
+      "pattern": "**/api/prereqs",
+      "status": 200,
+      "body": "[{\"name\": \"Node\", \"ok\": true, \"detail\": \"found\", \"blocking\": true, \"hint\": \"\"}, {\"name\": \"git\", \"ok\": true, \"detail\": \"found\", \"blocking\": true, \"hint\": \"\"}, {\"name\": \"python3\", \"ok\": true, \"detail\": \"found\", \"blocking\": true, \"hint\": \"\"}, {\"name\": \"GitHub CLI\", \"ok\": true, \"detail\": \"found\", \"blocking\": false, \"hint\": \"\"}, {\"name\": \"Claude Code\", \"ok\": true, \"detail\": \"found\", \"blocking\": false, \"hint\": \"\"}]"
+     },
+     {
+      "pattern": "**/api/brain",
+      "status": 200,
+      "body": "{\"name\": \"acme-brain\", \"path\": \"/Users/sam/brains/acme-brain\"}"
+     },
+     {
+      "pattern": "**/api/health",
+      "status": 500,
+      "body": "{}"
+     }
+    ]
+   },
+   "fullPage": true
+  },
+  {
+   "state": "health:unauthorized",
+   "screen": "health",
+   "url": "/?t=f2d2064c39d69e5780e6c0ca245a84c9f5b71962203dd464f441e40b0c156b09#health",
+   "status": "forceable",
+   "force": {
+    "kind": "route",
+    "routes": [
+     {
+      "pattern": "**/api/prereqs",
+      "status": 200,
+      "body": "[{\"name\": \"Node\", \"ok\": true, \"detail\": \"found\", \"blocking\": true, \"hint\": \"\"}, {\"name\": \"git\", \"ok\": true, \"detail\": \"found\", \"blocking\": true, \"hint\": \"\"}, {\"name\": \"python3\", \"ok\": true, \"detail\": \"found\", \"blocking\": true, \"hint\": \"\"}, {\"name\": \"GitHub CLI\", \"ok\": true, \"detail\": \"found\", \"blocking\": false, \"hint\": \"\"}, {\"name\": \"Claude Code\", \"ok\": true, \"detail\": \"found\", \"blocking\": false, \"hint\": \"\"}]"
+     },
+     {
+      "pattern": "**/api/brain",
+      "status": 200,
+      "body": "{\"name\": \"acme-brain\", \"path\": \"/Users/sam/brains/acme-brain\"}"
+     },
+     {
+      "pattern": "**/api/**",
+      "status": 401,
+      "body": "{}"
+     }
+    ]
+   },
+   "fullPage": true
+  },
+  {
+   "state": "setup:blocked",
+   "screen": "setup",
+   "url": "/?t=f2d2064c39d69e5780e6c0ca245a84c9f5b71962203dd464f441e40b0c156b09#health",
+   "status": "forceable",
+   "force": {
+    "kind": "route",
+    "routes": [
+     {
+      "pattern": "**/api/prereqs",
+      "status": 200,
+      "body": "[{\"name\": \"Node\", \"ok\": true, \"detail\": \"found\", \"blocking\": true, \"hint\": \"\"}, {\"name\": \"git\", \"ok\": true, \"detail\": \"found\", \"blocking\": true, \"hint\": \"\"}, {\"name\": \"python3\", \"ok\": true, \"detail\": \"found\", \"blocking\": true, \"hint\": \"\"}, {\"name\": \"GitHub CLI\", \"ok\": true, \"detail\": \"found\", \"blocking\": false, \"hint\": \"\"}, {\"name\": \"Claude Code\", \"ok\": true, \"detail\": \"found\", \"blocking\": false, \"hint\": \"\"}]"
+     },
+     {
+      "pattern": "**/api/brain",
+      "status": 200,
+      "body": "{\"name\": \"acme-brain\", \"path\": \"/Users/sam/brains/acme-brain\"}"
+     },
+     {
+      "pattern": "**/api/prereqs",
+      "status": 200,
+      "body": "[{\"name\": \"Node\", \"ok\": true, \"detail\": \"v22.18.0\", \"blocking\": true, \"hint\": \"\"}, {\"name\": \"git\", \"ok\": true, \"detail\": \"git version 2.50\", \"blocking\": true, \"hint\": \"\"}, {\"name\": \"python3\", \"ok\": false, \"detail\": \"\", \"blocking\": true, \"hint\": \"Install Python 3; the brain's source checks need it.\"}, {\"name\": \"GitHub CLI\", \"ok\": false, \"detail\": \"not signed in\", \"blocking\": false, \"hint\": \"Run gh auth login. Needed for later phases.\"}, {\"name\": \"Claude Code\", \"ok\": true, \"detail\": \"2.1.0\", \"blocking\": false, \"hint\": \"\"}]"
+     },
+     {
+      "pattern": "**/api/health",
+      "status": 200,
+      "body": "{\"canon\": {\"available\": true, \"stderr\": \"\", \"timedOut\": false, \"stdout\": \"Canon health \\u2014 context/canon\\n  9 approved and current \\u00b7 4 past review \\u00b7 2 never reviewed \\u00b7 6 draft(s)\\n\\n\\u2717 approved but never reviewed \\u2014 carrying full authority on a template default\\n    context/canon/brand/naming.md                owner: TODO\\n    context/canon/eng/conventions.md             owner: TODO\\n\\n\\u26a0 past review \\u2014 the date someone last confirmed this is still true\\n    context/canon/brand/voice.md                 2025-11-02  biannual (default)     owner: Priya\\n    context/canon/product/roadmap.md             2026-05-30  quarterly              owner: Sam\\n    context/canon/design/principles.md           2025-08-14  biannual (default)     owner: Jordan\\n    context/canon/company/org.md                 2024-12-01  annual                 owner: Lee\\n\\n\\u00b7 drafts \\u2014 not yet trusted as canon; a stalled one means the approve gate never closed\\n    context/canon/brand/arch.md                  last touched 2026-03-29  stalled\\n    context/canon/pricing/tiers.md               last touched 2026-06-02  stalled\\n    context/canon/audience/archetypes.md         last touched 2026-10-14  open\\n    context/canon/analytics/metrics.md           last touched 2026-10-11  open\\n    context/canon/product/tenets.md              last touched 2026-10-02  open\\n    context/canon/company/remote-work.md         last touched 2026-09-30  open\\n\\nRe-confirm a doc by reviewing it and running /approve-canon, which stamps today's date.\\nA doc that genuinely does not rot can declare 'review-cadence: never' in its frontmatter.\\n\", \"exitCode\": 1, \"finding\": true, \"error\": false}, \"tripwires\": {\"available\": true, \"stderr\": \"\", \"timedOut\": false, \"stdout\": \"\\u26a0\\ufe0f  Context changed since last drift review \\u2014 run /drift to check canon vs. reality.\\n\\u26a0\\ufe0f  Sync health: a source is unsynced or still has a TODO \\u2014 run /sync-health.\", \"exitCode\": 0, \"lines\": [\"\\u26a0\\ufe0f  Context changed since last drift review \\u2014 run /drift to check canon vs. reality.\", \"\\u26a0\\ufe0f  Sync health: a source is unsynced or still has a TODO \\u2014 run /sync-health.\"], \"error\": false}}"
+     }
+    ]
+   },
+   "fullPage": true
+  },
+  {
+   "state": "brain:browse",
+   "screen": "brain",
+   "url": "/?t=f2d2064c39d69e5780e6c0ca245a84c9f5b71962203dd464f441e40b0c156b09#brain",
+   "status": "forceable",
+   "force": {
+    "kind": "input",
+    "routes": [
+     {
+      "pattern": "**/api/prereqs",
+      "status": 200,
+      "body": "[{\"name\": \"Node\", \"ok\": true, \"detail\": \"found\", \"blocking\": true, \"hint\": \"\"}, {\"name\": \"git\", \"ok\": true, \"detail\": \"found\", \"blocking\": true, \"hint\": \"\"}, {\"name\": \"python3\", \"ok\": true, \"detail\": \"found\", \"blocking\": true, \"hint\": \"\"}, {\"name\": \"GitHub CLI\", \"ok\": true, \"detail\": \"found\", \"blocking\": false, \"hint\": \"\"}, {\"name\": \"Claude Code\", \"ok\": true, \"detail\": \"found\", \"blocking\": false, \"hint\": \"\"}]"
+     },
+     {
+      "pattern": "**/api/brain",
+      "status": 200,
+      "body": "{\"name\": \"acme-brain\", \"path\": \"/Users/sam/brains/acme-brain\"}"
+     }
+    ],
+    "steps": [
+     {
+      "kind": "click",
+      "selector": ".br-file >> nth=0"
+     }
+    ]
+   },
+   "fullPage": true,
+   "captureAfterMs": 1300
+  },
+  {
+   "state": "brain:no-manifest",
+   "screen": "brain",
+   "url": "/?t=f2d2064c39d69e5780e6c0ca245a84c9f5b71962203dd464f441e40b0c156b09#brain",
+   "status": "forceable",
+   "force": {
+    "kind": "route",
+    "routes": [
+     {
+      "pattern": "**/api/prereqs",
+      "status": 200,
+      "body": "[{\"name\": \"Node\", \"ok\": true, \"detail\": \"found\", \"blocking\": true, \"hint\": \"\"}, {\"name\": \"git\", \"ok\": true, \"detail\": \"found\", \"blocking\": true, \"hint\": \"\"}, {\"name\": \"python3\", \"ok\": true, \"detail\": \"found\", \"blocking\": true, \"hint\": \"\"}, {\"name\": \"GitHub CLI\", \"ok\": true, \"detail\": \"found\", \"blocking\": false, \"hint\": \"\"}, {\"name\": \"Claude Code\", \"ok\": true, \"detail\": \"found\", \"blocking\": false, \"hint\": \"\"}]"
+     },
+     {
+      "pattern": "**/api/brain",
+      "status": 200,
+      "body": "{\"name\": \"acme-brain\", \"path\": \"/Users/sam/brains/acme-brain\"}"
+     },
+     {
+      "pattern": "**/api/manifest",
+      "status": 200,
+      "body": "{\"available\": false, \"hint\": \"Not available in this brain; run /upgrade.\"}"
+     }
+    ]
+   },
+   "fullPage": true
+  },
+  {
+   "state": "sources:list",
+   "screen": "sources",
+   "url": "/?t=f2d2064c39d69e5780e6c0ca245a84c9f5b71962203dd464f441e40b0c156b09#sources",
+   "status": "forceable",
+   "force": {
+    "kind": "route",
+    "routes": [
+     {
+      "pattern": "**/api/prereqs",
+      "status": 200,
+      "body": "[{\"name\": \"Node\", \"ok\": true, \"detail\": \"found\", \"blocking\": true, \"hint\": \"\"}, {\"name\": \"git\", \"ok\": true, \"detail\": \"found\", \"blocking\": true, \"hint\": \"\"}, {\"name\": \"python3\", \"ok\": true, \"detail\": \"found\", \"blocking\": true, \"hint\": \"\"}, {\"name\": \"GitHub CLI\", \"ok\": true, \"detail\": \"found\", \"blocking\": false, \"hint\": \"\"}, {\"name\": \"Claude Code\", \"ok\": true, \"detail\": \"found\", \"blocking\": false, \"hint\": \"\"}]"
+     },
+     {
+      "pattern": "**/api/brain",
+      "status": 200,
+      "body": "{\"name\": \"acme-brain\", \"path\": \"/Users/sam/brains/acme-brain\"}"
+     }
+    ]
+   },
+   "fullPage": true
+  },
+  {
+   "state": "sources:none",
+   "screen": "sources",
+   "url": "/?t=f2d2064c39d69e5780e6c0ca245a84c9f5b71962203dd464f441e40b0c156b09#sources",
+   "status": "forceable",
+   "force": {
+    "kind": "route",
+    "routes": [
+     {
+      "pattern": "**/api/prereqs",
+      "status": 200,
+      "body": "[{\"name\": \"Node\", \"ok\": true, \"detail\": \"found\", \"blocking\": true, \"hint\": \"\"}, {\"name\": \"git\", \"ok\": true, \"detail\": \"found\", \"blocking\": true, \"hint\": \"\"}, {\"name\": \"python3\", \"ok\": true, \"detail\": \"found\", \"blocking\": true, \"hint\": \"\"}, {\"name\": \"GitHub CLI\", \"ok\": true, \"detail\": \"found\", \"blocking\": false, \"hint\": \"\"}, {\"name\": \"Claude Code\", \"ok\": true, \"detail\": \"found\", \"blocking\": false, \"hint\": \"\"}]"
+     },
+     {
+      "pattern": "**/api/brain",
+      "status": 200,
+      "body": "{\"name\": \"acme-brain\", \"path\": \"/Users/sam/brains/acme-brain\"}"
+     },
+     {
+      "pattern": "**/api/sources",
+      "status": 200,
+      "body": "{\"available\": false, \"hint\": \"x\"}"
+     }
+    ]
+   },
+   "fullPage": true
+  }
+ ]
+}

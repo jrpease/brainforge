@@ -78,10 +78,14 @@ reality, one source at a time. Type: **reveal**.
 
 | duration | travel | participants | groups | coverage |
 |---|---|---|---|---|
-| 820ms | 0.02 | 8 | 3 | 0.35 |
+| 820ms | 0.50 | 8 | 3 | 0.35 |
 
-Against the reveal IQR (350–650ms, 0–0.07, 3–10, 1–2, 0.03–0.18): outside on duration, groups and
-coverage; inside on travel and participants. Floor met (groups ≥ 2).
+Against the reveal IQR (350–650ms, 0–0.07, 3–10, 1–2, 0.03–0.18): outside on duration, travel,
+groups and coverage; inside on participants. Floor met (groups ≥ 2).
+
+Travel is large on purpose: the seam-coloured line sweeps the whole Derived column, because the moment
+means "every source was just checked". First declared at 0.02, which described the rows and missed the
+line; corrected after measuring (821ms, travel 0.51 at 1440, 13 parts, 3 groups, coverage 0.35).
 
 Reduced motion: no travel, no stagger; each row's status changes in place, all at once.
 
