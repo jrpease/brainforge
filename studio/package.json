@@ -4,14 +4,27 @@
   "private": true,
   "description": "A local admin cockpit for a Brainforge brain: health, browse, and (later) triage and runs.",
   "license": "MIT",
-  "repository": { "type": "git", "url": "https://github.com/jrpease/brainforge", "directory": "studio" },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jrpease/brainforge",
+    "directory": "studio"
+  },
   "type": "module",
-  "bin": { "brainforge-studio": "bin/brainforge-studio.js" },
-  "files": ["bin/", "dist/"],
-  "engines": { "node": ">=20" },
+  "bin": {
+    "brainforge-studio": "bin/brainforge-studio.js"
+  },
+  "files": [
+    "bin/",
+    "dist/",
+    "README.md"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
   "scripts": {
     "dev": "vite",
     "build": "vite build && tsc -p tsconfig.server.json",
+    "prepack": "npm run build",
     "typecheck": "tsc -p tsconfig.json --noEmit && tsc -p tsconfig.server.json --noEmit",
     "test": "vitest run",
     "smoke": "playwright test"

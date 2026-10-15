@@ -150,6 +150,19 @@ Recorded during the build (Part A and Part B up to the PR):
   HTML) rather than plain text.
 - **Performance floor.** One rule (long frames) fails on this machine even for a blank page; it is
   recorded as not evidenced, and shipping past it is put to Jordan (see `studio/SCREENS.md`).
+- **The launch token travels as a header, not a cookie.** B3 traded `?t=` for an httpOnly cookie. Code
+  review found cookies are not port-isolated: any other server on `127.0.0.1` would receive it, and a
+  page on another local port could fire `POST /api/gates/run` with it. The page now keeps the token
+  for its tab (`sessionStorage`) and sends `x-studio-token`; a cross-origin custom header needs a
+  CORS preflight, which the server never grants. The row "Local server security" holds as written.
+- **Files differ from the Plan's names.** `server/index.ts` became `server/cli.ts` + `server/app.ts`
+  (routes live in `app.ts`); `readers/canon.ts` became `readers/files.ts`; the smoke test is
+  `test/smoke/smoke.spec.ts`. `studio/README.md` (B1) was added late, after review caught it missing.
+- **Publishing builds first.** `prepack` runs the build, so B13's `npm publish` from a fresh checkout
+  cannot ship a package without `dist/`.
+- **Code review fixes.** The canon parser reads paths longer than the script's 44-column pad;
+  Monday and GA slots are read by `boardId` and `propertyId`; a timed-out script is killed with its
+  whole process group, so a hung `git fetch` cannot hold a request past its timeout.
 
 ## Plan
 

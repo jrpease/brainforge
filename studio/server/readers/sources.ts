@@ -14,6 +14,8 @@ const read = (p: string): Json | null => {
 
 // sources.json key → adapter type, as the gates and envelope-check name them
 const TYPE: Record<string, string> = { repos: "github", websites: "website" };
+// the field each gate keys its .sync-state.json slot by (gate-figma/monday/ga.sh); the rest use id
+const SLOT_KEY: Record<string, string> = { figma: "fileKey", monday: "boardId", ga: "propertyId" };
 
 export function readSources(brain: string) {
   const sources = read(join(brain, "sources.json"));
@@ -24,7 +26,7 @@ export function readSources(brain: string) {
     if (key.startsWith("$") || !Array.isArray(list)) continue;
     const slots = (state[key] ?? {}) as Json;
     for (const e of list as Json[]) {
-      const slotKey = key === "figma" ? (e.fileKey as string) : (e.id as string);
+      const slotKey = String(e[SLOT_KEY[key] ?? "id"] ?? "");
       entries.push({ key, type: TYPE[key] ?? key, entry: e, slot: (slots[slotKey] as Json) ?? null });
     }
   }

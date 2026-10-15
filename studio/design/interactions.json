@@ -17,7 +17,7 @@
    "id": "sources-resolve",
    "type": "reveal",
    "signature": true,
-   "url": "/?t=f2d2064c39d69e5780e6c0ca245a84c9f5b71962203dd464f441e40b0c156b09",
+   "url": "/?t=0ff7a4a088d3b0cbba4c7ffee37c390b809e24248aca960e2c7f307dddd6b00a",
    "trigger": {
     "kind": "click",
     "selector": "button.sm-btn-primary"
@@ -33,7 +33,7 @@
   {
    "id": "content-arrives",
    "type": "reveal",
-   "url": "/?t=f2d2064c39d69e5780e6c0ca245a84c9f5b71962203dd464f441e40b0c156b09",
+   "url": "/?t=0ff7a4a088d3b0cbba4c7ffee37c390b809e24248aca960e2c7f307dddd6b00a",
    "force": {
     "kind": "route",
     "pattern": "**/api/gates/run",
@@ -53,7 +53,7 @@
   {
    "id": "command-copied",
    "type": "feedback",
-   "url": "/?t=f2d2064c39d69e5780e6c0ca245a84c9f5b71962203dd464f441e40b0c156b09",
+   "url": "/?t=0ff7a4a088d3b0cbba4c7ffee37c390b809e24248aca960e2c7f307dddd6b00a",
    "force": {
     "kind": "route",
     "pattern": "**/api/gates/run",

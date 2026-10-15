@@ -1,6 +1,5 @@
 import { serveStatic } from "@hono/node-server/serve-static";
 import { Hono } from "hono";
-import { getCookie, setCookie } from "hono/cookie";
 import { timingSafeEqual } from "node:crypto";
 import type { BrainInfo } from "./brain.js";
 import { checkPrereqs } from "./prereqs.js";
@@ -9,28 +8,23 @@ import { readManifest } from "./readers/manifest.js";
 import { readSources } from "./readers/sources.js";
 import { canonHealth, gates, tripwires } from "./scripts.js";
 
-const COOKIE = "studio_token";
-
-const same = (a: string, b: string) => a.length === b.length && timingSafeEqual(Buffer.from(a), Buffer.from(b));
+// Byte length, not string length: a multibyte character would make timingSafeEqual throw.
+const same = (a: string, b: string) => {
+  const x = Buffer.from(a);
+  const y = Buffer.from(b);
+  return x.length === y.length && timingSafeEqual(x, y);
+};
 
 export function createApp(opts: { brain: BrainInfo; token: string; clientDir?: string }) {
   const { brain, token, clientDir } = opts;
   const app = new Hono();
 
-  // The URL Studio prints carries ?t=<token>; trade it for a cookie and drop it from the address bar.
-  app.use("*", async (c, next) => {
-    const t = c.req.query("t");
-    if (t && same(t, token)) {
-      setCookie(c, COOKIE, token, { httpOnly: true, sameSite: "Strict", path: "/" });
-      const url = new URL(c.req.url);
-      url.searchParams.delete("t");
-      return c.redirect(url.pathname + url.search);
-    }
-    await next();
-  });
-
+  // The token travels only as a header the page adds itself, never as a cookie: cookies are not
+  // port-isolated, so any other server on 127.0.0.1 would receive one, and a page on another local
+  // port could send it. A custom header from another origin needs a CORS preflight, which this
+  // server never grants.
   app.use("/api/*", async (c, next) => {
-    const given = c.req.header("x-studio-token") ?? getCookie(c, COOKIE) ?? "";
+    const given = c.req.header("x-studio-token") ?? "";
     if (!same(given, token)) return c.json({ error: "unauthorized" }, 401);
     await next();
   });

@@ -35,7 +35,11 @@ export function parseCanonReport(text: string): CanonReport {
       continue;
     }
     if (current && raw.startsWith("    ")) {
-      const cells = raw.trim().split(/\s{2,}/);
+      // canon-health.sh pads the path to 44 columns, so a longer path is followed by a single space:
+      // take the path as the first token, then split the rest on its two-space gaps.
+      const line = raw.trim();
+      const path = line.split(/\s/, 1)[0];
+      const cells = [path, ...line.slice(path.length).trim().split(/\s{2,}/).filter(Boolean)];
       const owner = cells.find((c) => c.startsWith("owner:"))?.slice(6).trim();
       const rest = cells.slice(1).filter((c) => !c.startsWith("owner:"));
       const detail = rest.join(" · ");

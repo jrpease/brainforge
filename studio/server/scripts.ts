@@ -11,13 +11,19 @@ const UPGRADE: Unavailable = { available: false, hint: "Not available in this br
 
 export function runScript(brain: string, script: string, args: string[], timeoutMs: number): Promise<ScriptResult> {
   return new Promise((done) => {
-    const child = spawn("bash", [join(".brainforge", script), ...args], { cwd: brain, stdio: ["ignore", "pipe", "pipe"] });
+    // detached: the script leads its own process group, so a timeout kills python3/curl/git with it
+    // instead of leaving them holding the pipe open long after "timed out".
+    const child = spawn("bash", [join(".brainforge", script), ...args], { cwd: brain, stdio: ["ignore", "pipe", "pipe"], detached: true });
     let stdout = "";
     let stderr = "";
     let timedOut = false;
     const timer = setTimeout(() => {
       timedOut = true;
-      child.kill("SIGKILL");
+      try {
+        process.kill(-child.pid!, "SIGKILL");
+      } catch {
+        child.kill("SIGKILL");
+      }
     }, timeoutMs);
     child.stdout.on("data", (d) => (stdout += d));
     child.stderr.on("data", (d) => (stderr += d));
@@ -56,6 +62,7 @@ export async function gates(brain: string) {
   if (!existsSync(join(brain, "sources.json"))) {
     return { available: false as const, hint: "This brain has no sources.json yet; add a source with /add-source." };
   }
+  if (!existsSync(join(brain, ".brainforge"))) return UPGRADE;
   const scripts = readdirSync(join(brain, ".brainforge")).filter((f) => /^gate-[a-z]+\.sh$/.test(f)).sort();
   const results = await Promise.all(
     scripts.map(async (script) => {

@@ -1,7 +1,9 @@
+import { mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { join } from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
 import { readManifest } from "../server/readers/manifest";
 import { readSources } from "../server/readers/sources";
-import { canonHealth, gates, tripwires } from "../server/scripts";
+import { canonHealth, gates, runScript, tripwires } from "../server/scripts";
 import { makeBrain, type Brain } from "./make-brain";
 
 const made: Brain[] = [];
@@ -65,5 +67,43 @@ describe("readers", () => {
     expect(r.lastFullSync).toBeNull();
     expect(r.entries).toContainEqual(expect.objectContaining({ type: "github", slot: { synced: false } }));
     expect(r.entries).toContainEqual(expect.objectContaining({ type: "figma", slot: { synced: false } }));
+  });
+});
+
+describe("slot keys", () => {
+  it("finds monday and ga slots by boardId and propertyId, websites by id", () => {
+    const b = brain();
+    const src = JSON.parse(readFileSync(join(b.path, "sources.json"), "utf8"));
+    src.monday = [{ id: "roadmap", boardId: 123, into: "context/derived/monday/" }];
+    src.ga = [{ id: "web-analytics", propertyId: "456", into: "context/derived/ga/" }];
+    src.websites = [{ id: "site", url: "https://x", into: "context/derived/web/" }];
+    writeFileSync(join(b.path, "sources.json"), JSON.stringify(src));
+    const st = JSON.parse(readFileSync(join(b.path, ".sync-state.json"), "utf8"));
+    st.monday = { "123": { synced: true } };
+    st.ga = { "456": { synced: true } };
+    st.websites = { site: { synced: true } };
+    writeFileSync(join(b.path, ".sync-state.json"), JSON.stringify(st));
+    const r = readSources(b.path);
+    if (!r.available) throw new Error("unavailable");
+    for (const id of ["roadmap", "web-analytics", "site"]) {
+      expect(r.entries.find((e) => e.entry.id === id)?.slot, id).toEqual({ synced: true });
+    }
+  });
+});
+
+describe("script timeouts", () => {
+  it("kill the whole process group, not just bash", async () => {
+    const b = brain();
+    writeFileSync(join(b.path, ".brainforge", "slow.sh"), "sleep 30 &\nwait\n");
+    const t0 = Date.now();
+    const r = await runScript(b.path, "slow.sh", [], 500);
+    expect(r.timedOut).toBe(true);
+    expect(Date.now() - t0).toBeLessThan(5000);
+  });
+  it("gates say unavailable when .brainforge/ is missing", async () => {
+    const b = brain();
+    rmSync(join(b.path, ".brainforge"), { recursive: true });
+    mkdirSync(join(b.path, "x"));
+    expect(await gates(b.path)).toMatchObject({ available: false });
   });
 });

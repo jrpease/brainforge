@@ -53,22 +53,30 @@ describe("the locked-down API", () => {
     expect((await app.request("/api/brain", { headers: { "x-studio-token": "wrong" } })).status).toBe(401);
     expect((await app.request("/api/brain", authed)).status).toBe(200);
   });
-  it("trades ?t= for an httpOnly cookie and strips it from the URL", async () => {
+  it("never sets a cookie, and a cookie alone is not accepted", async () => {
     const app = appFor(brain());
-    const r = await app.request(`/?t=${TOKEN}`);
-    expect(r.status).toBe(302);
-    expect(r.headers.get("location")).toBe("/");
-    const cookie = r.headers.get("set-cookie") ?? "";
-    expect(cookie).toMatch(/HttpOnly/);
-    expect(cookie).toMatch(/SameSite=Strict/);
-    const again = await app.request("/api/brain", { headers: { cookie: cookie.split(";")[0] } });
-    expect(again.status).toBe(200);
+    const page = await app.request(`/?t=${TOKEN}`);
+    expect(page.headers.get("set-cookie")).toBeNull();
+    const withCookie = await app.request("/api/brain", { headers: { cookie: `studio_token=${TOKEN}` } });
+    expect(withCookie.status).toBe(401);
+  });
+  it("answers 401, not 500, to a token with multibyte characters", async () => {
+    const app = appFor(brain());
+    const r = await app.request("/api/brain", { headers: { "x-studio-token": "é".repeat(64) } });
+    expect(r.status).toBe(401);
+  });
+  it("sends no CORS headers, so another origin cannot read or preflight", async () => {
+    const app = appFor(brain());
+    const r = await app.request("/api/health", { method: "OPTIONS", headers: { origin: "http://127.0.0.1:5173", "access-control-request-method": "POST", "access-control-request-headers": "x-studio-token" } });
+    expect(r.headers.get("access-control-allow-origin")).toBeNull();
   });
   it("will not read files outside context/", async () => {
     const app = appFor(brain());
     expect((await app.request("/api/file?path=context/canon/company/org.md", authed)).status).toBe(200);
     expect((await app.request("/api/file?path=sources.json", authed)).status).toBe(403);
     expect((await app.request("/api/file?path=context/../.env", authed)).status).toBe(403);
+    expect((await app.request("/api/file?path=context/canon", authed)).status).toBe(404);
+    expect((await app.request("/api/file?path=context", authed)).status).toBe(403);
   });
 });
 

@@ -23,6 +23,19 @@ describe("parseCanonReport, against the real script", () => {
     expect(r.groups.drafts?.find((d) => d.path.endsWith("voice.md"))?.stalled).toBe(false);
     expect(r.footer.join(" ")).toContain("/approve-canon");
   });
+  it("keeps a path longer than the script's 44-column pad apart from its date", () => {
+    const text = `Canon health — context/canon
+  0 approved and current · 1 past review · 0 never reviewed · 0 draft(s)
+
+⚠ past review — the date someone last confirmed this is still true
+    context/canon/brand/voice-and-tone-guidelines-for-marketing.md 2024-01-01  biannual (default)     owner: Priya
+`;
+    const r = parseCanonReport(text);
+    expect(r.parsed).toBe(true);
+    if (!r.parsed) return;
+    expect(r.groups["past-review"]?.[0]).toMatchObject({ path: "context/canon/brand/voice-and-tone-guidelines-for-marketing.md", owner: "Priya" });
+    expect(r.groups["past-review"]?.[0].detail).toBe("2024-01-01 · biannual (default)");
+  });
   it("reads a clean report", () => {
     const r = parseCanonReport(report({}));
     expect(r.parsed).toBe(true);
