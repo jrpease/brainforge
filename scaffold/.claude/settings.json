@@ -1,5 +1,5 @@
 {
-  "$comment": "Ships with the brain. On session start, runs .brainforge/session-start.sh, which holds the session hooks (pull the latest context, then the drift, sync-health and canon-health nudges) and documents each in its header. The hooks live in that script so they can be tested and upgraded as one file; do not add them back here. Fails safe: a missing script is silent.",
+  "$comment": "Ships with the brain. On session start, runs .brainforge/session-start.sh, which holds the session hooks (pull the latest context, then the drift and sync-health nudges from .brainforge/tripwires.sh, then the canon-health nudge) and documents each in its header. The hooks live in that script so they can be tested and upgraded as one file; do not add them back here. Fails safe: a missing script is silent.",
   "hooks": {
     "SessionStart": [
       {
