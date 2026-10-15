@@ -38,7 +38,7 @@
 .sm-cols:has(.sm-bridge) .sm-bridge { display: flex; grid-row: 1; width: 100%; gap: var(--space-3); align-items: center; margin: 0 0 var(--space-4);
   padding: var(--space-3) var(--space-4); border: 1px solid var(--color-status-stale); border-radius: var(--radius-md); background: var(--color-bg-subtle); }
 .sm-cols:has(.sm-bridge) .sm-bridge > div:nth-child(2) { flex: 1; min-width: 0; }
-.sm-cols:has(.sm-bridge) .sm-bridge-quiet { border-color: var(--color-border-default); padding: 0; background: none; }
+.sm-cols:has(.sm-bridge) .sm-bridge-quiet { border-color: var(--color-border-default); padding: 0 var(--space-3); background: var(--color-bg-default); }
 .sm-cols:has(.sm-bridge) .sm-bridge-quiet > .sm-card { flex: 1; }
 .sm-cols:has(.sm-bridge) .sm-col-canon, .sm-cols:has(.sm-bridge) .sm-col-derived { grid-row: 2; }
 
@@ -46,7 +46,8 @@
 .sm-card:hover, .sm-src:hover { background: var(--color-bg-subtle); }
 .sm-card > .dot, .sm-src > .dot { align-self: flex-start; margin-top: 6px; }
 .sm-card-main, .sm-src-main { flex: 1 1 0; min-width: 140px; }
-.sm-card > .cmd, .sm-src > .cmd, .sm-bridge > .cmd { max-width: 55%; }
+.sm-card > .cmd, .sm-src > .cmd { flex: 0 0 auto; width: 54%; max-width: 340px; justify-content: space-between; }
+.sm-bridge > .cmd { max-width: 55%; }
 .sm-card-title { font-weight: var(--font-weight-semibold); }
 .sm-card-meta { color: var(--color-text-secondary); font-size: var(--font-size-sm); overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
 .sm-path, .sm-src-id { font: var(--font-size-sm)/1.5 var(--font-mono); color: var(--color-text-secondary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -92,5 +93,10 @@
   .sm-cols { column-gap: var(--space-5); }
   .sm-card, .sm-src { flex-wrap: wrap; row-gap: var(--space-2); }
   .sm-card > .sm-card-main, .sm-src > .sm-src-main { flex: 1 1 calc(100% - 20px); }
-  .sm-card > .cmd, .sm-src > .cmd { max-width: calc(100% - 20px); margin-left: 20px; }
+  .sm-card > .cmd, .sm-src > .cmd { width: auto; max-width: calc(100% - 20px); margin-left: 20px; }
 }
+
+/* content arriving after the skeleton: a short reveal, not a cut */
+.sm-arrive { animation: sm-arrive 220ms var(--ease-out-expo) both; }
+@keyframes sm-arrive { from { opacity: 0; transform: translateY(4px); } }
+@media (prefers-reduced-motion: reduce) { .sm-arrive { animation: sm-fade 150ms linear both; } }

@@ -18,10 +18,9 @@ export function SetupScreen({ prereqs, blocked }: { prereqs: Prereq[]; blocked: 
           <div className="row" key={p.name}>
             <Dot severity={p.ok ? "ok" : p.blocking ? "error" : "warning"} />
             <div className="row-main">
-              <div className="row-title">{p.name}</div>
+              <div className="row-title">{p.name} <span className="row-status">{p.ok ? "Ready" : p.blocking ? "Required" : "Needed later"}</span></div>
               <div className="row-meta">{p.ok ? p.detail || "found" : p.hint}</div>
             </div>
-            <div className="row-meta">{p.ok ? "Ready" : p.blocking ? "Required" : "Needed later"}</div>
           </div>
         ))}
       </div>

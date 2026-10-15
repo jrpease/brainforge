@@ -36,7 +36,7 @@ export function HealthScreen({ model }: { model: HealthModel }) {
   const changed = gates?.rows.filter((r) => r.severity === "stale").length ?? 0;
 
   return (
-    <div className={model.load === "refreshing" ? "is-refreshing" : undefined}>
+    <div className={model.load === "refreshing" ? "sm-arrive is-refreshing" : "sm-arrive"}>
       <div className="sm-verdict" aria-live="polite">
         <h1>{v.head}</h1>
         <p>{v.sub}</p>

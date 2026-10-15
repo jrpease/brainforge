@@ -26,6 +26,8 @@
 .md-h { margin: var(--space-5) 0 var(--space-2); font-weight: var(--font-weight-semibold); line-height: var(--line-height-tight); }
 .md > .md-h:first-child { margin-top: 0; }
 h2.md-h { font-size: var(--font-size-xl); }
+.md > h2.md-h:first-child { font-size: var(--font-size-2xl); }
+.br .screen-head h1 { font-size: var(--font-size-lg); }
 h3.md-h { font-size: var(--font-size-lg); }
 h4.md-h { font-size: var(--font-size-md); }
 .md-p { margin: 0 0 var(--space-3); }

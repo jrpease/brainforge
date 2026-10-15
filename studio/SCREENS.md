@@ -43,8 +43,48 @@ weaker claim on this surface.
 
 - Family: **dense**. Body 14px. Size set 12 / 14 / 16 / 20 / 28. Weights 400 and 600 (500 for labels).
   Contrast 28/14 = 2.0×.
-- Density target, Health: 30–60 interactive targets per megapixel.
+- Density target, Health: declared 30–60 interactive targets per megapixel before build; measured
+  14/MP on `dense` at 1440 (28/MP counting each chip's copy affordance), critic round 1. Below the
+  declaration because each canon item carries exactly one action; accepted as the task's density.
 - Spacing steps used on Health: 4 / 8 / 12 / 16 / 24.
+
+## Spine
+
+- Tokens: `src/styles/tokens.draft.css` (draft layer; `tokens.css` is the empty generated layer).
+- Palette in use, by role (dark / light): bg-default void / paper · bg-subtle · bg-raised ·
+  text-primary bone / void-3 · text-secondary slate / ink-slate · text-muted slate-dim / ink-muted ·
+  border line / paper-line · accent-canon · accent-derived · accent-seam · status-stale (drift and
+  out-of-date facts only) · status-warning amber · status-error violet · status-success seam ·
+  status-info (hollow dot). All text pairs ≥ 4.5:1, measured.
+- Components: `Dot` (status, 5 severities) · `Command` (mono command chip, copies on click) ·
+  `ThemeToggle` · `Skeleton` · `ErrorNotice` · Health rows (`sm-card`, `sm-src`) · counter band.
+- Templates: **dashboard** (Health: verdict, counter band, two columns with the seam) ·
+  **list + detail** (Brain: domain tree, document) · **list** (Sources, Setup). Empty, error and
+  unavailable states render inside each template, never as their own page.
+
+## Chrome
+
+One pinned 48px bar: wordmark, screen nav (current screen marked), brain name and path (path hidden
+below 1180px), theme toggle. Setup appears in the nav only while something is missing, with a dot.
+Chrome is quieter than content: 14px/500 nav, muted path.
+
+## Interaction manifest
+
+| moment | type | trigger | surface |
+|---|---|---|---|
+| sources-resolve (signature) | reveal | click "Check sources now" | 1440, 1024 |
+| content arrives after skeleton | reveal | page load | all |
+| command copied | feedback | click a command chip ("copy" → "copied", 1.2s) | all |
+
+Other budgets: content arrival 220ms ease-out, 4px; copy feedback instant text swap.
+
+## Performance and accessibility budgets
+
+LCP ≤ 2500ms · CLS ≤ 0.1 · INP ≤ 200ms · axe 0 critical/serious, every focus ring visible, every
+control keyboard-reachable, both themes, every state.
+
+Product copy voice: Brainforge has no product voice guide (`VOICE.md` or brand copy rules), so
+Studio's copy falls back to Jordan's voice: short, plain, direct.
 
 ## State inventory — Health (desktop 1440 and 1024; dark and light)
 
@@ -101,3 +141,13 @@ The killed comp is kept at `design/comps/a-ledger/` and still renders at `?dir=a
 
 Recommendation history, for the record: A was first recommended on the claim that it showed more per
 screen. Measuring showed the opposite; Jordan picked again on the corrected numbers.
+
+## Critic rounds
+
+**Round 1 (REVISE).** Major: 1024 canon rows truncated paths and wrapped titles — the light 1024
+shots in that pack predated the narrow-layout fix (stale capture), but the finding stood until
+reshot. Minors fixed in round 2: chip left edges aligned into one action column per side; Brain
+document title now outranks the page title; seam line no longer cuts through a full-width band;
+Setup status word sits with its item; content now arrives with a 220ms reveal instead of a cut.
+Density recorded above. Not evidenced in round 1 and supplied for round 2: dark and 1024 and
+reduced-motion recordings of the signature.
