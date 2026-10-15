@@ -1,0 +1,38 @@
+{
+  "name": "brainforge-studio",
+  "version": "0.0.0",
+  "private": true,
+  "description": "A local admin cockpit for a Brainforge brain: health, browse, and (later) triage and runs.",
+  "license": "MIT",
+  "repository": { "type": "git", "url": "https://github.com/jrpease/brainforge", "directory": "studio" },
+  "type": "module",
+  "bin": { "brainforge-studio": "bin/brainforge-studio.js" },
+  "files": ["bin/", "dist/"],
+  "engines": { "node": ">=20" },
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build && tsc -p tsconfig.server.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit && tsc -p tsconfig.server.json --noEmit",
+    "test": "vitest run",
+    "smoke": "playwright test"
+  },
+  "dependencies": {
+    "@hono/node-server": "2.1.3",
+    "hono": "4.13.12"
+  },
+  "devDependencies": {
+    "@fontsource/instrument-serif": "5.3.0",
+    "@fontsource/jetbrains-mono": "5.3.0",
+    "@fontsource/space-grotesk": "5.3.0",
+    "@playwright/test": "1.63.0",
+    "@types/node": "22.20.4",
+    "@types/react": "19.3.0",
+    "@types/react-dom": "19.3.0",
+    "@vitejs/plugin-react": "6.1.1",
+    "react": "19.3.0",
+    "react-dom": "19.3.0",
+    "typescript": "7.0.2",
+    "vite": "8.3.1",
+    "vitest": "5.0.3"
+  }
+}
