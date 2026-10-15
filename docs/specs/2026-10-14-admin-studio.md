@@ -1,6 +1,6 @@
 # Brainforge Studio: an admin app over a brain
 
-Status: planned
+Status: built
 Reviewed: 2026-10-15 — design ready to plan; Plan needs revision, fixes applied the same day
 Date: 2026-10-14
 
@@ -149,7 +149,8 @@ Recorded during the build (Part A and Part B up to the PR):
 - **Markdown.** The Brain browser renders a small, safe subset of markdown (React elements, no raw
   HTML) rather than plain text.
 - **Performance floor.** One rule (long frames) fails on this machine even for a blank page; it is
-  recorded as not evidenced, and shipping past it is put to Jordan (see `studio/SCREENS.md`).
+  recorded as not evidenced, and Jordan accepted shipping past it on 2026-10-15 (see `studio/SCREENS.md`).
+  The rule itself is jrpease/claude-bootstrap#114.
 - **The launch token travels as a header, not a cookie.** B3 traded `?t=` for an httpOnly cookie. Code
   review found cookies are not port-isolated: any other server on `127.0.0.1` would receive it, and a
   page on another local port could fire `POST /api/gates/run` with it. The page now keeps the token
@@ -163,6 +164,18 @@ Recorded during the build (Part A and Part B up to the PR):
 - **Code review fixes.** The canon parser reads paths longer than the script's 44-column pad;
   Monday and GA slots are read by `boardId` and `propertyId`; a timed-out script is killed with its
   whole process group, so a hung `git fetch` cannot hold a request past its timeout.
+
+Recorded at release (B12 to B14):
+
+- **Shipped:** PR #17 (Studio v0), PR #18 (0.1.0; `brainforge-studio@0.1.0` published by Jordan,
+  tagged `studio-v0.1.0`), PR #24 (README and `/forge` pointer). The published package was checked
+  from npm: it refuses outside a brain, and inside one it serves Health with a clean console.
+- **The pointer release is 0.17.2, not 0.17.1.** Main shipped its own 0.17.1 (the Shopify example
+  fix) while the publish was pending.
+- **The `/forge` line is its own short paragraph** after step 5's hand-off, not a sentence appended
+  inside it, so the hand-off's one-sentence instruction stays one sentence.
+- **Follow-ups filed:** #19 (`canon-health.sh --json`), #20 (one "server isn't answering" notice),
+  #21 (page-title scale), #22 (keep the path-filtered `studio` check optional).
 
 ## Plan
 
