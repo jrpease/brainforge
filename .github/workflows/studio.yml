@@ -1,0 +1,49 @@
+name: studio
+
+on:
+  pull_request:
+    paths:
+      - "studio/**"
+      - "scaffold/.brainforge/**"
+      - "scaffold/sources.json"
+      - "evals/fixtures/acme-brain/**"
+      - ".github/workflows/studio.yml"
+  push:
+    branches: [main]
+    paths:
+      - "studio/**"
+      - "scaffold/.brainforge/**"
+      - "scaffold/sources.json"
+      - "evals/fixtures/acme-brain/**"
+      - ".github/workflows/studio.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  studio:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: studio
+    steps:
+      - uses: actions/checkout@v4
+      # Building and testing need Node 22 (Vite 8, Vitest 5); what admins run needs only Node 20.
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm test
+      - run: npm run build
+      - run: npx playwright install --with-deps chromium
+      # The smoke test runs the built CLI, so running it on Node 20 proves the runtime floor.
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: node --version && npm run smoke
+      - name: Draft tokens still waiting to be formalized in Figma
+        run: |
+          if grep -q -- '--[a-z]' src/styles/tokens.draft.css; then
+            echo "::warning file=studio/src/styles/tokens.draft.css::Draft tokens are not yet formalized in Figma (design-system spec). This is expected until the first formalize."
+          fi
