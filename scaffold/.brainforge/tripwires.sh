@@ -20,7 +20,8 @@
 #
 # USAGE
 #   tripwires.sh [brain-dir]    brain-dir defaults to $CLAUDE_PROJECT_DIR, else this script's
-#                               brain (the parent of .brainforge/)
+#                               brain (the parent of .brainforge/). Keep this argument stable:
+#                               after a pull, an older session-start.sh can run a newer copy.
 #
 # OUTPUT  at most one line per tripwire, or silence.
 # EXIT    always 0. A non-zero exit means the script itself broke, never a finding.

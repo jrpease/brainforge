@@ -46,7 +46,11 @@ brain clean
 out=$(bash "$TMP/clean/.brainforge/tripwires.sh" "$TMP/clean") || fail "(d) must exit 0 when clean"
 [ -z "$out" ] || fail "(c) clean brain must be silent (got: $out)"
 
-# --- (e) never pulls or fetches, and leaves the tree as it found it ---
+# --- (e) never pulls or fetches, and leaves the tree as it found it. A watermark from an earlier
+# commit sends the drift gate through git cat-file and git diff, so git calls really reach the stub.
+first=$(git -C "$TMP/hot" rev-list --max-parents=0 HEAD)
+printf '%s\n' "$first" > "$TMP/hot/.brainforge/last-drift-review"
+git -C "$TMP/hot" add -A; git -C "$TMP/hot" -c user.name=t -c user.email=t@t commit -q -m watermark
 mkdir -p "$TMP/bin"; : > "$TMP/git.log"
 REALGIT=$(command -v git)
 cat > "$TMP/bin/git" <<EOF
@@ -54,12 +58,14 @@ cat > "$TMP/bin/git" <<EOF
 for a in "\$@"; do
   case "\$a" in pull|fetch) echo "\$a" >> "$TMP/git.log"; exit 99 ;; esac
 done
+echo call >> "$TMP/git.calls"
 exec "$REALGIT" "\$@"
 EOF
 chmod +x "$TMP/bin/git"
 before=$(git -C "$TMP/hot" status --porcelain)
 out=$(PATH="$TMP/bin:$PATH" bash "$TMP/hot/.brainforge/tripwires.sh" "$TMP/hot") || fail "(e) must exit 0"
-has "$out" "$DRIFT" "(e) stubbed git broke the drift nudge"
+has "$out" 'Context changed since last drift review' "(e) watermarked drift nudge missing"
+[ -s "$TMP/git.calls" ] || fail "(e) no git call reached the stub, so the check proves nothing"
 [ ! -s "$TMP/git.log" ] || fail "(e) tripwires.sh ran: $(cat "$TMP/git.log")"
 after=$(git -C "$TMP/hot" status --porcelain)
 [ "$before" = "$after" ] || fail "(e) working tree changed: $after"
@@ -67,6 +73,8 @@ after=$(git -C "$TMP/hot" status --porcelain)
 # --- (f) $1 wins over CLAUDE_PROJECT_DIR; without either, the script's own brain ---
 out=$(CLAUDE_PROJECT_DIR="$TMP/clean" bash "$TMP/clean/.brainforge/tripwires.sh" "$TMP/hot")
 has "$out" "$SYNC" "(f) \$1 must win over CLAUDE_PROJECT_DIR"
+out=$(CLAUDE_PROJECT_DIR="$TMP/hot" bash "$TMP/clean/.brainforge/tripwires.sh")
+has "$out" "$SYNC" "(f) with no \$1, CLAUDE_PROJECT_DIR must win over the script's brain"
 out=$(env -u CLAUDE_PROJECT_DIR bash "$TMP/hot/.brainforge/tripwires.sh")
 has "$out" "$SYNC" "(f) no argument and no env must fall back to the script's brain"
 

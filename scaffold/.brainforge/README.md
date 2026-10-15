@@ -144,21 +144,22 @@ They used to be four inline commands in `.claude/settings.json`. A script can be
 `settings.json` still has the old inline hooks, the script prints one line asking you to delete
 them, because otherwise every nudge prints twice.
 
+The body sits inside a `main` function and the last line is `main "$@"; exit 0`. The pull can
+rewrite this very file while bash is still reading it; the function makes bash read the whole
+body first, and the `exit` keeps it from reading on into the new file. Keep both.
+
 ## `tripwires.sh`
 
 The **drift gate and the sync-health tripwire**, on their own. `session-start.sh` calls it right
 after its pull, so a session prints exactly what it always did. It prints at most one line per
 tripwire, reads only (`git`/`cat`/`find`/`grep`), never pulls or fetches, never writes, and always
 exits 0; a non-zero exit means the script broke, never a finding. Usage: `tripwires.sh [brain-dir]`.
+Keep that argument stable: after a pull, an older `session-start.sh` can run a newer `tripwires.sh`.
 
 It exists because `session-start.sh` begins with a `git pull`, and Brainforge Studio's Health panel
 must show these nudges without ever writing to the brain. Before 0.17.0 they were inline in
 `session-start.sh`; a brain without this file still starts sessions cleanly, just without these two
 nudges, until `/upgrade` adds it.
-
-The body sits inside a `main` function and the last line is `main "$@"; exit 0`. The pull can
-rewrite this very file while bash is still reading it; the function makes bash read the whole
-body first, and the `exit` keeps it from reading on into the new file. Keep both.
 
 ## `sync-contract.sh`
 
