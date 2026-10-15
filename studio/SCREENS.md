@@ -163,7 +163,7 @@ sweep line held inside its column; counter numerals use the caption's zero. Not 
 page-title sizes across screens (Health's is the verdict sentence); the skeleton-to-content gap of
 1–2 frames; overflow rows truncating their chips (the state's job).
 
-**Performance floor, open.** The long-frames rule (>16.7ms) reads 26–30% on Health and 37–40% on a
-static blank page on this machine, with no frame over 16.8ms; the jank control reads 57% with 33.5ms
-frames. Recorded as not evidenced as jank, not as a pass. Shipping past a failed floor needs Jordan's
-agreement, asked at the PR.
+**Performance floor, accepted by Jordan 2026-10-15.** The long-frames rule (>16.7ms) reads 26–30% on
+Health and 37–40% on a static blank page on this machine, with no frame over 16.8ms; the jank control
+reads 57% with 33.5ms frames. Recorded as not evidenced as jank, not as a pass. Jordan agreed at PR #17
+to ship past the failed floor.
