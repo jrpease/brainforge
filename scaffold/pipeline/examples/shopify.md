@@ -11,21 +11,28 @@ Covers store catalog, collections, and store config. Auth: see below (Shopify-sp
 This adapter accepts **two** mechanisms (a deliberate, Shopify-specific exception to golden
 rule #2's "REST-not-MCP"). Name the *current* state of each path — it's why the exception exists:
 
-1. **Intended steady-state — Admin REST API.** `SHOPIFY_ADMIN_TOKEN` in `.env` (`read_products`
-   scope), base URL `https://<shopDomain>/admin/api/<apiVersion>/`. This is the path for
-   *unattended/scheduled* syncs. **Blocked when the token is dead:** Shopify **deprecated legacy
-   custom-app tokens**, so a stored token of that class may be **REVOKED** (a live probe of
-   `shop.json` returns **HTTP 401**). To restore REST, mint a fresh token via the **Dev Dashboard
-   OAuth token-exchange** — the new apps only expose a Client ID + secret, not a
-   one-click Admin token, so this is a developer task. Once a valid token exists, REST is default.
-2. **Working fallback — connected Shopify MCP** via `graphql_query`.
-   Sanctioned for bootstrap and human-triggered re-syncs, and the transport to use
-   while REST is blocked. Same extraction shape, same derived output as REST.
+1. **Steady state — Admin REST API**, base URL `https://<shopDomain>/admin/api/<apiVersion>/`,
+   header `X-Shopify-Access-Token`. Shopify retired legacy custom-app tokens on 2026-01-01, so
+   there is no long-lived Admin token to store. Instead, `.env` holds a Dev Dashboard app's
+   `SHOPIFY_CLIENT_ID` + `SHOPIFY_CLIENT_SECRET` (the app granted `read_products` only), and each
+   sync mints a short-lived token with the client-credentials grant:
+   ```bash
+   curl -s -X POST "https://<shopDomain>/admin/oauth/access_token" \
+     --data-urlencode grant_type=client_credentials \
+     --data-urlencode "client_id=$SHOPIFY_CLIENT_ID" \
+     --data-urlencode "client_secret=$SHOPIFY_CLIENT_SECRET"
+   ```
+   The response carries `access_token`, `scope` and `expires_in` (~24h). **Check `scope` is
+   exactly `read_products` before any other call, and stop if it is wider** — another app's
+   credentials in `.env` would put order and customer access one step from this adapter. Never
+   write the minted token to disk or into a doc.
+2. **Fallback — connected Shopify MCP** via `graphql_query`, only if the token mint fails.
+   Same extraction shape, same derived output as REST. Say so in `generated-by`.
 
 Whichever is used, the extraction shape and derived output are identical.
 
 *(Example note: copy the two-mechanism **shape** and the "name the real state, don't paper over a
-broken path" discipline — not these Shopify-specific token/revocation details.)*
+broken path" discipline — not these Shopify-specific token details.)*
 
 ## 0. Inputs
 - `sources.json` → `shopify[]`. Per entry: `shopDomain` + `apiVersion` (Auth, above), `extract`
