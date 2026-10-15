@@ -315,6 +315,13 @@ Live checks, backlogged until they can run against real sources (each gets a pro
 - [x] **One domain-total acceptance covers the domain.** `acceptedSize` `"domain total"` recorded on
       any entry feeding a domain covers every entry feeding it; the latest `since` wins (0.16.1).
 
+## Studio groundwork (v0.17.0)
+
+- [x] **The drift and sync-health nudges run on their own.** They moved out of `session-start.sh`
+      into `.brainforge/tripwires.sh`, which never pulls and never writes, so Brainforge Studio's
+      Health panel can show them without touching the brain. Sessions print exactly what they did
+      ([spec](docs/specs/2026-10-14-admin-studio.md)).
+
 ## Deferred (C-tier and additive)
 
 - Hosted MCP endpoint · access tiers · autonomous scheduled sync · declarative/executable adapters.

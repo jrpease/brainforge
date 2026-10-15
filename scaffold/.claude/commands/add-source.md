@@ -21,7 +21,7 @@ Steps:
    verdict has no other basis, and an entry without it is silently treated as `weekly`.
 4. Add the source's slot in `.sync-state.json`, holding no fingerprint and only `"synced": false`
    (one key per line, per that file's `$comment`), so the first sync does a full extract. The
-   session-start tripwire in `.brainforge/session-start.sh` nudges until that source's first successful
+   session-start tripwire in `.brainforge/tripwires.sh` nudges until that source's first successful
    sync sets it to `true`, even when other sources have already synced.
 5. Remind the user which credential (e.g. `FIGMA_TOKEN` / `GITHUB_TOKEN`) must be in `.env`.
 6. Offer to run `/sync <that source>` now to do the initial extraction.

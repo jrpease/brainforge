@@ -8,7 +8,7 @@ A single line: the **git commit SHA** at which authored canon was last reconcile
 reality (the `/drift` run's `HEAD` at completion). It is the watermark for the session-start drift
 gate:
 
-- The `SessionStart` hook (see `session-start.sh` below) cheaply asks *"has `context/canon/` or
+- The drift gate (in `tripwires.sh`, run by `session-start.sh`; both below) cheaply asks *"has `context/canon/` or
   `context/derived/` changed since this SHA?"* — if yes (or if this file is missing on a brain that
   already has derived content), it nudges you to run `/drift`.
 - `/drift` **writes** this file at the end of every run that reviewed everything changed since it
@@ -21,7 +21,7 @@ Do not hand-edit it; `/drift` owns it.
 
 ## No file for the sync-health tripwire (by design)
 
-The session-start **sync-health tripwire** (see `session-start.sh` below) nudges you to run
+The session-start **sync-health tripwire** (in `tripwires.sh`, below) nudges you to run
 `/sync-health` when a source is wired but never synced or a derived doc still carries
 `source: TODO`. "Never synced" has two triggers in `.sync-state.json`: a source's slot still
 says `"synced": false` (written by `/add-source`, flipped by that source's first successful sync,
@@ -110,7 +110,7 @@ silently reverted and emitted a zero-domain map.
 
 `BRAIN_CONTEXT_DIR` exists so a **source repo** whose docs do not live under `context/` can emit
 a valid manifest for a reader. It is not a general setting for a brain. The brain-side hooks in
-`.brainforge/session-start.sh` — the drift gate and the sync-health tripwire — assume `context/canon`
+`.brainforge/tripwires.sh` — the drift gate and the sync-health tripwire — assume `context/canon`
 and `context/derived` literally, so a brain that moves its root loses both without a word. Move
 a brain's root only if you are also prepared to change those two hooks.
 
@@ -125,8 +125,8 @@ no network — `git`/`find`/`sed`/`awk`/`date` only. Two modes: bare prints the 
 exits 1 when approved canon is past review or was never reviewed; `--tripwire` prints at most one
 summary line and always exits 0, because a session hook must never fail.
 
-It is a separate script rather than another one-liner in `session-start.sh` (as the drift and
-sync-health tripwires are) because it needs frontmatter parsing and date arithmetic, and both
+It is a separate script rather than a few lines in `tripwires.sh` (where the drift and sync-health
+tripwires live) because it needs frontmatter parsing and date arithmetic, and both
 carry BSD-versus-GNU portability traps. A check whose failure looks identical to "nothing to
 report" is the exact bug class this repo keeps finding, so this one is testable and tested.
 
@@ -134,7 +134,8 @@ report" is the exact bug class this repo keeps finding, so this one is testable 
 
 The brain's **session hooks**, in one script. `.claude/settings.json` ships a single
 `SessionStart` hook that runs it; the script does the rest, in this order: fast-forward pull, the
-drift gate, the sync-health tripwire, the canon-health tripwire. Its header comment explains each.
+drift gate and the sync-health tripwire (by calling `tripwires.sh`), the canon-health tripwire. Its
+header comment explains each.
 Every hook runs in its own subshell, so one failing cannot silence the others, and the script
 always exits 0.
 
@@ -146,6 +147,19 @@ them, because otherwise every nudge prints twice.
 The body sits inside a `main` function and the last line is `main "$@"; exit 0`. The pull can
 rewrite this very file while bash is still reading it; the function makes bash read the whole
 body first, and the `exit` keeps it from reading on into the new file. Keep both.
+
+## `tripwires.sh`
+
+The **drift gate and the sync-health tripwire**, on their own. `session-start.sh` calls it right
+after its pull, so a session prints exactly what it always did. It prints at most one line per
+tripwire, reads only (`git`/`cat`/`find`/`grep`), never pulls or fetches, never writes, and always
+exits 0; a non-zero exit means the script broke, never a finding. Usage: `tripwires.sh [brain-dir]`.
+Keep that argument stable: after a pull, an older `session-start.sh` can run a newer `tripwires.sh`.
+
+It exists because `session-start.sh` begins with a `git pull`, and Brainforge Studio's Health panel
+must show these nudges without ever writing to the brain. Before 0.17.0 they were inline in
+`session-start.sh`; a brain without this file still starts sessions cleanly, just without these two
+nudges, until `/upgrade` adds it.
 
 ## `sync-contract.sh`
 

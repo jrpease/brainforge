@@ -7,7 +7,7 @@ ingest → draft → approve → PR loop (`authoring/README.md`), initiated by t
 the user. Run by `/drift`.
 
 ## 0. Trigger
-Proactively: the `SessionStart` drift gate (`.brainforge/session-start.sh`) nudges when `context/canon/` or
+Proactively: the `SessionStart` drift gate (`.brainforge/tripwires.sh`, run by `session-start.sh`) nudges when `context/canon/` or
 `context/derived/` changed since the last review (`.brainforge/last-drift-review`). Or on demand any
 time. Good moments: after a big sync, before a campaign, monthly.
 

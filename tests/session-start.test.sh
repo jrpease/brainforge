@@ -4,6 +4,7 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 SS="$ROOT/scaffold/.brainforge/session-start.sh"
 CH="$ROOT/scaffold/.brainforge/canon-health.sh"
+TW="$ROOT/scaffold/.brainforge/tripwires.sh"
 SETTINGS="$ROOT/scaffold/.claude/settings.json"
 TMP=$(mktemp -d); trap 'chmod -R u+rw "$TMP" 2>/dev/null; rm -rf "$TMP"' EXIT
 fail() { echo "FAIL: $1"; exit 1; }
@@ -17,7 +18,7 @@ LEGACY='still has the old inline session hooks'
 # the scripts installed where a scaffolded brain has them.
 brain() {
   local B="$TMP/$1"; mkdir -p "$B/.brainforge" "$B/.claude"
-  cp "$SS" "$CH" "$B/.brainforge/"
+  cp "$SS" "$CH" "$TW" "$B/.brainforge/"
   cp "$SETTINGS" "$B/.claude/settings.json"
   printf '{\n  "version": 1,\n  "repos": {},\n  "lastFullSync": "2026-09-01"\n}\n' > "$B/.sync-state.json"
   git -C "$B" init -q
@@ -91,7 +92,7 @@ brain rewrite; trip rewrite
 python3 - "$TMP/rewrite/.brainforge/session-start.sh" <<'PY' || fail "(e) could not pad the script"
 import sys
 p = sys.argv[1]; s = open(p).read()
-anchor = "  # (2) drift gate\n"
+anchor = "  # (2)+(3) drift gate and sync-health tripwire, in tripwires.sh\n"
 assert s.count(anchor) == 1, "hook 2 anchor not found"
 pad = "".join("  # padding line %04d, pushes the later hooks past the read buffer\n" % i for i in range(400))
 open(p, "w").write(s.replace(anchor, pad + "  # PAD-END\n" + anchor))

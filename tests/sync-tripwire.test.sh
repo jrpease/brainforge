@@ -7,7 +7,7 @@ SS="$ROOT/scaffold/.brainforge/session-start.sh"
 TMP=$(mktemp -d); trap 'rm -rf "$TMP"' EXIT
 fail() { echo "FAIL: $1"; exit 1; }
 [ -f "$SS" ] || fail "scaffold has no .brainforge/session-start.sh"
-grep -q 'sync-state.json' "$SS" || fail "session-start.sh has no sync-health tripwire"
+grep -q 'sync-state.json' "$(dirname "$SS")/tripwires.sh" || fail "tripwires.sh has no sync-health tripwire"
 
 # brain <name> <.sync-state.json body> — a brain dir holding only that state file
 brain() { mkdir -p "$TMP/$1"; printf '%s\n' "$2" > "$TMP/$1/.sync-state.json"; }

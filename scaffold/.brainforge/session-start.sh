@@ -6,19 +6,10 @@
 # (1) fast-forward pull the latest context so read-only consumers get current truth without
 #     remembering to pull (--ff-only is safe: it no-ops on local edits/divergence rather than
 #     making merge noise);
-# (2) the drift gate - a dependency-free cheap check (git/cat/find/test only, no jq) that nudges
-#     to run /drift when context/canon or context/derived changed since the last drift review
-#     (.brainforge/last-drift-review), or when a brain with derived content has never had a
-#     review;
-# (3) the sync-health tripwire - a dependency-free check (grep only, no jq) that nudges to run
-#     /sync-health when a source is wired but never synced (a source's slot in .sync-state.json
-#     still says synced: false at the slot's own level (six-space indent, per that file's
-#     formatting contract, so a synced key nested inside a fingerprint never counts), or, for
-#     brains older than that flag, a populated fingerprint slot while lastFullSync is null) or a
-#     derived doc still carries source: TODO. A tripwire, not a monitor: it catches the common
-#     broken states cheaply; /sync-health does the full per-source accounting, and
-#     cadence-staleness. Stateless - self-clears when the underlying state is fixed (unlike the
-#     drift gate, which clears on acknowledgment);
+# (2) the drift gate and (3) the sync-health tripwire - cheap, dependency-free nudges to run
+#     /drift and /sync-health. They live in .brainforge/tripwires.sh (see its header), which is
+#     read-only and never pulls, so Brainforge Studio can run them without this script's pull.
+#     Resolved beside this script, not under $CLAUDE_PROJECT_DIR; missing → silent;
 # (4) the canon-health tripwire - authored canon whose `last-reviewed` is past its review
 #     cadence, was never reviewed at all, or is a draft stalled over 30 days. It calls a shipped
 #     script (.brainforge/canon-health.sh) because it needs frontmatter parsing and date
@@ -46,14 +37,9 @@ main() {
     git -C "$CLAUDE_PROJECT_DIR" pull --ff-only --quiet 2>/dev/null && echo 'Context: pulled latest.' || echo 'Context: could not fast-forward (local changes or offline) — using current copy.'
   )
 
-  # (2) drift gate
+  # (2)+(3) drift gate and sync-health tripwire, in tripwires.sh
   (
-    WM="$CLAUDE_PROJECT_DIR/.brainforge/last-drift-review"; if [ -e "$WM" ] && [ ! -s "$WM" ]; then echo '⚠️  Drift watermark is empty — run /drift to check canon vs. reality.'; elif [ -s "$WM" ]; then SHA="$(cat "$WM")"; if ! git -C "$CLAUDE_PROJECT_DIR" cat-file -e "$SHA^{commit}" 2>/dev/null; then echo '⚠️  Drift watermark names a commit this clone does not have (squash-merged, rebased, or pruned) — run /drift to re-establish it.'; elif ! git -C "$CLAUDE_PROJECT_DIR" diff --quiet "$SHA" HEAD -- context/canon context/derived 2>/dev/null; then echo '⚠️  Context changed since last drift review — run /drift to check canon vs. reality.'; fi; elif [ ! -e "$WM" ] && [ -n "$(find "$CLAUDE_PROJECT_DIR/context/derived" -name '*.md' ! -name 'README.md' ! -name '_index.md' -print -quit 2>/dev/null)" ]; then echo '⚠️  Context has never had a drift review — run /drift to check canon vs. reality.'; fi
-  )
-
-  # (3) sync-health tripwire
-  (
-    D="$CLAUDE_PROJECT_DIR"; S="$D/.sync-state.json"; N=""; if [ -d "$D/context/derived" ] && grep -rqE '^source:[[:space:]]*TODO' "$D/context/derived" 2>/dev/null; then N=1; fi; if [ -f "$S" ] && grep -qE '"lastFullSync":[[:space:]]*null' "$S" 2>/dev/null && grep -qE '"[a-zA-Z0-9_-]+":[[:space:]]*\{$' "$S" 2>/dev/null; then N=1; fi; if [ -f "$S" ] && grep -qE '^      "synced":[[:space:]]*false' "$S" 2>/dev/null; then N=1; fi; if [ -n "$N" ]; then echo '⚠️  Sync health: a source is unsynced or still has a TODO — run /sync-health.'; fi
+    T="$(dirname "${BASH_SOURCE[0]}")/tripwires.sh"; [ -r "$T" ] && bash "$T" "$CLAUDE_PROJECT_DIR" 2>/dev/null || true
   )
 
   # (4) canon-health tripwire

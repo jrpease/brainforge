@@ -19,7 +19,7 @@
 #   1  approved canon is past review, or was never reviewed at all
 #   0  clean, or drafts only. --tripwire ALWAYS exits 0 -- a session hook must never fail.
 #
-# WHY A SCRIPT AND NOT A ONE-LINER INSIDE session-start.sh, like the other two tripwires: this one needs
+# WHY A SCRIPT OF ITS OWN AND NOT A FEW LINES IN tripwires.sh, like the other two: this one needs
 # frontmatter parsing and date arithmetic, and both have portability traps (BSD vs GNU `date`).
 # A check whose failure is indistinguishable from "nothing to report" is the exact bug class
 # this repo spent 2026-09-09 removing, so this one is testable and tested.

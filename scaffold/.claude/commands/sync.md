@@ -51,7 +51,7 @@ Always:
    the per-source fingerprint, that source's `"synced": true`, **and** `lastFullSync` (set it to
    today, `YYYY-MM-DD`, on every successful completion). The fingerprint is the gate's
    `fingerprint`, stored verbatim; when it is `null` (a `never` entry), the adapter's §3 says how
-   to build it. The session-start tripwire in `.brainforge/session-start.sh` stays armed while
+   to build it. The session-start tripwire in `.brainforge/tripwires.sh` stays armed while
    any source's slot says `"synced": false`, or while `lastFullSync` is `null`, so skipping either
    means nudging the owner forever after a sync that actually worked.
 
