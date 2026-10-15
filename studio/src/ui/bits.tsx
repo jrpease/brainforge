@@ -1,5 +1,5 @@
 import { useState } from "react";
-import type { Severity } from "../model";
+import type { Severity } from "../health/model";
 import "./bits.css";
 
 /** A command the admin runs in Claude Code. Click copies it. */

@@ -1,7 +1,7 @@
 // Turns the API's script output into what Health shows. Every verdict is the script's; this only
 // sorts and labels it, and names the command that acts on it.
-import { parseCanonReport, type CanonRow } from "../../src/lib/canonReport";
-import type { GateLine, GatesResponse, HealthResponse } from "../../src/lib/types";
+import { parseCanonReport, type CanonRow } from "../lib/canonReport";
+import type { GateLine, GatesResponse, HealthResponse } from "../lib/types";
 
 export type Severity = "stale" | "warning" | "error" | "info" | "ok";
 export type Issue = { key: string; severity: Severity; title: string; path?: string; meta: string[]; command?: string };

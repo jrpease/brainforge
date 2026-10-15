@@ -4,12 +4,13 @@ import "./styles/fonts.css";
 import "./styles/tokens.css";
 import "./styles/tokens.draft.css";
 import "./styles/base.css";
+import { App } from "./App";
 import { initTheme } from "./theme";
 
 initTheme();
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
-    <main>Brainforge Studio</main>
+    <App />
   </StrictMode>,
 );

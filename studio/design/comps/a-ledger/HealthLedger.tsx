@@ -1,8 +1,8 @@
 import type { BrainInfo } from "../../../src/lib/types";
-import { canonView, nudges, sourceRows, type Issue } from "../model";
-import { Command, Dot, Skeleton, ThemeToggle } from "../shared/bits";
+import { canonView, nudges, sourceRows, type Issue } from "../../../src/health/model";
+import { Command, Dot, Skeleton, ThemeToggle } from "../../../src/ui/bits";
 import type { HealthModel } from "../useHealth";
-import { verdict } from "../verdict";
+import { verdict } from "../../../src/health/verdict";
 import "./ledger.css";
 
 type Props = { brain: BrainInfo; model: HealthModel; theme: "dark" | "light"; onTheme: () => void };

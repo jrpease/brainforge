@@ -87,4 +87,13 @@ Reduced motion: no travel, no stagger; each row's status changes in place, all a
 
 ## Killed comp
 
-Pending Jordan's pick (stop 2).
+**Killed: A · Ledger** (Jordan, 2026-10-15). Kept: **B · Seam**, with its narrow-width command fix.
+
+A lost on density: 11 vs 13 action items above the fold at 1440 (7 vs 9 at 1024), and a 1684px vs
+1288px page, for one ranked list whose only measured win was 0 vs 3 truncated commands at 1024, which
+B fixes in layout. Measured with `design/.harness/fold2.mjs` on the `dense` state.
+
+The killed comp is kept at `design/comps/a-ledger/` and still renders at `?dir=a`.
+
+Recommendation history, for the record: A was first recommended on the claim that it showed more per
+screen. Measuring showed the opposite; Jordan picked again on the corrected numbers.
