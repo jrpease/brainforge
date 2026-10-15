@@ -17,7 +17,7 @@
 .sm-counter-canon .sm-counter-label { color: var(--color-accent-canon); }
 .sm-counter-seam .sm-counter-label { color: var(--color-accent-seam); }
 .sm-counter-derived .sm-counter-label { color: var(--color-accent-derived); }
-.sm-counter-value { font: var(--font-weight-semibold) var(--font-size-xl)/1.3 var(--font-mono); }
+.sm-counter-value { font: var(--font-weight-semibold) var(--font-size-xl)/1.3 var(--font-sans); font-variant-numeric: tabular-nums; }
 .sm-counter-note { font-size: var(--font-size-sm); color: var(--color-text-muted); }
 
 /* the two sides, and the seam between them */
@@ -76,7 +76,7 @@
 .sm-src-pending { color: var(--color-text-secondary); }
 .sm-pulse { width: 8px; height: 8px; border-radius: 50%; background: var(--color-accent-derived); animation: sm-pulse 900ms var(--ease-in-out-cine) infinite alternate; }
 @keyframes sm-pulse { from { opacity: 0.25; } }
-.sm-scanline { position: absolute; left: -12px; right: -12px; top: 0; height: 2px; background: var(--color-accent-seam); box-shadow: 0 0 12px var(--color-accent-seam);
+.sm-scanline { position: absolute; left: 0; right: 0; top: 0; height: 2px; background: var(--color-accent-seam); box-shadow: 0 0 12px var(--color-accent-seam);
   animation: sm-scan 820ms var(--ease-in-out-cine) both; pointer-events: none; z-index: 1; }
 @keyframes sm-scan { from { top: 0; opacity: 1; } 90% { opacity: 1; } to { top: 100%; opacity: 0; } }
 .is-done .sm-src { animation: sm-settle 460ms var(--ease-out-expo) both; animation-delay: calc(var(--g) * 180ms); }

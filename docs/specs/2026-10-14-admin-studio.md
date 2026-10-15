@@ -126,6 +126,31 @@ an important P0"), given 2026-10-14. Any of them can be reopened.
   already builds temp brains from `scaffold/` scripts.
 - `claude --help` lists `-p`, `--output-format stream-json` and `--include-partial-messages`.
 
+## Where it diverged
+
+Recorded during the build (Part A and Part B up to the PR):
+
+- **Node versions.** Vite 8 and Vitest 5 need Node 22 to build and test; what admins run (Hono and
+  its Node server) needs only Node 20, so the Node 20 floor holds. CI builds and tests on 22 and runs
+  the smoke test on 20 (B11).
+- **npm.** npm 10.9's resolver crashes on Vitest's optional peers; `studio/.npmrc` sets
+  `legacy-peer-deps`. Every dependency is pinned to a version published at least two weeks earlier.
+- **Health reads `canon-health.sh`'s text.** The full report has no machine format, so Studio parses
+  its stable text and falls back to the raw text if the format changes. A `--json` mode in the script
+  would remove that; it is a scaffold change, not done here.
+- **Comps.** Two directions for Health were built state-complete; A (Ledger) was first recommended,
+  then measured to show less per screen (11 vs 13 action items above the fold), and Jordan picked B
+  (Seam) on the corrected numbers. A is kept under `studio/design/comps/`.
+- **Type scale.** The draft started at a 13px body; the product-design canon measures 14px, so the
+  scale became 12/14/16/20/28 and a full status set (warning, error, success, info) joined `stale`,
+  which stays reserved for drifted or out-of-date facts.
+- **Light-theme contrast.** The first light palette failed WCAG contrast on muted text; it was
+  re-picked by measurement (every text pair ≥ 4.5:1).
+- **Markdown.** The Brain browser renders a small, safe subset of markdown (React elements, no raw
+  HTML) rather than plain text.
+- **Performance floor.** One rule (long frames) fails on this machine even for a blank page; it is
+  recorded as not evidenced, and shipping past it is put to Jordan (see `studio/SCREENS.md`).
+
 ## Plan
 
 Two parts, two branches, two PRs. Part A is a Brainforge plugin release and lands first. Part B is

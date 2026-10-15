@@ -13,7 +13,30 @@
   }
  ],
  "fingerprintPaths": [
-  "src"
+  "../src/App.tsx",
+  "../src/api.ts",
+  "../src/app.css",
+  "../src/brain/BrainScreen.tsx",
+  "../src/brain/brain.css",
+  "../src/brain/markdown.tsx",
+  "../src/health/HealthScreen.tsx",
+  "../src/health/health.css",
+  "../src/health/model.ts",
+  "../src/health/useHealth.ts",
+  "../src/health/verdict.ts",
+  "../src/lib/canonReport.ts",
+  "../src/lib/types.ts",
+  "../src/main.tsx",
+  "../src/setup/SetupScreen.tsx",
+  "../src/sources/SourcesScreen.tsx",
+  "../src/styles/base.css",
+  "../src/styles/fonts.css",
+  "../src/styles/tokens.css",
+  "../src/styles/tokens.draft.css",
+  "../src/theme.ts",
+  "../src/ui/ErrorNotice.tsx",
+  "../src/ui/bits.css",
+  "../src/ui/bits.tsx"
  ],
  "states": [
   {
@@ -115,7 +138,7 @@
    "url": "/?t=f2d2064c39d69e5780e6c0ca245a84c9f5b71962203dd464f441e40b0c156b09#health",
    "status": "forceable",
    "force": {
-    "kind": "input",
+    "kind": "route",
     "routes": [
      {
       "pattern": "**/api/prereqs",
@@ -131,22 +154,10 @@
       "pattern": "**/api/health",
       "status": 200,
       "body": "{\"canon\": {\"available\": true, \"stderr\": \"\", \"timedOut\": false, \"stdout\": \"Canon health \\u2014 context/canon\\n  9 approved and current \\u00b7 4 past review \\u00b7 2 never reviewed \\u00b7 6 draft(s)\\n\\n\\u2717 approved but never reviewed \\u2014 carrying full authority on a template default\\n    context/canon/brand/naming.md                owner: TODO\\n    context/canon/eng/conventions.md             owner: TODO\\n\\n\\u26a0 past review \\u2014 the date someone last confirmed this is still true\\n    context/canon/brand/voice.md                 2025-11-02  biannual (default)     owner: Priya\\n    context/canon/product/roadmap.md             2026-05-30  quarterly              owner: Sam\\n    context/canon/design/principles.md           2025-08-14  biannual (default)     owner: Jordan\\n    context/canon/company/org.md                 2024-12-01  annual                 owner: Lee\\n\\n\\u00b7 drafts \\u2014 not yet trusted as canon; a stalled one means the approve gate never closed\\n    context/canon/brand/arch.md                  last touched 2026-03-29  stalled\\n    context/canon/pricing/tiers.md               last touched 2026-06-02  stalled\\n    context/canon/audience/archetypes.md         last touched 2026-10-14  open\\n    context/canon/analytics/metrics.md           last touched 2026-10-11  open\\n    context/canon/product/tenets.md              last touched 2026-10-02  open\\n    context/canon/company/remote-work.md         last touched 2026-09-30  open\\n\\nRe-confirm a doc by reviewing it and running /approve-canon, which stamps today's date.\\nA doc that genuinely does not rot can declare 'review-cadence: never' in its frontmatter.\\n\", \"exitCode\": 1, \"finding\": true, \"error\": false}, \"tripwires\": {\"available\": true, \"stderr\": \"\", \"timedOut\": false, \"stdout\": \"\\u26a0\\ufe0f  Context changed since last drift review \\u2014 run /drift to check canon vs. reality.\\n\\u26a0\\ufe0f  Sync health: a source is unsynced or still has a TODO \\u2014 run /sync-health.\", \"exitCode\": 0, \"lines\": [\"\\u26a0\\ufe0f  Context changed since last drift review \\u2014 run /drift to check canon vs. reality.\", \"\\u26a0\\ufe0f  Sync health: a source is unsynced or still has a TODO \\u2014 run /sync-health.\"], \"error\": false}}"
-     },
-     {
-      "pattern": "**/api/gates/run",
-      "status": 200,
-      "body": "{\"available\": true, \"results\": [{\"available\": true, \"stderr\": \"\", \"timedOut\": false, \"script\": \"gate-figma.sh\", \"lines\": [{\"type\": \"figma\", \"id\": \"design-system\", \"status\": \"changed\", \"reason\": \"version 4120 \\u2192 4188\"}, {\"type\": \"figma\", \"id\": \"icon-library\", \"status\": \"not-checked\", \"reason\": \"no credentials\"}], \"exitCode\": 0, \"stdout\": \"\", \"error\": false}, {\"available\": true, \"stderr\": \"\", \"timedOut\": false, \"script\": \"gate-github.sh\", \"lines\": [{\"type\": \"github\", \"id\": \"web\", \"status\": \"changed\", \"reason\": \"12 files changed in scope\", \"delta\": [null, null, null, null, null, null, null, null, null, null, null, null]}, {\"type\": \"github\", \"id\": \"api\", \"status\": \"unchanged\", \"reason\": \"origin/main at 3f9c2e1\"}, {\"type\": \"github\", \"id\": \"mobile\", \"status\": \"not-checked\", \"reason\": \"no clone\"}, {\"type\": \"github\", \"id\": \"infra\", \"status\": \"blocked\", \"reason\": \"no into: set on this entry\"}], \"exitCode\": 0, \"stdout\": \"\", \"error\": false}, {\"available\": true, \"stderr\": \"\", \"timedOut\": false, \"script\": \"gate-website.sh\", \"lines\": [{\"type\": \"website\", \"id\": \"marketing-site\", \"status\": \"unchanged\", \"reason\": \"sitemap unchanged (148 pages)\"}, {\"type\": \"website\", \"id\": \"docs\", \"status\": \"changed\", \"reason\": \"3 pages changed\"}], \"exitCode\": 0, \"stdout\": \"\", \"error\": false}, {\"available\": true, \"stderr\": \"\", \"timedOut\": false, \"script\": \"gate-monday.sh\", \"lines\": [{\"type\": \"monday\", \"id\": \"roadmap\", \"status\": \"never\", \"reason\": \"no stored version\"}], \"exitCode\": 0, \"stdout\": \"\", \"error\": false}, {\"available\": true, \"stderr\": \"\", \"timedOut\": false, \"script\": \"gate-ga.sh\", \"lines\": [{\"type\": \"ga\", \"id\": \"web-analytics\", \"status\": \"unchanged\", \"reason\": \"within lookback\"}, {\"type\": \"ga\", \"id\": \"app-analytics\", \"status\": \"not-checked\", \"reason\": \"no credentials\"}, {\"type\": \"ga\", \"id\": \"events\", \"status\": \"unchanged\", \"reason\": \"within lookback\"}], \"exitCode\": 0, \"stdout\": \"\", \"error\": false}]}"
-     }
-    ],
-    "steps": [
-     {
-      "kind": "click",
-      "selector": "button.sm-btn-primary"
      }
     ]
    },
-   "fullPage": true,
-   "captureAfterMs": 1300
+   "fullPage": true
   },
   {
    "state": "health:overflow",
@@ -605,6 +616,41 @@
     ]
    },
    "fullPage": true
+  },
+  {
+   "state": "health:refresh",
+   "screen": "health",
+   "url": "/?t=f2d2064c39d69e5780e6c0ca245a84c9f5b71962203dd464f441e40b0c156b09#health",
+   "status": "forceable",
+   "force": {
+    "kind": "input",
+    "routes": [
+     {
+      "pattern": "**/api/prereqs",
+      "status": 200,
+      "body": "[{\"name\": \"Node\", \"ok\": true, \"detail\": \"found\", \"blocking\": true, \"hint\": \"\"}, {\"name\": \"git\", \"ok\": true, \"detail\": \"found\", \"blocking\": true, \"hint\": \"\"}, {\"name\": \"python3\", \"ok\": true, \"detail\": \"found\", \"blocking\": true, \"hint\": \"\"}, {\"name\": \"GitHub CLI\", \"ok\": true, \"detail\": \"found\", \"blocking\": false, \"hint\": \"\"}, {\"name\": \"Claude Code\", \"ok\": true, \"detail\": \"found\", \"blocking\": false, \"hint\": \"\"}]"
+     },
+     {
+      "pattern": "**/api/brain",
+      "status": 200,
+      "body": "{\"name\": \"acme-brain\", \"path\": \"/Users/sam/brains/acme-brain\"}"
+     },
+     {
+      "pattern": "**/api/health",
+      "status": 200,
+      "body": "{\"canon\": {\"available\": true, \"stderr\": \"\", \"timedOut\": false, \"stdout\": \"Canon health \\u2014 context/canon\\n  14 approved and current \\u00b7 0 past review \\u00b7 0 never reviewed \\u00b7 3 draft(s)\\n\\n\\u00b7 drafts \\u2014 not yet trusted as canon; a stalled one means the approve gate never closed\\n    context/canon/brand/naming.md                last touched 2026-10-09  open\\n    context/canon/pricing/model.md               last touched 2026-10-12  open\\n    context/canon/audience/archetypes.md         last touched 2026-10-14  open\\n\\n\\u2713 every approved canon doc is within its review cadence.\\n\", \"exitCode\": 0, \"finding\": false, \"error\": false}, \"tripwires\": {\"available\": true, \"stderr\": \"\", \"timedOut\": false, \"stdout\": \"\\u26a0\\ufe0f  Context changed since last drift review \\u2014 run /drift to check canon vs. reality.\\n\\u26a0\\ufe0f  Sync health: a source is unsynced or still has a TODO \\u2014 run /sync-health.\", \"exitCode\": 0, \"lines\": [\"\\u26a0\\ufe0f  Context changed since last drift review \\u2014 run /drift to check canon vs. reality.\", \"\\u26a0\\ufe0f  Sync health: a source is unsynced or still has a TODO \\u2014 run /sync-health.\"], \"error\": false}}"
+     }
+    ],
+    "steps": [
+     {
+      "kind": "click",
+      "selector": "button.sm-link"
+     }
+    ]
+   },
+   "captureAfterMs": 150,
+   "fullPage": true,
+   "_note": "refresh is held by a route registered after load"
   }
  ],
  "localStorage": {

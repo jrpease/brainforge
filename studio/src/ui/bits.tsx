@@ -8,7 +8,7 @@ export function Command({ text }: { text: string }) {
   return (
     <button
       type="button"
-      className="cmd"
+      className={copied ? "cmd is-copied" : "cmd"}
       onClick={() => {
         navigator.clipboard?.writeText(text).catch(() => {});
         setCopied(true);

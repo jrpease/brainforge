@@ -29,6 +29,42 @@
     "body": "{\"available\":true,\"results\":[{\"available\":true,\"stderr\":\"\",\"timedOut\":false,\"script\":\"gate-figma.sh\",\"lines\":[{\"type\":\"figma\",\"id\":\"design-system\",\"status\":\"changed\",\"reason\":\"version 4120 \u2192 4188\"},{\"type\":\"figma\",\"id\":\"icon-library\",\"status\":\"not-checked\",\"reason\":\"no credentials\"}],\"exitCode\":0,\"stdout\":\"\",\"error\":false},{\"available\":true,\"stderr\":\"\",\"timedOut\":false,\"script\":\"gate-github.sh\",\"lines\":[{\"type\":\"github\",\"id\":\"web\",\"status\":\"changed\",\"reason\":\"12 files changed in scope\",\"delta\":[null,null,null,null,null,null,null,null,null,null,null,null]},{\"type\":\"github\",\"id\":\"api\",\"status\":\"unchanged\",\"reason\":\"origin/main at 3f9c2e1\"},{\"type\":\"github\",\"id\":\"mobile\",\"status\":\"not-checked\",\"reason\":\"no clone\"},{\"type\":\"github\",\"id\":\"infra\",\"status\":\"blocked\",\"reason\":\"no into: set on this entry\"}],\"exitCode\":0,\"stdout\":\"\",\"error\":false},{\"available\":true,\"stderr\":\"\",\"timedOut\":false,\"script\":\"gate-website.sh\",\"lines\":[{\"type\":\"website\",\"id\":\"marketing-site\",\"status\":\"unchanged\",\"reason\":\"sitemap unchanged (148 pages)\"},{\"type\":\"website\",\"id\":\"docs\",\"status\":\"changed\",\"reason\":\"3 pages changed\"}],\"exitCode\":0,\"stdout\":\"\",\"error\":false},{\"available\":true,\"stderr\":\"\",\"timedOut\":false,\"script\":\"gate-monday.sh\",\"lines\":[{\"type\":\"monday\",\"id\":\"roadmap\",\"status\":\"never\",\"reason\":\"no stored version\"}],\"exitCode\":0,\"stdout\":\"\",\"error\":false},{\"available\":true,\"stderr\":\"\",\"timedOut\":false,\"script\":\"gate-ga.sh\",\"lines\":[{\"type\":\"ga\",\"id\":\"web-analytics\",\"status\":\"unchanged\",\"reason\":\"within lookback\"},{\"type\":\"ga\",\"id\":\"app-analytics\",\"status\":\"not-checked\",\"reason\":\"no credentials\"},{\"type\":\"ga\",\"id\":\"events\",\"status\":\"unchanged\",\"reason\":\"within lookback\"}],\"exitCode\":0,\"stdout\":\"\",\"error\":false}]}",
     "delayMs": 1200
    }
+  },
+  {
+   "id": "content-arrives",
+   "type": "reveal",
+   "url": "/?t=f2d2064c39d69e5780e6c0ca245a84c9f5b71962203dd464f441e40b0c156b09",
+   "force": {
+    "kind": "route",
+    "pattern": "**/api/gates/run",
+    "status": 200,
+    "body": "{\"available\":true,\"results\":[{\"available\":true,\"stderr\":\"\",\"timedOut\":false,\"script\":\"gate-figma.sh\",\"lines\":[{\"type\":\"figma\",\"id\":\"design-system\",\"status\":\"changed\",\"reason\":\"version 4120 \u2192 4188\"},{\"type\":\"figma\",\"id\":\"icon-library\",\"status\":\"not-checked\",\"reason\":\"no credentials\"}],\"exitCode\":0,\"stdout\":\"\",\"error\":false},{\"available\":true,\"stderr\":\"\",\"timedOut\":false,\"script\":\"gate-github.sh\",\"lines\":[{\"type\":\"github\",\"id\":\"web\",\"status\":\"changed\",\"reason\":\"12 files changed in scope\",\"delta\":[null,null,null,null,null,null,null,null,null,null,null,null]},{\"type\":\"github\",\"id\":\"api\",\"status\":\"unchanged\",\"reason\":\"origin/main at 3f9c2e1\"},{\"type\":\"github\",\"id\":\"mobile\",\"status\":\"not-checked\",\"reason\":\"no clone\"},{\"type\":\"github\",\"id\":\"infra\",\"status\":\"blocked\",\"reason\":\"no into: set on this entry\"}],\"exitCode\":0,\"stdout\":\"\",\"error\":false},{\"available\":true,\"stderr\":\"\",\"timedOut\":false,\"script\":\"gate-website.sh\",\"lines\":[{\"type\":\"website\",\"id\":\"marketing-site\",\"status\":\"unchanged\",\"reason\":\"sitemap unchanged (148 pages)\"},{\"type\":\"website\",\"id\":\"docs\",\"status\":\"changed\",\"reason\":\"3 pages changed\"}],\"exitCode\":0,\"stdout\":\"\",\"error\":false},{\"available\":true,\"stderr\":\"\",\"timedOut\":false,\"script\":\"gate-monday.sh\",\"lines\":[{\"type\":\"monday\",\"id\":\"roadmap\",\"status\":\"never\",\"reason\":\"no stored version\"}],\"exitCode\":0,\"stdout\":\"\",\"error\":false},{\"available\":true,\"stderr\":\"\",\"timedOut\":false,\"script\":\"gate-ga.sh\",\"lines\":[{\"type\":\"ga\",\"id\":\"web-analytics\",\"status\":\"unchanged\",\"reason\":\"within lookback\"},{\"type\":\"ga\",\"id\":\"app-analytics\",\"status\":\"not-checked\",\"reason\":\"no credentials\"},{\"type\":\"ga\",\"id\":\"events\",\"status\":\"unchanged\",\"reason\":\"within lookback\"}],\"exitCode\":0,\"stdout\":\"\",\"error\":false}]}",
+    "delayMs": 1200
+   },
+   "setup": {
+    "kind": "click",
+    "selector": "nav a[href='#brain']"
+   },
+   "trigger": {
+    "kind": "click",
+    "selector": "nav a[href='#health']"
+   }
+  },
+  {
+   "id": "command-copied",
+   "type": "feedback",
+   "url": "/?t=f2d2064c39d69e5780e6c0ca245a84c9f5b71962203dd464f441e40b0c156b09",
+   "force": {
+    "kind": "route",
+    "pattern": "**/api/gates/run",
+    "status": 200,
+    "body": "{\"available\":true,\"results\":[{\"available\":true,\"stderr\":\"\",\"timedOut\":false,\"script\":\"gate-figma.sh\",\"lines\":[{\"type\":\"figma\",\"id\":\"design-system\",\"status\":\"changed\",\"reason\":\"version 4120 \u2192 4188\"},{\"type\":\"figma\",\"id\":\"icon-library\",\"status\":\"not-checked\",\"reason\":\"no credentials\"}],\"exitCode\":0,\"stdout\":\"\",\"error\":false},{\"available\":true,\"stderr\":\"\",\"timedOut\":false,\"script\":\"gate-github.sh\",\"lines\":[{\"type\":\"github\",\"id\":\"web\",\"status\":\"changed\",\"reason\":\"12 files changed in scope\",\"delta\":[null,null,null,null,null,null,null,null,null,null,null,null]},{\"type\":\"github\",\"id\":\"api\",\"status\":\"unchanged\",\"reason\":\"origin/main at 3f9c2e1\"},{\"type\":\"github\",\"id\":\"mobile\",\"status\":\"not-checked\",\"reason\":\"no clone\"},{\"type\":\"github\",\"id\":\"infra\",\"status\":\"blocked\",\"reason\":\"no into: set on this entry\"}],\"exitCode\":0,\"stdout\":\"\",\"error\":false},{\"available\":true,\"stderr\":\"\",\"timedOut\":false,\"script\":\"gate-website.sh\",\"lines\":[{\"type\":\"website\",\"id\":\"marketing-site\",\"status\":\"unchanged\",\"reason\":\"sitemap unchanged (148 pages)\"},{\"type\":\"website\",\"id\":\"docs\",\"status\":\"changed\",\"reason\":\"3 pages changed\"}],\"exitCode\":0,\"stdout\":\"\",\"error\":false},{\"available\":true,\"stderr\":\"\",\"timedOut\":false,\"script\":\"gate-monday.sh\",\"lines\":[{\"type\":\"monday\",\"id\":\"roadmap\",\"status\":\"never\",\"reason\":\"no stored version\"}],\"exitCode\":0,\"stdout\":\"\",\"error\":false},{\"available\":true,\"stderr\":\"\",\"timedOut\":false,\"script\":\"gate-ga.sh\",\"lines\":[{\"type\":\"ga\",\"id\":\"web-analytics\",\"status\":\"unchanged\",\"reason\":\"within lookback\"},{\"type\":\"ga\",\"id\":\"app-analytics\",\"status\":\"not-checked\",\"reason\":\"no credentials\"},{\"type\":\"ga\",\"id\":\"events\",\"status\":\"unchanged\",\"reason\":\"within lookback\"}],\"exitCode\":0,\"stdout\":\"\",\"error\":false}]}",
+    "delayMs": 1200
+   },
+   "trigger": {
+    "kind": "click",
+    "selector": ".cmd"
+   }
   }
  ]
 }

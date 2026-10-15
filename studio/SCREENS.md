@@ -74,9 +74,9 @@ Chrome is quieter than content: 14px/500 nav, muted path.
 |---|---|---|---|
 | sources-resolve (signature) | reveal | click "Check sources now" | 1440, 1024 |
 | content arrives after skeleton | reveal | page load | all |
-| command copied | feedback | click a command chip ("copy" → "copied", 1.2s) | all |
+| command copied | feedback | click a command chip: 200ms press-and-settle, border and label turn seam ("copy" → "copied", held 1.2s) | all |
 
-Other budgets: content arrival 220ms ease-out, 4px; copy feedback instant text swap.
+Other budgets: content arrival 220ms ease-out, 4px; copy feedback 200ms ease-out.
 
 ## Performance and accessibility budgets
 
@@ -102,7 +102,7 @@ Studio's copy falls back to Jordan's voice: short, plain, direct.
 | gate-error | a gate exited 1 (no python3) | input + route |
 | degraded-older-brain | tripwires and manifest unavailable; canon still shown | route |
 | canon-error | canon-health.sh broke (exit 2) | route |
-| refresh | content present, reloading in place | input + route delayed |
+| refresh | content present, reloading in place | input + second request held (`shoot-refresh.mjs`; the state harness cannot hold only the second request) |
 | server-down | the API is unreachable | route: status 0 / abort |
 | unauthorized | opened without the launch link's token | route: 401 |
 | no-results | **does not apply**: Health has no search or filter | — |
@@ -151,3 +151,19 @@ document title now outranks the page title; seam line no longer cuts through a f
 Setup status word sits with its item; content now arrives with a 220ms reveal instead of a cut.
 Density recorded above. Not evidenced in round 1 and supplied for round 2: dark and 1024 and
 reduced-motion recordings of the signature.
+
+**Round 2 (REVISE-and-recapture, the cap).** Rubric items 1–4, 6 and 7 passed (canon rank: no named
+target or precedent places above on a visible axis; signature "a cold viewer can name it"; 0 of 12
+tells). All round-1 findings confirmed resolved. Blocking was evidence, not design: `refresh` had no
+cell; `dense` and `gates-mixed` rendered identically (the manifest clicked the gates in both); two
+declared moments were never captured. Fixed after round 2, not re-judged by a critic (the cap is two
+rounds): `refresh` shot (40 states now); `dense` no longer runs the gates; all 3 moments captured
+(6/6; "command copied" now has a 200ms feedback, it was an instant swap with nothing to record);
+sweep line held inside its column; counter numerals use the caption's zero. Not changed: three
+page-title sizes across screens (Health's is the verdict sentence); the skeleton-to-content gap of
+1–2 frames; overflow rows truncating their chips (the state's job).
+
+**Performance floor, open.** The long-frames rule (>16.7ms) reads 26–30% on Health and 37–40% on a
+static blank page on this machine, with no frame over 16.8ms; the jank control reads 57% with 33.5ms
+frames. Recorded as not evidenced as jank, not as a pass. Shipping past a failed floor needs Jordan's
+agreement, asked at the PR.

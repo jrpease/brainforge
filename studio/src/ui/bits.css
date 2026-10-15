@@ -20,3 +20,9 @@
   animation: skel 1.4s var(--ease-in-out-cine) infinite alternate; }
 @keyframes skel { to { opacity: 0.45; } }
 @media (prefers-reduced-motion: reduce) { .skel { animation: none; } }
+
+/* copy feedback: the chip answers in place, ~200ms (canon feedback median 217ms) */
+.cmd.is-copied { animation: cmd-copied 200ms var(--ease-out-expo); border-color: var(--color-accent-seam); }
+.cmd.is-copied .cmd-hint { color: var(--color-accent-seam); }
+@keyframes cmd-copied { from { transform: scale(0.97); background: var(--color-bg-raised); } }
+@media (prefers-reduced-motion: reduce) { .cmd.is-copied { animation: none; } }
