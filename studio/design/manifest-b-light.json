@@ -1,0 +1,171 @@
+{
+ "baseUrl": "http://127.0.0.1:5174",
+ "surfaces": [
+  {
+   "name": "1440",
+   "width": 1440,
+   "height": 900
+  },
+  {
+   "name": "1024",
+   "width": 1024,
+   "height": 768
+  }
+ ],
+ "fingerprintPaths": [
+  "design/comps",
+  "src/styles"
+ ],
+ "states": [
+  {
+   "state": "initial-load",
+   "screen": "health-b-light",
+   "url": "/design/comps/?dir=b&state=initial-load&theme=light&chrome=0&still=1",
+   "status": "forceable",
+   "force": {
+    "kind": "none"
+   },
+   "fullPage": true
+  },
+  {
+   "state": "all-clear",
+   "screen": "health-b-light",
+   "url": "/design/comps/?dir=b&state=all-clear&theme=light&chrome=0&still=1",
+   "status": "forceable",
+   "force": {
+    "kind": "none"
+   },
+   "fullPage": true
+  },
+  {
+   "state": "first-run",
+   "screen": "health-b-light",
+   "url": "/design/comps/?dir=b&state=first-run&theme=light&chrome=0&still=1",
+   "status": "forceable",
+   "force": {
+    "kind": "none"
+   },
+   "fullPage": true
+  },
+  {
+   "state": "single-item",
+   "screen": "health-b-light",
+   "url": "/design/comps/?dir=b&state=single-item&theme=light&chrome=0&still=1",
+   "status": "forceable",
+   "force": {
+    "kind": "none"
+   },
+   "fullPage": true
+  },
+  {
+   "state": "dense",
+   "screen": "health-b-light",
+   "url": "/design/comps/?dir=b&state=dense&theme=light&chrome=0&still=1",
+   "status": "forceable",
+   "force": {
+    "kind": "none"
+   },
+   "fullPage": true
+  },
+  {
+   "state": "overflow",
+   "screen": "health-b-light",
+   "url": "/design/comps/?dir=b&state=overflow&theme=light&chrome=0&still=1",
+   "status": "forceable",
+   "force": {
+    "kind": "none"
+   },
+   "fullPage": true
+  },
+  {
+   "state": "tripwires",
+   "screen": "health-b-light",
+   "url": "/design/comps/?dir=b&state=tripwires&theme=light&chrome=0&still=1",
+   "status": "forceable",
+   "force": {
+    "kind": "none"
+   },
+   "fullPage": true
+  },
+  {
+   "state": "gates-running",
+   "screen": "health-b-light",
+   "url": "/design/comps/?dir=b&state=gates-running&theme=light&chrome=0&still=1",
+   "status": "forceable",
+   "force": {
+    "kind": "none"
+   },
+   "fullPage": true
+  },
+  {
+   "state": "gates-mixed",
+   "screen": "health-b-light",
+   "url": "/design/comps/?dir=b&state=gates-mixed&theme=light&chrome=0&still=1",
+   "status": "forceable",
+   "force": {
+    "kind": "none"
+   },
+   "fullPage": true
+  },
+  {
+   "state": "gate-error",
+   "screen": "health-b-light",
+   "url": "/design/comps/?dir=b&state=gate-error&theme=light&chrome=0&still=1",
+   "status": "forceable",
+   "force": {
+    "kind": "none"
+   },
+   "fullPage": true
+  },
+  {
+   "state": "degraded-older-brain",
+   "screen": "health-b-light",
+   "url": "/design/comps/?dir=b&state=degraded-older-brain&theme=light&chrome=0&still=1",
+   "status": "forceable",
+   "force": {
+    "kind": "none"
+   },
+   "fullPage": true
+  },
+  {
+   "state": "canon-error",
+   "screen": "health-b-light",
+   "url": "/design/comps/?dir=b&state=canon-error&theme=light&chrome=0&still=1",
+   "status": "forceable",
+   "force": {
+    "kind": "none"
+   },
+   "fullPage": true
+  },
+  {
+   "state": "refresh",
+   "screen": "health-b-light",
+   "url": "/design/comps/?dir=b&state=refresh&theme=light&chrome=0&still=1",
+   "status": "forceable",
+   "force": {
+    "kind": "none"
+   },
+   "fullPage": true
+  },
+  {
+   "state": "server-down",
+   "screen": "health-b-light",
+   "url": "/design/comps/?dir=b&state=server-down&theme=light&chrome=0&still=1",
+   "status": "forceable",
+   "force": {
+    "kind": "none"
+   },
+   "fullPage": true
+  },
+  {
+   "state": "unauthorized",
+   "screen": "health-b-light",
+   "url": "/design/comps/?dir=b&state=unauthorized&theme=light&chrome=0&still=1",
+   "status": "forceable",
+   "force": {
+    "kind": "none"
+   },
+   "fullPage": true
+  }
+ ]
+}

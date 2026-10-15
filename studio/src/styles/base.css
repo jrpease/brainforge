@@ -1,0 +1,3 @@
+/* The page itself: no browser margin, the theme's background behind everything. */
+html, body { margin: 0; background: var(--color-bg-default); color: var(--color-text-primary); }
+*, *::before, *::after { box-sizing: border-box; }

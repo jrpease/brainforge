@@ -18,6 +18,8 @@
   --color-derived-dim: #2a6b78;
   --color-seam: #d8ffe9;
   --color-stale: #ff5c5c;
+  --color-amber: #f2c14e;
+  --color-violet: #c7a2ff;
   --color-bone: #eaf2f5;
   --color-slate: #7c8a94;
   --color-slate-dim: #727e89;
@@ -33,6 +35,8 @@
   --color-derived-ink: #04768d;
   --color-seam-deep: #1f7a52;
   --color-stale-deep: #c62f2f;
+  --color-amber-deep: #8f6a00;
+  --color-violet-deep: #6f43c0;
 
   /* ---- semantic: dark (default) ---- */
   --color-bg-default: var(--color-void);
@@ -47,19 +51,23 @@
   --color-accent-derived: var(--color-derived);
   --color-accent-derived-muted: var(--color-derived-dim);
   --color-accent-seam: var(--color-seam);
+  /* stale: the one alarm, only for drifted or out-of-date facts (design-system spec) */
   --color-status-stale: var(--color-stale);
+  --color-status-warning: var(--color-amber);
+  --color-status-error: var(--color-violet);
+  --color-status-success: var(--color-seam);
+  --color-status-info: var(--color-derived);
   --color-focus-ring: var(--color-derived);
 
   /* ---- type: a fixed scale for a dense app ---- */
   --font-sans: "Space Grotesk", system-ui, sans-serif;
   --font-serif: "Instrument Serif", Georgia, serif;
   --font-mono: "JetBrains Mono", ui-monospace, monospace;
-  --font-size-xs: 11px;
   --font-size-sm: 12px;
-  --font-size-md: 13px;
-  --font-size-lg: 15px;
-  --font-size-xl: 18px;
-  --font-size-2xl: 24px;
+  --font-size-md: 14px;
+  --font-size-lg: 16px;
+  --font-size-xl: 20px;
+  --font-size-2xl: 28px;
   --line-height-tight: 1.25;
   --line-height-normal: 1.5;
   --font-weight-regular: 400;
@@ -100,6 +108,10 @@
   --color-accent-derived-muted: var(--color-derived-dim);
   --color-accent-seam: var(--color-seam-deep);
   --color-status-stale: var(--color-stale-deep);
+  --color-status-warning: var(--color-amber-deep);
+  --color-status-error: var(--color-violet-deep);
+  --color-status-success: var(--color-seam-deep);
+  --color-status-info: var(--color-derived-ink);
   --color-focus-ring: var(--color-derived-ink);
 
   color-scheme: light;

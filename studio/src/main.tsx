@@ -3,6 +3,7 @@ import { createRoot } from "react-dom/client";
 import "./styles/fonts.css";
 import "./styles/tokens.css";
 import "./styles/tokens.draft.css";
+import "./styles/base.css";
 import { initTheme } from "./theme";
 
 initTheme();
