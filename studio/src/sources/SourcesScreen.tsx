@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { ApiError, getJson } from "../api";
 import { Command, Dot, Skeleton } from "../ui/bits";
+import { ErrorNotice } from "../ui/ErrorNotice";
 
 type Entry = { key: string; type: string; entry: Record<string, unknown>; slot: Record<string, unknown> | null };
 type SourcesResponse = { available: true; lastFullSync: string | null; entries: Entry[] } | { available: false; hint: string };
@@ -40,7 +41,7 @@ export function SourcesScreen() {
           const enabled = e.entry.enabled !== false;
           return (
             <div className="row" key={`${e.key}:${id}`}>
-              <Dot severity={synced === false ? "warning" : enabled ? "info" : "info"} />
+              <Dot severity={synced === false ? "warning" : "info"} />
               <div className="row-main">
                 <div className="mono"><span className="muted">{e.type}</span> {id}</div>
                 <div className="row-meta">{String(e.entry.label ?? e.entry.remote ?? e.entry.url ?? "")}</div>
@@ -54,21 +55,5 @@ export function SourcesScreen() {
         })}
       </div>
     </section>
-  );
-}
-
-export function ErrorNotice({ kind }: { kind: string }) {
-  return (
-    <div className="notice" role="alert">
-      <Dot severity={kind === "unauthorized" ? "info" : "error"} />
-      <div>
-        <p className="notice-head">{kind === "unauthorized" ? "Open Studio from the link it printed." : "Studio's server isn't answering."}</p>
-        <p className="notice-sub">
-          {kind === "unauthorized"
-            ? "This page needs the address Studio showed in your terminal when it started."
-            : "It may have stopped. Check the terminal you started it from, or run npx brainforge-studio again."}
-        </p>
-      </div>
-    </div>
   );
 }

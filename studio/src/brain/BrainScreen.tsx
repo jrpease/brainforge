@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { ApiError, getJson, getText } from "../api";
 import { Command, Skeleton } from "../ui/bits";
-import { ErrorNotice } from "../sources/SourcesScreen";
+import { ErrorNotice } from "../ui/ErrorNotice";
 import "./brain.css";
 import { Markdown } from "./markdown";
 
