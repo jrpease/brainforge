@@ -116,6 +116,20 @@ brain, they subscribe to it:
 - **Web-only tools (ChatGPT, Claude.ai)** → on the roadmap: a hosted MCP endpoint, the same server
   behind HTTPS and sign-in.
 
+## Brainforge Studio (for the admin)
+
+The person who builds the brain also has to keep it healthy. Studio is a local app for that. Run it
+inside a brain:
+
+```bash
+npx brainforge-studio
+```
+
+It opens in your browser and shows what needs you (stale canon, drift, sources that never synced),
+each with the Claude Code command that fixes it, plus every doc the brain holds and every source it
+syncs. It reads the brain and never writes to it. Needs Node 20+, git and python3. More in
+[`studio/README.md`](studio/README.md).
+
 ---
 
 ## What it connects to

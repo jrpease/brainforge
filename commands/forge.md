@@ -106,6 +106,9 @@ Tell the user, in one sentence: the brain now carries its own `/forge`
 starts the real depth-first setup wizard. Point at `setup/README.md` for what that wizard does. Do
 not restate its loop here.
 
+Once the brain has content, mention that `npx brainforge-studio`, run inside the brain, opens a
+local read-only view of its health, docs and sources.
+
 ## Never
 
 - Never overwrite a file that already exists in the cwd — a collision means stop and report, not
