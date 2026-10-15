@@ -1,0 +1,106 @@
+/* DRAFT tokens: hand-edited, live exploration. Loads after tokens.css and overrides it.
+ * When a value is formalized into Figma and synced down, delete it from here.
+ *
+ * Two tiers. Primitives are the brand's values (brainforge-brand/apps/site/app/globals.css);
+ * semantic tokens point at them. Components use semantic tokens only, never a primitive.
+ * Dark is the bare :root (the brand's "void" is the reference); light is [data-theme="light"]. */
+
+:root {
+  /* ---- primitives: brand ---- */
+  --color-void: #05070a;
+  --color-void-2: #080b11;
+  --color-void-3: #0c111a;
+  --color-canon: #e8b57a;
+  --color-canon-ink: #c98a4b;
+  --color-canon-dim: #7a5f43;
+  --color-derived: #37e5ff;
+  --color-derived-deep: #0aa4c4;
+  --color-derived-dim: #2a6b78;
+  --color-seam: #d8ffe9;
+  --color-stale: #ff5c5c;
+  --color-bone: #eaf2f5;
+  --color-slate: #7c8a94;
+  --color-slate-dim: #727e89;
+  --color-line: #18222c;
+
+  /* ---- primitives: light palette, first pass ---- */
+  --color-paper: #f5f3ee;
+  --color-paper-2: #fbfaf7;
+  --color-paper-3: #ebe8e1;
+  --color-paper-line: #d9d5cc;
+  --color-ink-slate: #55616b;
+  --color-canon-deep: #8a5a28;
+  --color-derived-ink: #04768d;
+  --color-seam-deep: #1f7a52;
+  --color-stale-deep: #c62f2f;
+
+  /* ---- semantic: dark (default) ---- */
+  --color-bg-default: var(--color-void);
+  --color-bg-subtle: var(--color-void-2);
+  --color-bg-raised: var(--color-void-3);
+  --color-text-primary: var(--color-bone);
+  --color-text-secondary: var(--color-slate);
+  --color-text-muted: var(--color-slate-dim);
+  --color-border-default: var(--color-line);
+  --color-accent-canon: var(--color-canon);
+  --color-accent-canon-muted: var(--color-canon-dim);
+  --color-accent-derived: var(--color-derived);
+  --color-accent-derived-muted: var(--color-derived-dim);
+  --color-accent-seam: var(--color-seam);
+  --color-status-stale: var(--color-stale);
+  --color-focus-ring: var(--color-derived);
+
+  /* ---- type: a fixed scale for a dense app ---- */
+  --font-sans: "Space Grotesk", system-ui, sans-serif;
+  --font-serif: "Instrument Serif", Georgia, serif;
+  --font-mono: "JetBrains Mono", ui-monospace, monospace;
+  --font-size-xs: 11px;
+  --font-size-sm: 12px;
+  --font-size-md: 13px;
+  --font-size-lg: 15px;
+  --font-size-xl: 18px;
+  --font-size-2xl: 24px;
+  --line-height-tight: 1.25;
+  --line-height-normal: 1.5;
+  --font-weight-regular: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+
+  /* ---- space and shape ---- */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+  --space-7: 48px;
+  --space-8: 64px;
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 10px;
+
+  /* ---- motion ---- */
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in-out-cine: cubic-bezier(0.7, 0, 0.2, 1);
+
+  color-scheme: dark;
+}
+
+[data-theme="light"] {
+  --color-bg-default: var(--color-paper);
+  --color-bg-subtle: var(--color-paper-2);
+  --color-bg-raised: var(--color-paper-3);
+  --color-text-primary: var(--color-void-3);
+  --color-text-secondary: var(--color-ink-slate);
+  --color-text-muted: var(--color-slate-dim);
+  --color-border-default: var(--color-paper-line);
+  --color-accent-canon: var(--color-canon-deep);
+  --color-accent-canon-muted: var(--color-canon-ink);
+  --color-accent-derived: var(--color-derived-ink);
+  --color-accent-derived-muted: var(--color-derived-dim);
+  --color-accent-seam: var(--color-seam-deep);
+  --color-status-stale: var(--color-stale-deep);
+  --color-focus-ring: var(--color-derived-ink);
+
+  color-scheme: light;
+}
