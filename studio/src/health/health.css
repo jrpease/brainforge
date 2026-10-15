@@ -1,0 +1,102 @@
+
+
+.is-refreshing { opacity: 0.6; transition: opacity 200ms; }
+
+.sm-verdict { margin-bottom: var(--space-4); }
+.sm-verdict h1 { margin: 0; font-size: var(--font-size-2xl); font-weight: var(--font-weight-semibold); line-height: var(--line-height-tight); }
+.sm-verdict p { margin: var(--space-1) 0 0; color: var(--color-text-secondary); max-width: 72ch; }
+.sm-verdict-meta { margin-top: var(--space-2); display: flex; gap: var(--space-3); align-items: center; color: var(--color-text-muted); font-size: var(--font-size-sm); }
+.sm-link { background: none; border: 0; padding: 0; color: var(--color-text-secondary); font: inherit; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
+.sm-link:disabled { color: var(--color-text-muted); cursor: default; }
+.sm-link:focus-visible { outline: 2px solid var(--color-focus-ring); outline-offset: 2px; }
+
+.sm-strip { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); border: 1px solid var(--color-border-default); border-radius: var(--radius-md); margin-bottom: var(--space-5); }
+.sm-counter { padding: var(--space-3) var(--space-4); border-left: 1px solid var(--color-border-default); }
+.sm-counter:first-child { border-left: 0; }
+.sm-counter-label { font-size: var(--font-size-sm); font-weight: var(--font-weight-medium); color: var(--color-text-secondary); }
+.sm-counter-canon .sm-counter-label { color: var(--color-accent-canon); }
+.sm-counter-seam .sm-counter-label { color: var(--color-accent-seam); }
+.sm-counter-derived .sm-counter-label { color: var(--color-accent-derived); }
+.sm-counter-value { font: var(--font-weight-semibold) var(--font-size-xl)/1.3 var(--font-sans); font-variant-numeric: tabular-nums; }
+.sm-counter-note { font-size: var(--font-size-sm); color: var(--color-text-muted); }
+
+/* the two sides, and the seam between them */
+.sm-cols { position: relative; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); column-gap: var(--space-6); }
+.sm-seam { position: absolute; top: 0; bottom: 0; left: 50%; width: 1px; background: var(--color-border-default); }
+.sm-col { min-width: 0; display: grid; align-content: start; }
+.sm-col h2 { margin: 0; padding-bottom: var(--space-2); border-bottom: 1px solid var(--color-border-default); font-size: var(--font-size-sm); font-weight: var(--font-weight-semibold); }
+.sm-col-canon h2 { color: var(--color-accent-canon); }
+.sm-col-derived h2 { color: var(--color-accent-derived); }
+.sm-col-head { display: flex; align-items: center; justify-content: space-between; min-height: 40px; border-bottom: 1px solid var(--color-border-default); }
+.sm-col-head h2 { border-bottom: 0; padding-bottom: 0; }
+.sm-col-canon { grid-column: 1; }
+.sm-col-derived { grid-column: 2; grid-row: 1; }
+.sm-bridge { grid-column: 1 / -1; grid-row: 1; position: relative; z-index: 1; align-self: start; justify-self: center; margin-top: 40px;
+  display: none; }
+/* the drift nudge sits ON the seam: a band across both columns, under their headings */
+.sm-cols:has(.sm-bridge) { grid-template-rows: auto auto; }
+.sm-cols:has(.sm-bridge) .sm-bridge { display: flex; grid-row: 1; width: 100%; gap: var(--space-3); align-items: center; margin: 0 0 var(--space-4);
+  padding: var(--space-3) var(--space-4); border: 1px solid var(--color-status-stale); border-radius: var(--radius-md); background: var(--color-bg-subtle); }
+.sm-cols:has(.sm-bridge) .sm-bridge > div:nth-child(2) { flex: 1; min-width: 0; }
+.sm-cols:has(.sm-bridge) .sm-bridge-quiet { border-color: var(--color-border-default); padding: 0 var(--space-3); background: var(--color-bg-default); }
+.sm-cols:has(.sm-bridge) .sm-bridge-quiet > .sm-card { flex: 1; }
+.sm-cols:has(.sm-bridge) .sm-col-canon, .sm-cols:has(.sm-bridge) .sm-col-derived { grid-row: 2; }
+
+.sm-card, .sm-src { display: flex; gap: var(--space-3); align-items: center; padding: var(--space-3) var(--space-1); border-bottom: 1px solid var(--color-border-default); min-width: 0; }
+.sm-card:hover, .sm-src:hover { background: var(--color-bg-subtle); }
+.sm-card > .dot, .sm-src > .dot { align-self: flex-start; margin-top: 6px; }
+.sm-card-main, .sm-src-main { flex: 1 1 0; min-width: 140px; }
+.sm-card > .cmd, .sm-src > .cmd { flex: 0 0 auto; width: 54%; max-width: 340px; justify-content: space-between; }
+.sm-bridge > .cmd { max-width: 55%; }
+.sm-card-title { font-weight: var(--font-weight-semibold); }
+.sm-card-meta { color: var(--color-text-secondary); font-size: var(--font-size-sm); overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+.sm-path, .sm-src-id { font: var(--font-size-sm)/1.5 var(--font-mono); color: var(--color-text-secondary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.sm-src-id { color: var(--color-text-primary); }
+.sm-type { color: var(--color-text-muted); }
+.sm-broken .sm-path { white-space: normal; color: var(--color-status-error); }
+.sm-empty { margin: 0; padding: var(--space-3) var(--space-1); color: var(--color-text-secondary); display: flex; gap: var(--space-2); align-items: center; flex-wrap: wrap; }
+.sm-raw { font: var(--font-size-sm)/1.5 var(--font-mono); white-space: pre-wrap; color: var(--color-text-secondary); }
+.sm-open { color: var(--color-text-secondary); padding: var(--space-2) var(--space-1); }
+.sm-open summary { cursor: pointer; font-size: var(--font-size-sm); }
+.sm-open summary:focus-visible { outline: 2px solid var(--color-focus-ring); outline-offset: 2px; }
+
+.sm-btn { font: var(--font-weight-medium) var(--font-size-sm)/1 var(--font-sans); color: var(--color-text-primary); background: var(--color-bg-raised);
+  border: 1px solid var(--color-border-default); border-radius: var(--radius-sm); padding: var(--space-2) var(--space-3); cursor: pointer; margin-top: var(--space-3); }
+.sm-btn-primary { margin-top: 0; background: var(--color-accent-derived); color: var(--color-bg-default); border-color: transparent; }
+.sm-btn:disabled { background: var(--color-bg-raised); color: var(--color-text-muted); cursor: default; }
+.sm-btn:focus-visible { outline: 2px solid var(--color-focus-ring); outline-offset: 2px; }
+
+.sm-notice { display: flex; gap: var(--space-3); align-items: baseline; padding: var(--space-5); border: 1px solid var(--color-border-default); border-radius: var(--radius-md); max-width: 760px; }
+.sm-notice-head { margin: 0; font-size: var(--font-size-xl); font-weight: var(--font-weight-semibold); }
+.sm-notice-sub { margin: var(--space-1) 0 0; color: var(--color-text-secondary); }
+.sm-notice code { font-family: var(--font-mono); font-size: var(--font-size-sm); }
+
+/* running and the signature: a seam-coloured line scans down the derived side, rows settle behind it in three groups */
+.sm-scan { position: relative; display: grid; }
+.sm-src-pending { color: var(--color-text-secondary); }
+.sm-pulse { width: 8px; height: 8px; border-radius: 50%; background: var(--color-accent-derived); animation: sm-pulse 900ms var(--ease-in-out-cine) infinite alternate; }
+@keyframes sm-pulse { from { opacity: 0.25; } }
+.sm-scanline { position: absolute; left: 0; right: 0; top: 0; height: 2px; background: var(--color-accent-seam); box-shadow: 0 0 12px var(--color-accent-seam);
+  animation: sm-scan 820ms var(--ease-in-out-cine) both; pointer-events: none; z-index: 1; }
+@keyframes sm-scan { from { top: 0; opacity: 1; } 90% { opacity: 1; } to { top: 100%; opacity: 0; } }
+.is-done .sm-src { animation: sm-settle 460ms var(--ease-out-expo) both; animation-delay: calc(var(--g) * 180ms); }
+@keyframes sm-settle { from { opacity: 0; transform: translateY(-6px); background: var(--color-bg-raised); } }
+@media (prefers-reduced-motion: reduce) {
+  .sm-scanline { display: none; }
+  .is-done .sm-src { animation: sm-fade 200ms linear both; animation-delay: 0ms; }
+  .sm-pulse { animation: none; }
+}
+@keyframes sm-fade { from { opacity: 0; } }
+
+/* narrow: a command drops to its own line under its item, so its argument is never cut off */
+@media (max-width: 1180px) {
+  .sm-cols { column-gap: var(--space-5); }
+  .sm-card, .sm-src { flex-wrap: wrap; row-gap: var(--space-2); }
+  .sm-card > .sm-card-main, .sm-src > .sm-src-main { flex: 1 1 calc(100% - 20px); }
+  .sm-card > .cmd, .sm-src > .cmd { width: auto; max-width: calc(100% - 20px); margin-left: 20px; }
+}
+
+/* content arriving after the skeleton: a short reveal, not a cut */
+.sm-arrive { animation: sm-arrive 220ms var(--ease-out-expo) both; }
+@keyframes sm-arrive { from { opacity: 0; transform: translateY(4px); } }
+@media (prefers-reduced-motion: reduce) { .sm-arrive { animation: sm-fade 150ms linear both; } }

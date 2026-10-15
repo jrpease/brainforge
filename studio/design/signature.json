@@ -1,0 +1,10 @@
+{
+ "sources-resolve": {
+  "type": "reveal",
+  "durationMs": 820,
+  "travelFraction": 0.5,
+  "participants": 8,
+  "choreographyDepth": 3,
+  "coverage": 0.35
+ }
+}

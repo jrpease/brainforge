@@ -1,0 +1,6 @@
+/* The comp picker is scaffolding, not design: fixed, small, out of the way. */
+.comp-picker { position: fixed; right: 12px; bottom: 12px; z-index: 99; display: flex; gap: 4px; padding: 6px;
+  background: #000c; border-radius: 8px; font: 12px/1 system-ui; }
+.comp-picker select, .comp-picker button { font: inherit; padding: 4px 6px; }
+/* ?still=1: settle every animation instantly, so a contact-sheet cell shows the end state */
+[data-still] *, [data-still] *::before, [data-still] *::after { animation-duration: 0s !important; animation-delay: 0s !important; transition: none !important; }
