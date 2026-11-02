@@ -165,9 +165,9 @@ built-in fills. The Shopify adapter above was built exactly this way; the
 
 ## Under the hood
 
-### The six golden rules
+### The seven golden rules
 
-Every sync playbook in `scaffold/pipeline/` follows the same six rules ([full detail](scaffold/pipeline/README.md)):
+Every sync playbook in `scaffold/pipeline/` follows the same seven rules ([full detail](scaffold/pipeline/README.md)):
 
 1. **Work scales with the delta (only what changed), not the whole corpus.** Run a cheap check
    first, a fingerprint (a lightweight marker of whether the source moved at all), and do the
@@ -183,6 +183,8 @@ Every sync playbook in `scaffold/pipeline/` follows the same six rules ([full de
 6. **Extraction produces reference, not mirrors.** Derived docs are reference material an LLM
    reasons from, not full replicas of the source; a sync that lands a doc over its expected size
    envelope must say so in the PR.
+7. **Credentials stay out of the repo.** Gates read an exported variable first and fall back to
+   a gitignored `.env`, so a secret manager like Bitwarden can supply them at sync time.
 
 ### How upgrades work
 

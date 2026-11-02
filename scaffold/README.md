@@ -131,7 +131,7 @@ context/
   derived/           ← 🤖 machine-extracted, regenerable
 
 pipeline/            ← ⚙️  the sync runtime (not consumed by readers)
-  README.md          ← the six golden rules
+  README.md          ← the seven golden rules
   adapters/          ← one playbook per source type (figma, github, website, …)
   examples/          ← worked extension examples (e.g. shopify)
   ADAPTER-TEMPLATE.md← the skeleton every adapter fills

@@ -61,7 +61,7 @@ scripts). Never run the call below by hand, even when the script cannot run: tha
 `not-checked`.
 
 The gate gets its token from `gcloud auth application-default print-access-token`, exporting
-`GOOGLE_APPLICATION_CREDENTIALS` first when `.env` sets it. No `gcloud`, or the command fails →
+`GOOGLE_APPLICATION_CREDENTIALS` first when the shell or `.env` sets it. No `gcloud`, or the command fails →
 `not-checked (no credentials)`. It passes `endDate` as the literal `"yesterday"` and never reads
 the local clock.
 

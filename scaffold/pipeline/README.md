@@ -46,6 +46,10 @@ its previous size — MUST say so in the PR body: what grew, by how much, and wh
 should aggregate harder. The human decides at the gate; the rule makes the growth loud, not
 forbidden. A breach the owner accepts is recorded as an `acceptedSize` entry, not ignored.
 
+## 7. Credentials stay out of the repo
+A gate that needs a credential reads the exported variable first, and falls back to `.env` (gitignored, matched line by line, never sourced) only when that variable is unset or empty.
+The safer setup keeps secrets in a secret manager and pulls them into the shell at sync time, so nothing sits on disk. With Bitwarden: `export FIGMA_TOKEN="$(bw get password '<item>')"`.
+
 ## Defaults — so a rule always has something to compare against
 
 A rule whose data nobody remembered to write down cannot fire. These defaults always apply, so

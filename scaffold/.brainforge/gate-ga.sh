@@ -10,11 +10,12 @@
 #   bash .brainforge/gate-ga.sh [<source-id>…]
 #   With ids, gates those `ga` entries of sources.json; with none, every enabled `ga` entry.
 #
-# READS  sources.json (ga[]), .sync-state.json (ga[<propertyId>]), .env (^GOOGLE_APPLICATION_CREDENTIALS=,
-#        matched, never sourced). Writes nothing: the state write stays in ga.md §3.
+# READS  sources.json (ga[]), .sync-state.json (ga[<propertyId>]), an exported
+#        GOOGLE_APPLICATION_CREDENTIALS, else .env (^GOOGLE_APPLICATION_CREDENTIALS=, matched, never
+#        sourced). Writes nothing: the state write stays in ga.md §3.
 #
 # CREDENTIALS, in order
-#   1. GOOGLE_APPLICATION_CREDENTIALS in .env → exported, then
+#   1. GOOGLE_APPLICATION_CREDENTIALS exported in the shell, else in .env → exported, then
 #      `gcloud auth application-default print-access-token`;
 #   2. otherwise the same command against the owner's own-OAuth-client ADC;
 #   3. no gcloud, or the command fails → not-checked (no credentials).
@@ -89,7 +90,7 @@ def token():
         tok = None
         if shutil.which("gcloud"):
             env = dict(os.environ)
-            gac = env_value("GOOGLE_APPLICATION_CREDENTIALS")
+            gac = env.get("GOOGLE_APPLICATION_CREDENTIALS") or env_value("GOOGLE_APPLICATION_CREDENTIALS")
             if gac:
                 env["GOOGLE_APPLICATION_CREDENTIALS"] = gac
             try:

@@ -9,6 +9,7 @@ fail() { echo "FAIL: $1"; exit 1; }
 
 mkdir -p "$TMP/bin"; ln -s "$ROOT/tests/lib/curl-stub.sh" "$TMP/bin/curl"
 export PATH="$TMP/bin:/usr/bin:/bin"
+unset MONDAY_API_TOKEN   # a token in the caller's shell must not leak into the .env cases
 [ "$(command -v curl)" = "$TMP/bin/curl" ] || fail "curl on PATH must be the stub"
 
 # A fresh brain + fixture dir per case. Board 1001 unchanged, 1002 edited in place (only the
@@ -119,6 +120,17 @@ printf 'OTHER=x\n# MONDAY_API_TOKEN=commented\n' > "$B/.env"
 out=$(run roadmap)
 [ "$(field "$out" roadmap 'o["reason"]')" = '"no credentials"' ] || fail "missing token must be no credentials (got: $out)"
 [ "$(calls)" = 0 ] || fail "missing token must make no call"
+
+# 8a. An exported token works with no .env and beats .env; an empty one falls back to .env.
+new_brain exported; rm "$B/.env"
+out=$(MONDAY_API_TOKEN=shell-token run roadmap)
+grep -q 'Authorization: shell-token' "$CURL_STUB_DIR/calls.log" || fail "exported token must work with no .env (got: $out)"
+new_brain exportedwins
+out=$(MONDAY_API_TOKEN=shell-token run roadmap)
+grep -q 'Authorization: shell-token' "$CURL_STUB_DIR/calls.log" || fail "exported token must beat .env (got: $out)"
+new_brain exportedempty
+out=$(MONDAY_API_TOKEN= run roadmap)
+grep -q 'Authorization: test-token-not-real' "$CURL_STUB_DIR/calls.log" || fail "empty export must fall back to .env (got: $out)"
 
 # 9. Stub exit 7 (no fixture) -> not-checked (offline). HTTP 500 -> reason names the status.
 new_brain offline

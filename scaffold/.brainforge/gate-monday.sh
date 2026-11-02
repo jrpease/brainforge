@@ -14,8 +14,9 @@
 # USAGE
 #   bash .brainforge/gate-monday.sh [<source-id>...]
 #   Run from the brain root. With ids it gates those entries; with none, every enabled monday entry.
-#   Reads sources.json -> monday[], .sync-state.json -> monday[<boardId>], and MONDAY_API_TOKEN
-#   from .env (matched as ^MONDAY_API_TOKEN=, never sourced).
+#   Reads sources.json -> monday[], .sync-state.json -> monday[<boardId>], and MONDAY_API_TOKEN:
+#   an exported value wins; unset or empty falls back to .env (matched as ^MONDAY_API_TOKEN=,
+#   never sourced).
 #
 # OUTPUT  one JSON object per gated entry, one per line:
 #   {"type":"monday","id":...,"status":...,"reason":...,"fingerprint":...,"stored":...,"delta":[...]}
@@ -87,17 +88,18 @@ def all_not_checked(reason):
 if not gated:
     sys.exit(0)
 
-token = None
-try:
-    with open(".env") as f:
-        for line in f:
-            m = re.match(r"^MONDAY_API_TOKEN=(.*)$", line.rstrip("\r\n"))
-            if m:
-                token = m.group(1).strip()
-                if len(token) >= 2 and token[0] == token[-1] and token[0] in "\"'":
-                    token = token[1:-1]
-except OSError:
-    pass
+token = os.environ.get("MONDAY_API_TOKEN") or None
+if not token:
+    try:
+        with open(".env") as f:
+            for line in f:
+                m = re.match(r"^MONDAY_API_TOKEN=(.*)$", line.rstrip("\r\n"))
+                if m:
+                    token = m.group(1).strip()
+                    if len(token) >= 2 and token[0] == token[-1] and token[0] in "\"'":
+                        token = token[1:-1]
+    except OSError:
+        pass
 if not token:
     all_not_checked("no credentials")
 

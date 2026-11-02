@@ -76,6 +76,12 @@ printf 'OTHER=1\nGOOGLE_APPLICATION_CREDENTIALS="/keys/sa-test.json"\n' > "$BRAI
 o=$(gate); [ "$(field "$o" web status)" = unchanged ] || fail "sa key: $o"
 grep -q 'GAC=/keys/sa-test.json' "$GCLOUD_LOG" || fail "gcloud must see GOOGLE_APPLICATION_CREDENTIALS exported: $(cat "$GCLOUD_LOG")"
 
+# an exported value beats .env
+new_case sakey-exported; sources "$(entry web 1001)"; state "$(slot 1001)"
+printf 'GOOGLE_APPLICATION_CREDENTIALS="/keys/sa-test.json"\n' > "$BRAIN/.env"
+o=$(GOOGLE_APPLICATION_CREDENTIALS=/keys/shell.json gate); [ "$(field "$o" web status)" = unchanged ] || fail "exported sa key: $o"
+grep -q 'GAC=/keys/shell.json' "$GCLOUD_LOG" || fail "exported value must beat .env: $(cat "$GCLOUD_LOG")"
+
 # no gcloud on PATH -> not-checked (no credentials), no call
 new_case nogcloud; sources "$(entry web 1001)"; state "$(slot 1001)"
 mkdir -p "$TMP/bin-nogcloud"; ln -s "$ROOT/tests/lib/curl-stub.sh" "$TMP/bin-nogcloud/curl"
