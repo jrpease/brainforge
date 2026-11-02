@@ -169,6 +169,51 @@ echo '{ not json' > bad.json
 bash "$EC" prev.json bad.json sources.json > /dev/null 2>&1 && fail "unreadable manifest must exit 1"
 bash "$EC" prev.json "$TMP/none.json" sources.json > /dev/null 2>&1 && fail "missing manifest must exit 1"
 
+# (w) several wildcard rows: each is a glob, the most specific match wins whatever the row order,
+# an exact row still beats them all, and a doc that no glob matches gets the default.
+cat > pipeline/adapters/linear.md <<'EOF'
+## 0a. Size envelope
+
+| Emitted doc | Envelope |
+|---|---|
+| `<doc>.md` | ≤ 3,000 each |
+| `issues-<team>.md` | ≤ 1,500 each |
+| `<team>-cycle-<n>.md` | ≤ 900 each |
+| `_index.md` | ≤ 500 |
+| **domain total** | **≤ 90,000** |
+EOF
+L=derived/linear
+sources "\"linear\": [$(src tracker $L)]"
+manifest cur.json 3 "$(dom $L 500 5000 issues-core.md:1500 core-cycle-12.md:900 notes.md:3000 data.json:8000)"
+run prev-empty.json cur.json sources.json tracker
+expect "(w) every doc at its own envelope" ""
+manifest cur.json 3 "$(dom $L 501 5000 issues-core.md:1501 core-cycle-12.md:901 notes.md:3001 data.json:8001)"
+run prev-empty.json cur.json sources.json tracker
+expect "(w) every doc over its own envelope" "⚠ rule-6: context/$L/_index.md is 501 tokens (envelope 500 / was n/a) — consider aggregating.
+⚠ rule-6: context/$L/issues-core.md is 1501 tokens (envelope 1500 / was n/a) — consider aggregating.
+⚠ rule-6: context/$L/core-cycle-12.md is 901 tokens (envelope 900 / was n/a) — consider aggregating.
+⚠ rule-6: context/$L/notes.md is 3001 tokens (envelope 3000 / was n/a) — consider aggregating.
+⚠ rule-6: context/$L/data.json is 8001 tokens (envelope 8000 / was n/a) — consider aggregating."
+# (w1) the rows that broke a real brain: trailing text in the cell, a backtick inside it, a compound row
+cat > pipeline/adapters/linear.md <<'EOF'
+## 0a. Size envelope
+
+| Emitted doc | Envelope |
+|---|---|
+| `<view-id>.md` (a `view`) | ≤ 7,000 |
+| `<pattern-id>-<slug>.md` (each `view-pattern` match) | ≤ 1,500 |
+EOF
+manifest cur.json 3 "$(dom $L 100 9000 roadmap.md:7000 bug-login.md:1501)"
+run prev-empty.json cur.json sources.json tracker
+expect "(w1) the compound row is enforced" "⚠ rule-6: context/$L/bug-login.md is 1501 tokens (envelope 1500 / was n/a) — consider aggregating."
+# (w2) a genuinely malformed first cell still fails the whole table
+for bad in '`issues-<>.md`' '`issues-<team.md`' 'issues-<team>.md'; do
+  printf '## 0a. Size envelope\n\n| Emitted doc | Envelope |\n|---|---|\n| %s | ≤ 1,500 |\n' "$bad" > pipeline/adapters/linear.md
+  run prev-empty.json cur.json sources.json tracker
+  case "$out" in "⚠ rule-6: linear envelope table unreadable — used the 8,000 default"*) ;; *) fail "(w2) $bad must fail the table, got [$out]" ;; esac
+done
+rm pipeline/adapters/linear.md
+
 # Every shipped adapter table parses: no "unreadable" line, and each row's own number is the one
 # applied (an _index.md over every row, a figma exact row with trailing text, website's
 # per-page wildcard, figma's "per-domain total ... each").

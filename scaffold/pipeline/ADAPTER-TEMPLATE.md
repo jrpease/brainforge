@@ -32,6 +32,8 @@ Paths are relative to `<into>`, the same base `acceptedSize[].doc` uses.
 | `<doc>.md` | ≤ <n> |
 | **domain total** | **≤ <n>** |
 
+A row with `<placeholders>` is a wildcard, so `issues-<team>.md` matches `issues-core.md`. A table can have several: an exact row beats them all, then the wildcard with the most literal characters wins.
+
 `/sync` checks the `_index.md` row from the manifest's `indexTokens`, the figure the generator
 records for each domain's `_index.md`.
 
