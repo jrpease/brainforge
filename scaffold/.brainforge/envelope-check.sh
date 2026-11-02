@@ -11,9 +11,11 @@
 #   2. the row in pipeline/adapters/<adapter>.md § "0a. Size envelope"
 #      (sources key -> adapter: repos -> github, websites -> website, any other key is its name)
 #   3. 8,000
-# Table grammar: first cell a backticked filename (exact row), a backticked `<placeholder>.md`
-# or `per-page file` (wildcard row), or `domain total` / `per-domain total`; second cell `≤ N`.
-# Bold is stripped; text after the closing backtick or after N is ignored. Exact beats wildcard.
+# Table grammar: first cell a backticked filename (exact row), a backticked name with one or more
+# `<placeholder>`s (wildcard row, a glob where each placeholder is `*`), `per-page file` (wildcard
+# row matching any doc), or `domain total` / `per-domain total`; second cell `≤ N`.
+# Bold is stripped; text after the closing backtick or after N is ignored. Exact beats wildcard,
+# and among wildcard rows the one with the most literal characters wins.
 # A table that does not parse, or a built-in adapter (figma, github, website, monday, ga) whose
 # playbook file is missing, is reported, then the 8,000 default is used. A custom adapter with no
 # playbook file gets the default silently.
@@ -32,7 +34,7 @@
 #         sources.json, or no python3.
 set -u
 
-case "${1:-}" in -h|--help) sed -n '2,32p' "$0"; exit 0 ;; esac
+case "${1:-}" in -h|--help) sed -n '2,34p' "$0"; exit 0 ;; esac
 
 if [ "$#" -lt 3 ]; then
   echo "✗ envelope-check: usage: envelope-check.sh <prev-manifest> <manifest> <sources.json> [source-id...]" >&2
@@ -134,7 +136,7 @@ def parse_table(adapter):
     data = [r for r in rows[1:] if not re.match(r"^\s*\|[\s|:-]*\|\s*$", r)]
     if not data:
         return None, True
-    parsed = {"exact": {}, "wild": None, "total": None}
+    parsed = {"exact": {}, "wild": [], "total": None}
     for r in data:
         cells = [c.strip() for c in r.strip().strip("|").split("|")]
         if len(cells) < 2:
@@ -148,14 +150,28 @@ def parse_table(adapter):
         low = first.lower()
         if low in ("domain total", "per-domain total"):
             parsed["total"] = n
-        elif low == "per-page file" or re.match(r"^`<[^`>]+>\.md`", first):
-            parsed["wild"] = n
+        elif low == "per-page file":
+            parsed["wild"].append(("", re.compile(r".*", re.S), n))
         else:
-            fm = re.match(r"^`([^`<>]+)`", first)
+            fm = re.match(r"^`([^`]+)`", first)
             if not fm:
                 return None, True
-            parsed["exact"][fm.group(1)] = n
+            literals = re.split(r"<[^<>]+>", fm.group(1))
+            if any("<" in part or ">" in part for part in literals):
+                return None, True
+            if len(literals) == 1:
+                parsed["exact"][fm.group(1)] = n
+            else:
+                pattern = re.compile(".*".join(re.escape(part) for part in literals), re.S)
+                parsed["wild"].append(("".join(literals), pattern, n))
+    parsed["wild"].sort(key=lambda row: len(row[0]), reverse=True)   # stable: ties keep table order
     return parsed, False
+
+def wildcard_envelope(table, name):
+    for _literal, pattern, n in table["wild"]:
+        if pattern.fullmatch(name):
+            return n
+    return None
 
 def table_for(key):
     adapter = ADAPTER.get(key, key)
@@ -216,10 +232,9 @@ for key, e in chosen:
             env = accepted[name]
         elif table and name in table["exact"]:
             env = table["exact"][name]
-        elif table and table["wild"] is not None:
-            env = table["wild"]
         else:
-            env = DEFAULT
+            wild = wildcard_envelope(table, name) if table else None
+            env = wild if wild is not None else DEFAULT
         over = n > env
         grew = p is not None and p > 0 and n >= 3 * p
         if over or grew:
