@@ -5,7 +5,9 @@
 # With ids it gates those entries (plus every enabled entry sharing their fileKey, because the
 # state slot is shared); with none it gates every enabled figma entry.
 #
-# Reads sources.json, .sync-state.json and FIGMA_TOKEN from .env (matched by `^FIGMA_TOKEN=`,
+# Reads sources.json, .sync-state.json and FIGMA_TOKEN: an exported value wins, so a secret
+# manager can supply it at sync time (export FIGMA_TOKEN="$(bw get password '<item>')" with
+# Bitwarden). When it is unset or empty the gate falls back to .env (matched by `^FIGMA_TOKEN=`,
 # never sourced). Read-only: it never writes .sync-state.json. One REST call per fileKey.
 #
 # OUTPUT  one JSON object per gated entry, one per line:
@@ -23,8 +25,8 @@ if [ ! -f sources.json ]; then
   echo "✗ gate-figma: no sources.json in $(pwd) (run from the brain root)." >&2; exit 1
 fi
 
-FIGMA_TOKEN=""
-if [ -f .env ]; then
+FIGMA_TOKEN="${FIGMA_TOKEN:-}"
+if [ -z "$FIGMA_TOKEN" ] && [ -f .env ]; then
   FIGMA_TOKEN=$(grep -m1 '^FIGMA_TOKEN=' .env | sed 's/^FIGMA_TOKEN=//; s/^"\(.*\)"$/\1/; s/^'"'"'\(.*\)'"'"'$/\1/' || true)
 fi
 export FIGMA_TOKEN

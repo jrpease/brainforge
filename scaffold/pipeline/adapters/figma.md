@@ -1,7 +1,7 @@
 # Playbook: sync Figma  (built-in adapter)
 
 Covers design tokens, component inventory, and frames/dielines.
-Uses the **Figma REST API** (`FIGMA_TOKEN` from `.env`) for the cheap change gate, styles, and
+Uses the **Figma REST API** (`FIGMA_TOKEN`, exported or from `.env`) for the cheap change gate, styles, and
 frame images. Two things need the **Figma Console MCP Desktop Bridge** instead — the two
 documented exceptions to golden rule #2, each because REST genuinely cannot reach the live truth:
 1. **Variables/tokens** — the Variables REST endpoint is Enterprise-only (403 on other plans).

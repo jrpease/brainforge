@@ -8,6 +8,7 @@ TMP=$(mktemp -d); trap 'rm -rf "$TMP"' EXIT
 fail() { echo "FAIL: $1"; exit 1; }
 mkdir -p "$TMP/bin"; ln -s "$ROOT/tests/lib/curl-stub.sh" "$TMP/bin/curl"
 export PATH="$TMP/bin:/usr/bin:/bin"
+unset FIGMA_TOKEN   # a token in the caller's shell must not leak into the .env cases
 
 # fresh brain + fixture dir per case: new_case <name> -> sets BRAIN and CURL_STUB_DIR
 new_case() {
@@ -45,6 +46,18 @@ echo "$o" | grep -q '"version": "200"' || fail "changed must carry the new versi
 new_case notoken; rm "$BRAIN/.env"; sources "$(entry ds KEYSAME out/ds/)"; state "$(slot KEYSAME 100)"; filled out/ds
 o=$(gate); [ "$(field "$o" ds status)" = not-checked ] && [ "$(field "$o" ds reason)" = "no credentials" ] || fail "no token: $o"
 [ "$(ncalls)" = 0 ] || fail "no token must make no call"
+
+# an exported token works with no .env, and beats a stale one in .env
+new_case exported; rm "$BRAIN/.env"; sources "$(entry ds KEYSAME out/ds/)"; state "$(slot KEYSAME 100)"; filled out/ds
+o=$(FIGMA_TOKEN=shell-token gate); [ "$(field "$o" ds status)" = unchanged ] || fail "exported, no .env: $o"
+grep -q 'X-Figma-Token: shell-token' "$CURL_STUB_DIR/calls.log" || fail "exported token must be the one sent"
+new_case exported-wins; sources "$(entry ds KEYSAME out/ds/)"; state "$(slot KEYSAME 100)"; filled out/ds
+o=$(FIGMA_TOKEN=shell-token gate)
+grep -q 'X-Figma-Token: shell-token' "$CURL_STUB_DIR/calls.log" || fail "exported token must beat .env"
+# exported but empty (a failed lookup) counts as unset: .env is still the fallback
+new_case exported-empty; sources "$(entry ds KEYSAME out/ds/)"; state "$(slot KEYSAME 100)"; filled out/ds
+o=$(FIGMA_TOKEN= gate)
+grep -q 'X-Figma-Token: fake-token-for-tests' "$CURL_STUB_DIR/calls.log" || fail "empty export must fall back to .env"
 
 # offline (stub exit 7: no fixture for this key)
 new_case offline; sources "$(entry ds KEYNOFIXTURE out/ds/)"; state "$(slot KEYNOFIXTURE 100)"; filled out/ds

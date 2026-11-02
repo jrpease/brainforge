@@ -188,8 +188,9 @@ bash .brainforge/gate-<type>.sh [<source-id>…]     # from the brain root
 `<type>` is the adapter's name: `repos` → `github`, `websites` → `website`, any other key is its
 own name. With ids it gates those entries; with none, every enabled entry of its type, which is
 how Monday keeps one call for all its boards. It reads entries from `sources.json`, stored slots
-from `.sync-state.json` and credentials from `.env`, which it matches line by line (`^KEY=`) and
-never sources, because sourcing executes the file. It is read-only: it never writes
+from `.sync-state.json` and credentials from the shell, then `.env`: an exported variable wins, and
+otherwise it matches `.env` line by line (`^KEY=`) and never sources it, because sourcing executes
+the file. It is read-only: it never writes
 `.sync-state.json`. The state write stays in the adapter's §3, after the PR exists.
 
 **The contract.** One JSON object per gated entry, one per line on stdout, exit 0:

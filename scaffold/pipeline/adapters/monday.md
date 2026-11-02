@@ -1,7 +1,7 @@
 # Playbook: sync Monday boards  (built-in adapter)
 
 Covers: roadmap/initiatives + task-status across the team's Monday boards — "what the team is
-working toward, and the live status of work." Auth: `MONDAY_API_TOKEN` from `.env` (add it to
+working toward, and the live status of work." Auth: `MONDAY_API_TOKEN`, exported or from `.env` (add it to
 `.env.example`). Monday has **no REST API** — it's GraphQL-only (single endpoint
 `https://api.monday.com/v2`, token in the `Authorization` header). This GraphQL-over-HTTP endpoint
 IS the cheap direct call golden rule #2 means — the heavy, token-hungry MCP is still avoided.

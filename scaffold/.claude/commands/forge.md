@@ -20,7 +20,7 @@ Always:
 4. **Drive the loop inline** (`setup/README.md` §3): scaffold → ingest → interview → `/draft-canon`
    → `/approve-canon` → wire adapter (`/add-source` or `/add-adapter`) → `/sync` → **read it back**.
 5. **Honor the two trust gates** — `/approve-canon` refuses on any `[GAP]`; every sync lands via a
-   PR, never a direct write. Never relax the canon guardrail or the six golden rules.
+   PR, never a direct write. Never relax the canon guardrail or the seven golden rules.
 6. After the read-back payoff, offer the next domain or stop (resumable later).
 
 Skip the adapter/sync rungs for authored-only domains (brand, company) — the loop ends at approved canon.

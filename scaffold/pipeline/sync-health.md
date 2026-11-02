@@ -30,7 +30,7 @@ free, take it. Fall back to cadence only where it is not, and always say which o
    A gate that cannot run is reported as `not checked` **with its reason**. Never skip it
    silently, never guess the number, and never run the adapter's §1 by hand instead:
    - `not checked (no clone)` — the entry has no `localClone` and this adapter needs one.
-   - `not checked (no credentials)` — the gate needs auth that is not in `.env`.
+   - `not checked (no credentials)` — the gate needs auth that is neither exported nor in `.env`.
    - `not checked (offline)` — the fetch or API call failed.
    - `not checked (gate failed)` — the script is missing, exited non-zero, or printed no line for
      that entry.
