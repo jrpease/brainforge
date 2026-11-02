@@ -69,7 +69,7 @@ and reports ✅ current / ⚠️ stale / ❌ never.
 
 | Precedence | Where | Owner |
 |---|---|---|
-| 1 | `acceptedSize[<doc>]` on the `sources.json` entry | the brain |
+| 1 | `acceptedSize[<doc>]` on any `sources.json` entry feeding the domain | the brain |
 | 2 | the adapter's `0a. Size envelope` table | the adapter |
 | 3 | the default below | shipped |
 
@@ -91,6 +91,10 @@ A domain total is accepted the same way, with `"doc": "domain total"`. It is a d
 domain, so record it once, on any one entry whose `into` is that domain: it covers every entry
 feeding the domain. If more than one entry carries one, the latest `since` wins (write it as an
 ISO date; a missing `since` counts as oldest, and a tie goes to the larger number).
+
+A per-doc acceptance works the same way: on any entry feeding the domain, it covers that doc whichever entry is being checked, so it never has to be copied onto an entry that does not own the file.
+
+When several adapters feed one domain, a doc is measured only against the adapter that emitted it, read from `generated-by:` and then `source:` in its frontmatter. A doc that names none of them, and a shared `_index.md`, takes the most specific row across them (the largest on a tie). The domain total prints once, against the largest total they declare.
 
 It lives on the source entry, in `sources.json`, because it is **brain-specific**. An adapter
 playbook is under the `pipeline/**` bump glob and would be overwritten on the next `/upgrade`.

@@ -88,7 +88,7 @@ bash .brainforge/envelope-check.sh "$PREV" .brainforge/brain-manifest.json sourc
 
 Pass the ids of the sources this run synced, or none after a bare `/sync` (it then checks every
 enabled source). It checks every doc and `_index.md` in each source's `into:` domain, and the
-domain total. A doc's envelope is its `acceptedSize`, else the adapter's `0a. Size envelope` row,
+domain total. A doc's envelope is its `acceptedSize`, else the emitting adapter's `0a. Size envelope` row,
 else 8,000. It also flags 3× growth since `$PREV`. Paste every `⚠ rule-6:` line it prints into
 the PR body verbatim. No output means nothing breached. Exit 1 means nothing was checked: relay
 its message and say in the PR body that golden rule 6 was not checked.
