@@ -214,6 +214,70 @@ for bad in '`issues-<>.md`' '`issues-<team.md`' 'issues-<team>.md'; do
 done
 rm pipeline/adapters/linear.md
 
+# (s) two adapters share one domain: figma (exact rows only, total 5,000), github (<repo-name>.md 2,500, total 8,000)
+S=derived/shared; mkdir -p "context/$S"
+stamp() { printf -- '---\n%s\n---\nbody\n' "$2" > "context/$S/$1"; }
+stamp lib.md 'generated-by: pipeline/adapters/figma.md (REST)'
+stamp old.md 'generated-by: figma-adapter'
+stamp web.md 'generated-by: pipeline/adapters/github.md'
+stamp repo.md 'source: "Repo · org/x @ abc123"'
+stamp both.md 'generated-by: pipeline/adapters/figma.md + pipeline/adapters/github.md'
+stamp other.md 'generated-by: pipeline/adapters/shopify.md'
+sources "\"figma\": [$(src ds $S)], \"repos\": [$(src code $S)]"
+# (s1) a doc goes against its emitter only; one naming no feeder takes the most specific row
+manifest cur.json 3 "$(dom $S 100 4000 lib.md:3000 old.md:3000 web.md:2500 repo.md:2500 both.md:2500 other.md:2500)"
+run prev-empty.json cur.json sources.json
+expect "(s1) every doc at its emitter's envelope" ""
+manifest cur.json 3 "$(dom $S 100 4000 lib.md:8001 web.md:2501 repo.md:2501 both.md:2501 other.md:2501)"
+run prev-empty.json cur.json sources.json
+expect "(s1) over the emitter's envelope, one line each" "⚠ rule-6: context/$S/lib.md is 8001 tokens (envelope 8000 / was n/a) — consider aggregating.
+⚠ rule-6: context/$S/web.md is 2501 tokens (envelope 2500 / was n/a) — consider aggregating.
+⚠ rule-6: context/$S/repo.md is 2501 tokens (envelope 2500 / was n/a) — consider aggregating.
+⚠ rule-6: context/$S/both.md is 2501 tokens (envelope 2500 / was n/a) — consider aggregating.
+⚠ rule-6: context/$S/other.md is 2501 tokens (envelope 2500 / was n/a) — consider aggregating."
+# (s2) an exact row beats a wildcard from the other adapter; a shared _index.md takes the larger exact row
+# (figma's exact figma-library.md is 2,500; monday's <board>.md wildcard is 3,000, so these numbers tell them apart)
+sources "\"figma\": [$(src ds $S)], \"monday\": [$(src board $S)]"
+manifest cur.json 3 "$(dom $S 2001 4000 figma-library.md:2501)"
+run prev-empty.json cur.json sources.json
+expect "(s2) exact rows across adapters" "⚠ rule-6: context/$S/_index.md is 2001 tokens (envelope 2000 / was n/a) — consider aggregating.
+⚠ rule-6: context/$S/figma-library.md is 2501 tokens (envelope 2500 / was n/a) — consider aggregating."
+sources "\"figma\": [$(src ds $S)], \"repos\": [$(src code $S)]"
+# (s3) the domain total prints once, against the largest, whichever entry is named
+manifest cur.json 3 "$(dom $S 100 8001)"
+for ids in "" ds code; do
+  run prev-empty.json cur.json sources.json $ids
+  expect "(s3) one total [$ids]" "⚠ rule-6: context/$S totals 8001 tokens (envelope 8000) — consider aggregating."
+done
+# (s4) a per-doc acceptance on either entry covers the doc, whichever entry is being checked
+sources "\"figma\": [$(src ds $S ', "acceptedSize": [{ "doc": "web.md", "tokens": 6000, "since": "2026-10-30", "why": "test" }]')], \"repos\": [$(src code $S)]"
+manifest cur.json 3 "$(dom $S 100 7000 web.md:6000)"
+for ids in "" ds code; do
+  run prev-empty.json cur.json sources.json $ids
+  expect "(s4) accepted on a sibling [$ids]" ""
+done
+# (s5) the latest per-doc acceptance wins by `since`, not by position
+sources "\"figma\": [$(src ds $S ', "acceptedSize": [{ "doc": "web.md", "tokens": 5000, "since": "2026-10-30", "why": "new" }]')], \"repos\": [$(src code $S ', "acceptedSize": [{ "doc": "web.md", "tokens": 7000, "since": "2026-09-01", "why": "old" }]')]"
+run prev-empty.json cur.json sources.json
+expect "(s5) latest per-doc acceptance wins" "⚠ rule-6: context/$S/web.md is 6000 tokens (envelope 5000 / was n/a) — consider aggregating."
+# (s5a) a disabled entry sharing the folder cannot raise the envelope, and its table goes unread;
+# its acceptance still counts. Naming it brings its table back in.
+sources "\"monday\": [$(src board $S)], \"repos\": [$(src code $S ', "enabled": false')]"
+manifest cur.json 3 "$(dom $S 100 5000 web.md:3001)"
+run prev-empty.json cur.json sources.json
+expect "(s5a) disabled entry ignored" "⚠ rule-6: context/$S/web.md is 3001 tokens (envelope 3000 / was n/a) — consider aggregating.
+⚠ rule-6: context/$S totals 5000 tokens (envelope 4500) — consider aggregating."
+run prev-empty.json cur.json sources.json code
+expect "(s5a) disabled entry named" "⚠ rule-6: context/$S/web.md is 3001 tokens (envelope 2500 / was n/a) — consider aggregating."
+sources "\"monday\": [$(src board $S)], \"repos\": [$(src code $S ', "enabled": false, "acceptedSize": [{ "doc": "web.md", "tokens": 3500, "since": "2026-10-30", "why": "test" }]')]"
+run prev-empty.json cur.json sources.json
+expect "(s5a) disabled entry's acceptance counts" "⚠ rule-6: context/$S totals 5000 tokens (envelope 4500) — consider aggregating."
+# (s6) with one feeder the frontmatter is not consulted: the only adapter's table applies
+sources "\"repos\": [$(src code $S)]"
+manifest cur.json 3 "$(dom $S 100 4000 lib.md:2501)"
+run prev-empty.json cur.json sources.json
+expect "(s6) a lone adapter measures every doc" "⚠ rule-6: context/$S/lib.md is 2501 tokens (envelope 2500 / was n/a) — consider aggregating."
+
 # Every shipped adapter table parses: no "unreadable" line, and each row's own number is the one
 # applied (an _index.md over every row, a figma exact row with trailing text, website's
 # per-page wildcard, figma's "per-domain total ... each").

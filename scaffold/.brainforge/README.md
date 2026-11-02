@@ -237,7 +237,7 @@ bash .brainforge/envelope-check.sh "$PREV" .brainforge/brain-manifest.json sourc
 
 It checks every doc and `_index.md` in each named source's `into:` domain (every enabled source
 when none are named), plus the domain total. A doc's envelope is its `acceptedSize` entry, else
-its row in the adapter's `0a. Size envelope` table, else 8,000. It also flags a doc that grew 3×
+its row in the emitting adapter's `0a. Size envelope` table, else 8,000. It also flags a doc that grew 3×
 since `$PREV`, accepted or not. It prints one warning line per breach, which `/sync` pastes into
 the PR body verbatim, and nothing when clean. An adapter table it cannot parse is reported, not
 silently defaulted. Exit 1 means bad arguments or an unreadable manifest: nothing was checked.
